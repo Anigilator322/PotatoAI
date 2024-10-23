@@ -2,10 +2,10 @@
 {
     public class Edge
     {
-        public Node nodeA;
-        public Node nodeB;
+        public RootNode nodeA;
+        public RootNode nodeB;
 
-        public Edge(Node nodeA, Node nodeB)
+        public Edge(RootNode nodeA, RootNode nodeB)
         {
             this.nodeA = nodeA;
             this.nodeB = nodeB;

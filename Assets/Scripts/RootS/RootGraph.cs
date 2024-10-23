@@ -7,40 +7,40 @@ namespace Assets.Scripts.RootS
 {
     public class RootGraph
     {
-        private List<Node> nodes = new List<Node>();
+        private List<RootNode> nodes = new List<RootNode>();
 
 
-        public Node AddRootNode(Vector3 position)
+        public RootNode AddRootNode(Vector3 position)
         {
-            nodes.Add(new Node(position));
+            nodes.Add(new RootNode(position));
             return nodes[nodes.Count - 1];
         }
-        public Node AddNode(Vector3 position, Node parent)
+        public RootNode AddNode(Vector3 position, RootNode parent)
         {
-            Node newNode = new Node(position, parent);
+            RootNode newNode = new RootNode(position, parent);
             parent.Childrens.Add(newNode);
             nodes.Add(newNode);
             return newNode;
         }
-        public bool isNodeLast(Node node)
+        public bool isNodeLast(RootNode node)
         {
             if(node.Childrens.Count == 0)
                 return true;
             else 
                 return false;
         }
-        public void AddEdge(Node nodeA, Node nodeB)
+        public void AddEdge(RootNode nodeA, RootNode nodeB)
         {
             Edge newEdge = new Edge(nodeA, nodeB);
             //nodeA.edges.Add(newEdge);
             //nodeB.edges.Add(newEdge);
         }
-        public Node FindClosestNode(Vector3 position, float radius)
+        public RootNode FindClosestNode(Vector3 position, float radius)
         {
-            Node closestNode = null;
+            RootNode closestNode = null;
             float closestDistance = radius;
 
-            foreach (Node node in nodes)
+            foreach (RootNode node in nodes)
             {
                 float distance = Vector3.Distance(position, node.Position);
                 if (distance < closestDistance)

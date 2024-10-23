@@ -50,7 +50,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""3eeae836-ea47-4d3a-9f9d-b467de5c48b7"",
-                    ""path"": ""<Mouse>/position"",
+                    ""path"": ""<Mouse>/CenterPosition"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

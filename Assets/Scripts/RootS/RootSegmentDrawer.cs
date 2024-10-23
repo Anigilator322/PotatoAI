@@ -55,7 +55,7 @@ namespace Assets.Scripts.RootS
             Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, mainCamera.nearClipPlane));
             worldPos.z = 0;
 
-            Node potentialParent = _rootGraph.FindClosestNode(worldPos, segmentLength);
+            RootNode potentialParent = _rootGraph.FindClosestNode(worldPos, segmentLength);
             if (potentialParent == null)
             {
                 _rootGraph.AddRootNode(worldPos);  //if parent not found then add new root
@@ -78,7 +78,7 @@ namespace Assets.Scripts.RootS
             }
         }
 
-        private void StartNewSubRoot(Node lastNode)
+        private void StartNewSubRoot(RootNode lastNode)
         {
             currentRootSegments.Clear(); // clear old segments list
             currentRootSegments.Add(lastNode.Position); // add new point
@@ -92,7 +92,7 @@ namespace Assets.Scripts.RootS
         }
 
         //TODO: Gets old segments from graph
-        private void ContinueRoot(Node lastNode)
+        private void ContinueRoot(RootNode lastNode)
         {
             currentRootSegments.Clear(); // clear old segments list
             currentRootSegments.Add(lastNode.Position); // add new point
