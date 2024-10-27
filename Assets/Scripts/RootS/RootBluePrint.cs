@@ -27,7 +27,8 @@ namespace Assets.Scripts.RootS
 
         public void TryBlueprint()
         {
-            
+            if(isDragging)
+                Debug.Log("Trying blueprint");
         }
     }
 }
