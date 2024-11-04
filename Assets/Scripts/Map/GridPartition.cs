@@ -56,9 +56,10 @@ namespace Assets.Scripts.Map
             {
                 _grid[cellCoordinates] = new Cell<T>(index);
             }
-
-            _grid[cellCoordinates].AddIndex(index);
-
+            else
+            {
+                _grid[cellCoordinates].AddIndex(index);
+            }
         }
         private List<int> GetPointsInCell(Vector2Int cellCoordinates)
         {
