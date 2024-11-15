@@ -28,10 +28,11 @@ namespace Assets.Scripts.Map
         }
     }
 
-    public class GridPartition<T>
+    public class GridPartition<T> where T : PositionedObject
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
+        public PositionedObjects<T> positionedObjects;
 
         public GridPartition(int cellSize)
         {
