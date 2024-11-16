@@ -11,18 +11,18 @@ public class GridUnitTest : ZenjectUnitTestFixture
     [SetUp]
     public void CommonInstall()
     {
-        RootSystem rootSystem = new RootSystem();
-        GridPartition<RootSystem> grid = new GridPartition<RootSystem>(1,rootSystem);
-        Container.Bind<GridPartition<RootSystem>>().FromInstance(grid).AsSingle();
-        Container.Bind<RootSystem>().FromInstance(rootSystem).AsSingle();
+        PlantRoots rootSystem = new PlantRoots();
+        GridPartition<PlantRoots> grid = new GridPartition<PlantRoots>(1,rootSystem);
+        Container.Bind<GridPartition<PlantRoots>>().FromInstance(grid).AsSingle();
+        Container.Bind<PlantRoots>().FromInstance(rootSystem).AsSingle();
     }
 
 
     [Test]
     public void TestInitialValues()
     {
-        var grid = Container.Resolve<GridPartition<RootSystem>>();
-        var rootSystem = Container.Resolve<RootSystem>();
+        var grid = Container.Resolve<GridPartition<PlantRoots>>();
+        var rootSystem = Container.Resolve<PlantRoots>();
         List<Vector2> points = new List<Vector2>();
         points.Add(new Vector2(0.5f, 0.5f));
         points.Add(new Vector2(0.5f, 0));
@@ -46,8 +46,8 @@ public class GridUnitTest : ZenjectUnitTestFixture
     [Test]
     public void TestInitialValues2()
     {
-        var grid = Container.Resolve<GridPartition<RootSystem>>();
-        var rootSystem = Container.Resolve<RootSystem>();
+        var grid = Container.Resolve<GridPartition<PlantRoots>>();
+        var rootSystem = Container.Resolve<PlantRoots>();
         List<Vector2> points = new List<Vector2>();
         points.Add(new Vector2(-0.5f, -0.5f));
         points.Add(new Vector2(-0.5f, 0));
@@ -69,8 +69,8 @@ public class GridUnitTest : ZenjectUnitTestFixture
     [Test]
     public void TestInitValues3()
     {
-        var grid = Container.Resolve<GridPartition<RootSystem>>();
-        var rootSystem = Container.Resolve<RootSystem>();
+        var grid = Container.Resolve<GridPartition<PlantRoots>>();
+        var rootSystem = Container.Resolve<PlantRoots>();
         List<Vector2> points = new List<Vector2>();
         points.Add(new Vector2(0.5f, 0.5f));
         points.Add(new Vector2(93f, 42f));

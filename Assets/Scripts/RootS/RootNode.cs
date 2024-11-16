@@ -5,16 +5,25 @@ namespace Assets.Scripts.RootS
 {
     public class RootNode : PositionedObject
     {
-        public List<RootNode> Childrens = new List<RootNode>();
-        public RootNode Parent = null;
-        public RootNode(Vector3 position)
+        public RootType Type;
+        public bool isRootBase;
+        public int prevNodeInd;
+        public List<int> nextNodesIndexes = new List<int>();
+
+        public RootNode(Vector2 position)
         {
             Position = position;
         }
-        public RootNode(Vector3 position, RootNode parent)
+
+        public RootNode(Vector2 position, int parentInd)
         {
             Position = position;
-            Parent = parent;
+            prevNodeInd = parentInd;
+        }
+
+        public void SetChildren(int childId)
+        {
+            nextNodesIndexes.Add(childId);
         }
     }
 }

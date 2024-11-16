@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.RootS
 {
-    enum RootType
+    public enum RootType
     {
         Harvester,
         Recon,
