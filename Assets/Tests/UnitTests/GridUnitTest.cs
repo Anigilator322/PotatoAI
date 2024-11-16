@@ -66,5 +66,22 @@ public class GridUnitTest : ZenjectUnitTestFixture
         List<int> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
         Assert.That(pointsIndexes.Count == 7);
     }
+    [Test]
+    public void TestInitValues3()
+    {
+        var grid = Container.Resolve<GridPartition<RootSystem>>();
+        var rootSystem = Container.Resolve<RootSystem>();
+        List<Vector2> points = new List<Vector2>();
+        points.Add(new Vector2(0.5f, 0.5f));
+        points.Add(new Vector2(93f, 42f));
+        for (int i = 0; i < 2; i++)
+        {
+            rootSystem.Nodes.Add(new RootNode(points[i]));
+            grid.Insert(i);
+        }
 
+        List<int> pointsIndexes = grid.Query(100, new Vector2(0, 0));
+
+        Assert.That(pointsIndexes.Count == 1);
+    }
 }

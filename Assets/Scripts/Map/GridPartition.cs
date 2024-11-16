@@ -73,7 +73,20 @@ namespace Assets.Scripts.Map
             return new List<int>();
         }
 
-        
+        private bool isAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 center, float radius)
+        {
+            Vector2 downLeft = new Vector2(cellCoordinates.x * _cellSize, cellCoordinates.y * _cellSize);
+            Vector2 upRight = new Vector2(downLeft.x + _cellSize, downLeft.y + _cellSize);
+            Vector2 upLeft = new Vector2(downLeft.x,downLeft.y + _cellSize);
+            Vector2 downRight = new Vector2(downLeft.x + _cellSize, downLeft.y);
+
+            if (Vector2.Distance(downLeft, center) < radius) return true;
+            if (Vector2.Distance(upRight, center) < radius) return true;
+            if (Vector2.Distance(downRight, center) < radius) return true;
+            if (Vector2.Distance(upLeft,center)<radius) return true;
+
+            return false;
+        }
 
         public List<int> Query(Vector2 worldPosition)
         {
@@ -99,8 +112,10 @@ namespace Assets.Scripts.Map
                     // Если ячейка существует
                     if (_grid.ContainsKey(cellCoordinates))
                     {
-                        // Проверяем каждую точку в ячейке
-                        indexes.AddRange(_grid[cellCoordinates].GetIndexes());
+                        if (isAnyCornerInRadius(cellCoordinates, center, radius))
+                        {
+                            indexes.AddRange(_grid[cellCoordinates].GetIndexes());
+                        } 
                     }
                 }
             }
