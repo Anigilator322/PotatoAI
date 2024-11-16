@@ -8,7 +8,8 @@ public class GridInstaller : MonoInstaller
 
     public override void InstallBindings()
     {
-        GridPartition<RootNode> grid = new GridPartition<RootNode>(1);
-        Container.Bind<GridPartition<RootNode>>().FromInstance(grid).AsSingle().NonLazy();
+        RootSystem rootSystem = new RootSystem();
+        GridPartition<RootSystem> grid = new GridPartition<RootSystem>(1,rootSystem);
+        Container.Bind<GridPartition<RootSystem>>().FromInstance(grid).AsSingle().NonLazy();
     }
 }

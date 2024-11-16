@@ -7,15 +7,12 @@ namespace Assets.Scripts.Map
 {
     public class GridGizmos : MonoBehaviour
     {
-        [Inject]public GridPartition<RootNode> _grid;
+        [Inject]public GridPartition<RootSystem> _grid;
 
 
         private void Start()
         {
-            _grid.Insert(new Vector2(1.2f, 3.4f),0);
-            _grid.Insert(new Vector2(5.0f, 2.0f), 1);
-            _grid.Insert(new Vector2(-2.3f, 4.1f),2);
-            _grid.Insert(new Vector2(7.0f, 7.0f),3);
+            
         }
         void OnDrawGizmos()
         {

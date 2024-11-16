@@ -15,6 +15,7 @@ namespace Assets.Scripts.RootS
             nodes.Add(new RootNode(position));
             return nodes[nodes.Count - 1];
         }
+
         public RootNode AddNode(Vector3 position, RootNode parent)
         {
             RootNode newNode = new RootNode(position, parent);
@@ -22,6 +23,7 @@ namespace Assets.Scripts.RootS
             nodes.Add(newNode);
             return newNode;
         }
+
         public bool isNodeLast(RootNode node)
         {
             if(node.Childrens.Count == 0)
@@ -29,12 +31,7 @@ namespace Assets.Scripts.RootS
             else 
                 return false;
         }
-        public void AddEdge(RootNode nodeA, RootNode nodeB)
-        {
-            Edge newEdge = new Edge(nodeA, nodeB);
-            //nodeA.edges.Add(newEdge);
-            //nodeB.edges.Add(newEdge);
-        }
+
         public RootNode FindClosestNode(Vector3 position, float radius)
         {
             RootNode closestNode = null;

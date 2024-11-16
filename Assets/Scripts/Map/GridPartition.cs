@@ -28,14 +28,15 @@ namespace Assets.Scripts.Map
         }
     }
 
-    public class GridPartition<T> where T : PositionedObject
+    public class GridPartition<T> 
+        where T : IPositionedObjects
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
-        public PositionedObjects<T> positionedObjects;
-
-        public GridPartition(int cellSize)
+        private T _positionedObjects;
+        public GridPartition(int cellSize, T positionedObjects)
         {
+            _positionedObjects = positionedObjects;
             _cellSize = cellSize;
             _grid = new Dictionary<Vector2Int, Cell<T>>();
         }
@@ -48,10 +49,10 @@ namespace Assets.Scripts.Map
         }
 
 
-        public void Insert(Vector2 position, int index)
+        public void Insert(int index)
         {
 
-            Vector2Int cellCoordinates = GetCellCoordinates(position);
+            Vector2Int cellCoordinates = GetCellCoordinates(_positionedObjects.GetPositionById(index));
 
             if (!_grid.ContainsKey(cellCoordinates))
             {
