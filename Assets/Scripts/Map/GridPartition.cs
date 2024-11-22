@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 namespace Assets.Scripts.Map
 {
     public class Cell<T>
@@ -29,14 +30,14 @@ namespace Assets.Scripts.Map
     }
 
     public class GridPartition<T> 
-        where T : IPositionedObjects
+        where T : IGridPartionableObjects
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
-        private T _positionedObjects;
-        public GridPartition(int cellSize, T positionedObjects)
+        [Inject] private T _positionedObjects;
+        public GridPartition(int cellSize)
         {
-            _positionedObjects = positionedObjects;
+            //_positionedObjects = positionedObjects;
             _cellSize = cellSize;
             _grid = new Dictionary<Vector2Int, Cell<T>>();
         }

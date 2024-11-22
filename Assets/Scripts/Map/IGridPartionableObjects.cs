@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Map
 {
-    public interface IPositionedObjects
+    public interface IGridPartionableObjects
     {
         Vector2 GetPositionById(int index);
     }

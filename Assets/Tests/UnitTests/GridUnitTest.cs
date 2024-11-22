@@ -11,8 +11,8 @@ public class GridUnitTest : ZenjectUnitTestFixture
     [SetUp]
     public void CommonInstall()
     {
-        PlantRoots rootSystem = new PlantRoots();
-        GridPartition<PlantRoots> grid = new GridPartition<PlantRoots>(1,rootSystem);
+        PlantRoots rootSystem = new PlantRoots(new Vector2(0, 0));
+        GridPartition<PlantRoots> grid = new GridPartition<PlantRoots>(1);
         Container.Bind<GridPartition<PlantRoots>>().FromInstance(grid).AsSingle();
         Container.Bind<PlantRoots>().FromInstance(rootSystem).AsSingle();
     }
@@ -40,7 +40,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
 
         List<int> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
         
-        Assert.That(pointsIndexes.Count == 6);
+        Assert.That(pointsIndexes.Count == 7);
     }
 
     [Test]
@@ -64,7 +64,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
         }
         Debug.Log(rootSystem.Nodes.Count);
         List<int> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
-        Assert.That(pointsIndexes.Count == 7);
+        Assert.That(pointsIndexes.Count == 8);
     }
     [Test]
     public void TestInitValues3()
@@ -82,6 +82,6 @@ public class GridUnitTest : ZenjectUnitTestFixture
 
         List<int> pointsIndexes = grid.Query(100, new Vector2(0, 0));
 
-        Assert.That(pointsIndexes.Count == 1);
+        Assert.That(pointsIndexes.Count == 2);
     }
 }

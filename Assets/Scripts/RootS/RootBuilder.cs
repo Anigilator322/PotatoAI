@@ -1,19 +1,21 @@
 using Assets.Scripts.Map;
 using Assets.Scripts.RootS;
+using Assets.Scripts.RootS.Plants;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RootBuilder : MonoBehaviour
 {
-    public PlantRoots PlantRoots = new PlantRoots();
-
+    [SerializeField] private Plant _plant;
+    [SerializeField] private RootView _rootView;
     public void BuildRoot(int parentInd, List<Vector2> rootPositions)
     {
-        //TODO: Creating rootNode objects, making graph, starting growing coroutine
         for(int i = 0; i < rootPositions.Count; i++)
         {
-            PlantRoots.CreateNode(parentInd, rootPositions[i]);
+            _plant.Roots.CreateNode(parentInd, rootPositions[i]);
         }
     }
+
+    
 }
