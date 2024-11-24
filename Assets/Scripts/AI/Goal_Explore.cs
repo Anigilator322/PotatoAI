@@ -1,6 +1,6 @@
 ﻿
+using Assets.Scripts.Map;
 using Assets.Scripts.RootS;
-using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
@@ -11,9 +11,8 @@ namespace Assets.Scripts.AI
         private const string GROWING_ROOT_ID_PREFIX = "exploration root";
         private readonly RootGrowthSystem _rootGrowthSystem;
         public IScoreMap exploraionValueMap { get; private set; }
-
-
-        Vector2 _explorationTarget = Vector2.zero;
+                        
+        PositionedObject _explorationTarget  = null;
 
         RootNode _explorationRoot = null;
         string _growingRootId;
@@ -23,7 +22,10 @@ namespace Assets.Scripts.AI
             Status = GoalStatus.Active;
 
             //==== Выбрать цель для открытия - точка интереса ===
-            _explorationTarget = exploraionValueMap.GetMostScoredPosition();
+            _explorationTarget = new ExplorationTarget() 
+            {
+                Position = exploraionValueMap.GetMostScoredPosition() 
+            };
 
 
             //==== Запустить рост корня-разведчика ===
@@ -31,7 +33,7 @@ namespace Assets.Scripts.AI
             //Рассчитать BluePrint корня
 
             _explorationRoot = new RootNode(new Vector2 (0, 1));
-            _explorationRoot.type = RootType.Recon;
+            _explorationRoot.Type = RootType.Recon;
 
             _growingRootId = GROWING_ROOT_ID_PREFIX + "_" + Guid.NewGuid().ToString();
             _rootGrowthSystem.StartGrowth(_growingRootId, _explorationRoot);

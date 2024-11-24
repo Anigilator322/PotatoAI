@@ -59,7 +59,7 @@ namespace Assets.Scripts.RootS
             if(_clickedNode.nextNodes.Count == 0)
             {
                 _isNewProcess = false;
-                _buildingPath.Add(_clickedNode.prevNode.Position);
+                _buildingPath.Add(_clickedNode.parent.Position);
                 _buildingPath.Add(_clickedNode.Position);
             }
             else

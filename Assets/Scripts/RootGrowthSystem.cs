@@ -1,6 +1,5 @@
 ﻿
 using Assets.Scripts.RootS;
-using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 
 namespace Assets.Scripts
