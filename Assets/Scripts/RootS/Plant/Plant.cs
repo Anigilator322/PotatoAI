@@ -6,7 +6,13 @@ namespace Assets.Scripts.RootS.Plants
 {
     public class Plant : MonoBehaviour
     {
-        [Inject] public PlantRoots Roots;
+        public PlantRoots Roots;
+
+        [Inject]
+        private void Construct(PlantRoots root)
+        {
+            Roots = root;
+        }
 
         private void Start()
         {

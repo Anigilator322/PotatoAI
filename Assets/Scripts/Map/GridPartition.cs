@@ -1,3 +1,4 @@
+using Assets.Scripts.RootS;
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,37 +8,37 @@ using UnityEngine.UIElements;
 using Zenject;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T>
+    public class Cell<T> where T : PositionedObject
     {
-        private List<int> _indexes;
+        private List<T> _positionedObjects;
         public Cell()
         {
-            _indexes = new List<int>();
+            _positionedObjects = new List<T>();
         }
-        public Cell(int index)
+        public Cell(T point)
         {
-            _indexes = new List<int>();
-            _indexes.Add(index);
+            _positionedObjects = new List<T>();
+            _positionedObjects.Add(point);
         }
-        public void AddIndex(int index)
+        public void AddIndex(T point)
         {
-            _indexes.Add(index);
+            _positionedObjects.Add(point);
         }
-        public List<int> GetIndexes()
+        public List<T> GetIndexes()
         {
-            return _indexes;
+            return _positionedObjects;
         }
     }
 
     public class GridPartition<T> 
-        where T : IGridPartionableObjects
+        where T : PositionedObject
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
-        [Inject] private T _positionedObjects;
+        //private List<T> _positionedObjects = new List<T>();
+
         public GridPartition(int cellSize)
-        {
-            //_positionedObjects = positionedObjects;
+        { 
             _cellSize = cellSize;
             _grid = new Dictionary<Vector2Int, Cell<T>>();
         }
@@ -50,28 +51,28 @@ namespace Assets.Scripts.Map
         }
 
 
-        public void Insert(int index)
+        public void Insert(T positionedObject)
         {
 
-            Vector2Int cellCoordinates = GetCellCoordinates(_positionedObjects.GetPositionById(index));
+            Vector2Int cellCoordinates = GetCellCoordinates(positionedObject.Position);
 
             if (!_grid.ContainsKey(cellCoordinates))
             {
-                _grid[cellCoordinates] = new Cell<T>(index);
+                _grid[cellCoordinates] = new Cell<T>(positionedObject);
             }
             else
             {
-                _grid[cellCoordinates].AddIndex(index);
+                _grid[cellCoordinates].AddIndex(positionedObject);
             }
         }
-        private List<int> GetPointsInCell(Vector2Int cellCoordinates)
+        private List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
             {
                 return _grid[cellCoordinates].GetIndexes();
             }
 
-            return new List<int>();
+            return new List<T>();
         }
 
         private bool isAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 center, float radius)
@@ -89,19 +90,19 @@ namespace Assets.Scripts.Map
             return false;
         }
 
-        public List<int> Query(Vector2 worldPosition)
+        public List<T> Query(Vector2 worldPosition)
         {
             Vector2Int cellCoordinates = GetCellCoordinates(worldPosition);
             return GetPointsInCell(cellCoordinates);
         }
-        public List<int> Query(float radius, Vector2 center)
+        public List<T> Query(float radius, Vector2 center)
         {
 
             // ¬ычисл€ем диапазон €чеек дл€ проверки
             Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
             Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
 
-            List<int> indexes = new List<int>();
+            List<T> indexes = new List<T>();
 
             // ѕеребираем все €чейки в этом диапазоне
             for (int x = minCell.x; x <= maxCell.x; x++)

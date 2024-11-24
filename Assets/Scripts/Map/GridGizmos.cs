@@ -7,7 +7,7 @@ namespace Assets.Scripts.Map
 {
     public class GridGizmos : MonoBehaviour
     {
-        [Inject]public GridPartition<PlantRoots> _grid;
+        [Inject]public GridPartition<RootNode> _grid;
 
 
         private void Start()

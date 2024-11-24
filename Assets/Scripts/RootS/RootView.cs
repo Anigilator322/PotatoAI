@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.RootS
 {
@@ -10,7 +11,10 @@ namespace Assets.Scripts.RootS
     {
         [SerializeField] private LineRenderer _lineRenderer;
         [SerializeField] private List<Vector2> _linePath = new List<Vector2>();
-        [SerializeField] private Plant _plant;
+        [SerializeField ]private Plant _plant;
+
+
+
         public void GrowUp(RootNode rootNode)
         {
             _linePath.Add(rootNode.Position);

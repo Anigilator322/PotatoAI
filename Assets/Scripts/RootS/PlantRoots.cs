@@ -9,38 +9,11 @@ using Zenject;
 
 namespace Assets.Scripts.Map
 {
-    public class PlantRoots : IGridPartionableObjects
+    public class PlantRoots
     {
-        [Inject] private GridPartition<PlantRoots> _gridPartition;
+        private int PlantID;
+
         public List<RootNode> Nodes = new List<RootNode>();
 
-        public Action<RootNode> OnNodeAdded;
-        
-        public PlantRoots(Vector2 basePosition)
-        {
-            //SetBaseNode(basePosition);
-        }
-        
-        private void SetBaseNode(Vector2 basePosition)
-        {
-            RootNode node = new RootNode(basePosition);
-            Nodes.Add(node);
-            _gridPartition.Insert(0);
-            OnNodeAdded?.Invoke(node);
-        }
-        public void CreateNode(int parentInd, Vector2 pos)
-        {
-            RootNode node = new RootNode(pos, parentInd);
-            Nodes[parentInd].SetChildren(Nodes.Count);
-            Nodes.Add(node);
-            _gridPartition.Insert(Nodes.Count - 1);
-            OnNodeAdded?.Invoke(node);
-        }
-
-
-        public Vector2 GetPositionById(int index)
-        {
-            return Nodes[index].Position;
-        }
     }
 }

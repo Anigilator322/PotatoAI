@@ -7,23 +7,23 @@ namespace Assets.Scripts.RootS
     {
         public RootType Type;
         public bool isRootBase;
-        public int prevNodeInd;
-        public List<int> nextNodesIndexes = new List<int>();
+        public RootNode prevNode;
+        public List<RootNode> nextNodes = new List<RootNode>();
 
         public RootNode(Vector2 position)
         {
             Position = position;
         }
 
-        public RootNode(Vector2 position, int parentInd)
+        public RootNode(Vector2 position, RootNode parent)
         {
             Position = position;
-            prevNodeInd = parentInd;
+            prevNode = parent;
         }
 
-        public void SetChildren(int childId)
+        public void SetChildren(RootNode child)
         {
-            nextNodesIndexes.Add(childId);
+            nextNodes.Add(child);
         }
     }
 }

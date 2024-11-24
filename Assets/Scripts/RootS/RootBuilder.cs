@@ -4,18 +4,28 @@ using Assets.Scripts.RootS.Plants;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-public class RootBuilder : MonoBehaviour
+public class RootBuilder
 {
-    [SerializeField] private Plant _plant;
-    [SerializeField] private RootView _rootView;
-    public void BuildRoot(int parentInd, List<Vector2> rootPositions)
+    private Plant _plant;
+    private RootView _rootView;
+    private GridPartition<RootNode> _gridPartition;
+
+    public void BuildRoot(RootNode parent, List<Vector2> rootPositions)
     {
         for(int i = 0; i < rootPositions.Count; i++)
         {
-            _plant.Roots.CreateNode(parentInd, rootPositions[i]);
+            CreateNode(parent, rootPositions[i]);
         }
     }
 
-    
+    private void CreateNode(RootNode parent, Vector2 pos)
+    {
+        RootNode node = new RootNode(pos, parent);
+        parent.SetChildren(node);
+        _gridPartition.Insert(node);
+    }
+
+
 }
