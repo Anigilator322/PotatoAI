@@ -18,7 +18,7 @@ namespace Assets.Scripts.RootS
         private bool _isNewProcess;
         
         private List<Vector2> _buildingPath = new List<Vector2>();
-
+        private bool _isPathCorrect;
         private bool isClickedOnRoot(Vector2 mousePos)
         {
             if (_gridPartition.Query(_clickedNodeSearchRadius, mousePos).Count != 0)
@@ -105,16 +105,16 @@ namespace Assets.Scripts.RootS
                 {
                     DecreasePath();
                 }
-                CheckPathCorrection();
+                _isPathCorrect = CheckPathCorrection();
             }
         }
 
-        private void CheckPathCorrection()
+        private bool CheckPathCorrection()
         {
             int count = _buildingPath.Count;
             if (count < 2)
             {
-                return;
+                return true;
             }
 
             for (int i = 2; i < count; i++)
@@ -127,11 +127,12 @@ namespace Assets.Scripts.RootS
 
                 float cosTheta = Vector3.Dot(P2-P1, P3-P2);
                 float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
-                if (angle < _maxBuildAngle)
+                if (angle > _maxBuildAngle)
                 {
-
+                    return false;
                 }
             }
+            return true;
         }
 
         private void DecreasePath()
