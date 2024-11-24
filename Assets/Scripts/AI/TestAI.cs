@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,8 +12,9 @@ public enum GoalStatus
 }
 
 //Atomic Goals
-//  Goal_PlanRootPath
 //  Goal_BuildRoot
+
+
 //Composite Goals
 //  ThinkingProcess
 //  Goal_GrowTubers
@@ -22,7 +23,7 @@ public enum GoalStatus
 
 public abstract class Goal
 {
-    public GoalStatus Status { get; private set; } = GoalStatus.Inactive;
+    public GoalStatus Status { get; protected set; } = GoalStatus.Inactive;
 
     public abstract void Activate();
     public abstract GoalStatus Process();
@@ -49,6 +50,10 @@ public abstract class Goal
     }
 }
 
+
+//Похоже, что в стратегии нормой может быть выполнение нескольких целей одновременно.
+//Это нужно будет учесть. Возможно созданием бюджетов под задачу и созданием ответственных корутин - мыслей
+//А пока наш искусственный интелект будет как в РПГ - в один момент времени делает одну вещь
 public abstract class CompositeGoal : Goal
 {
     public List<Goal> Subgoals { get; private set; } = new List<Goal>();
@@ -84,16 +89,19 @@ public abstract class CompositeGoal : Goal
             var subgoal = Subgoals[i];
             if (subgoal.IsInactive() || subgoal.IsActive())
                 break;
-        }         
-
-        if(i == Subgoals.Count)
-        {
-            Subgoals = new List<Goal>();
-            return GoalStatus.Completed;
         }
-        else
+
+        if (i > 0)
         {
-            RemoveSubgoalsRange(0, i);
+            if (i == Subgoals.Count)
+            {
+                Subgoals = new List<Goal>();
+                return GoalStatus.Completed;
+            }
+            else
+            {
+                RemoveSubgoalsRange(0, i);
+            }
         }
 
         var statusOfFrontSubgoal = Subgoals.First().Process();

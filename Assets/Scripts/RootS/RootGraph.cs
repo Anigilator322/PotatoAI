@@ -17,7 +17,7 @@ namespace Assets.Scripts.RootS
         }
         public RootNode AddNode(Vector3 position, RootNode parent)
         {
-            RootNode newNode = new RootNode(position, parent);
+            RootNode newNode = new(position, parent, RootType.Harvester);
             parent.Childrens.Add(newNode);
             nodes.Add(newNode);
             return newNode;
