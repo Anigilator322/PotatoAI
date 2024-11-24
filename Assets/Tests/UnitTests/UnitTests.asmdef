@@ -6,7 +6,7 @@
         "UnityEditor.TestRunner",
         "Zenject-TestFramework",
         "Zenject",
-        "MyAsnDef"
+        "Core"
     ],
     "includePlatforms": [
         "Editor"
