@@ -39,7 +39,6 @@ public class GridUnitTest : ZenjectUnitTestFixture
             grid.Insert(node);
         }
         List<RootNode> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
-        Debug.Log(pointsIndexes.Count);
         Assert.That(pointsIndexes.Count == 6);
     }
 
@@ -65,7 +64,6 @@ public class GridUnitTest : ZenjectUnitTestFixture
         }
         
         List<RootNode> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
-        Debug.Log(pointsIndexes.Count);
         Assert.That(pointsIndexes.Count == 7);
     }
     [Test]
@@ -84,7 +82,6 @@ public class GridUnitTest : ZenjectUnitTestFixture
         }
 
         List<RootNode> pointsIndexes = grid.Query(100, new Vector2(0, 0));
-        Debug.Log(pointsIndexes.Count);
         Assert.That(pointsIndexes.Count == 1);
     }
 }
