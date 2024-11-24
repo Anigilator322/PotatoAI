@@ -1,40 +1,44 @@
+using Assets.Scripts.RootS;
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T>
+    public class Cell<T> where T : PositionedObject
     {
-        private List<int> _indexes;
+        private List<T> _positionedObjects;
         public Cell()
         {
-            _indexes = new List<int>();
+            _positionedObjects = new List<T>();
         }
-        public Cell(int index)
+        public Cell(T point)
         {
-            _indexes = new List<int>();
-            _indexes.Add(index);
+            _positionedObjects = new List<T>();
+            _positionedObjects.Add(point);
         }
-        public void AddIndex(int index)
+        public void AddIndex(T point)
         {
-            _indexes.Add(index);
+            _positionedObjects.Add(point);
         }
-        public List<int> GetIndexes()
+        public List<T> GetIndexes()
         {
-            return _indexes;
+            return _positionedObjects;
         }
     }
 
-    public class GridPartition<T>
+    public class GridPartition<T> 
+        where T : PositionedObject
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
+        //private List<T> _positionedObjects = new List<T>();
 
         public GridPartition(int cellSize)
-        {
+        { 
             _cellSize = cellSize;
             _grid = new Dictionary<Vector2Int, Cell<T>>();
         }
@@ -47,44 +51,58 @@ namespace Assets.Scripts.Map
         }
 
 
-        public void Insert(Vector2 position, int index)
+        public void Insert(T positionedObject)
         {
 
-            Vector2Int cellCoordinates = GetCellCoordinates(position);
+            Vector2Int cellCoordinates = GetCellCoordinates(positionedObject.Position);
 
             if (!_grid.ContainsKey(cellCoordinates))
             {
-                _grid[cellCoordinates] = new Cell<T>(index);
+                _grid[cellCoordinates] = new Cell<T>(positionedObject);
             }
-
-            _grid[cellCoordinates].AddIndex(index);
-
+            else
+            {
+                _grid[cellCoordinates].AddIndex(positionedObject);
+            }
         }
-        private List<int> GetPointsInCell(Vector2Int cellCoordinates)
+        private List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
             {
                 return _grid[cellCoordinates].GetIndexes();
             }
 
-            return new List<int>();
+            return new List<T>();
         }
 
-        
+        private bool isAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 center, float radius)
+        {
+            Vector2 downLeft = new Vector2(cellCoordinates.x * _cellSize, cellCoordinates.y * _cellSize);
+            Vector2 upRight = new Vector2(downLeft.x + _cellSize, downLeft.y + _cellSize);
+            Vector2 upLeft = new Vector2(downLeft.x,downLeft.y + _cellSize);
+            Vector2 downRight = new Vector2(downLeft.x + _cellSize, downLeft.y);
 
-        public List<int> Query(Vector2 worldPosition)
+            if (Vector2.Distance(downLeft, center) < radius) return true;
+            if (Vector2.Distance(upRight, center) < radius) return true;
+            if (Vector2.Distance(downRight, center) < radius) return true;
+            if (Vector2.Distance(upLeft,center)<radius) return true;
+
+            return false;
+        }
+
+        public List<T> Query(Vector2 worldPosition)
         {
             Vector2Int cellCoordinates = GetCellCoordinates(worldPosition);
             return GetPointsInCell(cellCoordinates);
         }
-        public List<int> Query(float radius, Vector2 center)
+        public List<T> Query(float radius, Vector2 center)
         {
 
             // Вычисляем диапазон ячеек для проверки
             Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
             Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
 
-            List<int> indexes = new List<int>();
+            List<T> indexes = new List<T>();
 
             // Перебираем все ячейки в этом диапазоне
             for (int x = minCell.x; x <= maxCell.x; x++)
@@ -96,8 +114,10 @@ namespace Assets.Scripts.Map
                     // Если ячейка существует
                     if (_grid.ContainsKey(cellCoordinates))
                     {
-                        // Проверяем каждую точку в ячейке
-                        indexes.AddRange(_grid[cellCoordinates].GetIndexes());
+                        if (isAnyCornerInRadius(cellCoordinates, center, radius))
+                        {
+                            indexes.AddRange(_grid[cellCoordinates].GetIndexes());
+                        } 
                     }
                 }
             }
