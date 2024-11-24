@@ -6,7 +6,7 @@ using Zenject;
 
 namespace Assets.Scripts.RootS
 {
-    public class RootBluePrintSystem : MonoBehaviour
+    public class RootBluePrintingSystem : MonoBehaviour
     {
         private PlayerInputActions _playerInputActions;
         private GridPartition<RootNode> _gridPartition;
@@ -16,7 +16,8 @@ namespace Assets.Scripts.RootS
         private float _distanceToBuildNewNode = 2f;
         private float _maxBuildAngle = 90f;
         public RootBuildingPath RootBuildingPath;
-        private bool isClickedOnRoot(Vector2 mousePos)
+
+        private bool IsClickedOnRoot(Vector2 mousePos)
         {
             if (_gridPartition.Query(_clickedNodeSearchRadius, mousePos).Count != 0)
             {
@@ -32,10 +33,10 @@ namespace Assets.Scripts.RootS
         {
             _playerInputActions.PlayerMap.LBMPressed.performed += _ => 
             { 
-                if (isClickedOnRoot(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()))
+                if (IsClickedOnRoot(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()))
                 {
                     _isDragging = true; 
-                    PrepareBLuePrint(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()); 
+                    PrepareBlueprint(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()); 
                 } 
             };
             _playerInputActions.PlayerMap.LBMPressed.canceled += _ => { _isDragging = false; CancelBluePrinting(); };
@@ -46,22 +47,15 @@ namespace Assets.Scripts.RootS
             TryBlueprint();
         }
 
-        private void PrepareBLuePrint(Vector2 mousePosition)
+        private void PrepareBlueprint(Vector2 mousePosition)
         {
-            List<RootNode> quiredNodes = _gridPartition.Query(_clickedNodeSearchRadius,mousePosition);
-            RootNode _clickedNode;
-            _clickedNode = FindClosestNodeToMouse(quiredNodes, mousePosition);
             RootBuildingPath = new RootBuildingPath();
-            if(_clickedNode.nextNodes.Count == 0)
-            {
-                RootBuildingPath.IsNewProcess = false;
-                RootBuildingPath.AddInPath(_clickedNode.prevNode.Position);
-                RootBuildingPath.AddInPath(_clickedNode.Position);
-            }
-            else
-            {
-                RootBuildingPath.IsNewProcess = true;
-            }
+            List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
+            RootNode _clickedNode;
+            _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
+            RootBuildingPath.IsNewProcess = _clickedNode.nextNodes.Count != 0;
+            RootBuildingPath.AddInPath(_clickedNode.prevNode.Position);
+            RootBuildingPath.AddInPath(_clickedNode.Position);
         }
 
         private RootNode FindClosestNodeToMouse(List<RootNode> rootNodes, Vector2 mousePosition)
@@ -88,7 +82,7 @@ namespace Assets.Scripts.RootS
         {
             if (!_isDragging)
                 return;
-            Debug.Log("Dragging");
+
             Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
 
             if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count-1]) > _distanceToBuildNewNode)
@@ -108,6 +102,7 @@ namespace Assets.Scripts.RootS
         private bool CheckPathCorrection()
         {
             int count = RootBuildingPath.RootPath.Count;
+
             if (count < 2)
             {
                 return true;
@@ -119,7 +114,6 @@ namespace Assets.Scripts.RootS
                 Vector2 P1 = RootBuildingPath.RootPath[i-2];
                 Vector2 P2 = RootBuildingPath.RootPath[i-1];
                 Vector2 P3 = RootBuildingPath.RootPath[i];
-
 
                 float cosTheta = Vector3.Dot(P2-P1, P3-P2);
                 float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
@@ -147,6 +141,7 @@ namespace Assets.Scripts.RootS
             Vector2 newVector = (mousePos - RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]).normalized;
 
             float dot = Vector2.Dot(lastVector, newVector);
+
             if(dot < 0)
             {
                 return false;
