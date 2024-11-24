@@ -6,18 +6,20 @@ namespace Assets.Scripts.RootS
 {
     public class RootBuildingPath
     {
-        private Stack<Vector2> _rootPath = new Stack<Vector2>();
-        public List<Vector2> RootPath 
+        public List<Vector2> RootPath { get; private set; } = new List<Vector2>();
+        public bool IsNewProcess;
+        public bool IsPathCorrect;
+
+        public void AddInPath(Vector2 pathPoint)
         {
-            get
-            {
-                Stack<Vector2> rootPathReversed = new Stack<Vector2>(_rootPath);
-                List<Vector2> result = new List<Vector2>(rootPathReversed);
-                return result;
-            }
-            private set { }
+            RootPath.Add(pathPoint);
+        }
+        public void RemoveFromPathLastPoint()
+        {
+            RootPath.RemoveAt(RootPath.Count-1);
         }
 
+        
 
     }
 }

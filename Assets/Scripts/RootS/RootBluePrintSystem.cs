@@ -15,10 +15,7 @@ namespace Assets.Scripts.RootS
         private float _clickedNodeSearchRadius = 2f;
         private float _distanceToBuildNewNode = 2f;
         private float _maxBuildAngle = 90f;
-        private bool _isNewProcess;
-        
-        private List<Vector2> _buildingPath = new List<Vector2>();
-        private bool _isPathCorrect;
+        private RootBuildingPath _rootBuildingPath;
         private bool isClickedOnRoot(Vector2 mousePos)
         {
             if (_gridPartition.Query(_clickedNodeSearchRadius, mousePos).Count != 0)
@@ -55,16 +52,16 @@ namespace Assets.Scripts.RootS
             List<RootNode> quiredNodes = _gridPartition.Query(_clickedNodeSearchRadius,mousePosition);
             RootNode _clickedNode;
             _clickedNode = FindClosestNodeToMouse(quiredNodes, mousePosition);
-
+            _rootBuildingPath = new RootBuildingPath();
             if(_clickedNode.nextNodes.Count == 0)
             {
-                _isNewProcess = false;
-                _buildingPath.Add(_clickedNode.prevNode.Position);
-                _buildingPath.Add(_clickedNode.Position);
+                _rootBuildingPath.IsNewProcess = false;
+                _rootBuildingPath.AddInPath(_clickedNode.prevNode.Position);
+                _rootBuildingPath.AddInPath(_clickedNode.Position);
             }
             else
             {
-                _isNewProcess=true;
+                _rootBuildingPath.IsNewProcess = true;
             }
         }
 
@@ -85,7 +82,7 @@ namespace Assets.Scripts.RootS
 
         private void CreateNewPathNode(Vector2 position)
         {
-            _buildingPath.Add(position);
+            _rootBuildingPath.AddInPath(position);
         }
 
         private void TryBlueprint()
@@ -95,7 +92,7 @@ namespace Assets.Scripts.RootS
             Debug.Log("Dragging");
             Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
 
-            if (Vector2.Distance(mousePos, _buildingPath[_buildingPath.Count-1]) > _distanceToBuildNewNode)
+            if (Vector2.Distance(mousePos, _rootBuildingPath.RootPath[_rootBuildingPath.RootPath.Count-1]) > _distanceToBuildNewNode)
             {
                 if(IsCreating(mousePos))
                 {
@@ -105,13 +102,13 @@ namespace Assets.Scripts.RootS
                 {
                     DecreasePath();
                 }
-                _isPathCorrect = CheckPathCorrection();
+                _rootBuildingPath.IsPathCorrect = CheckPathCorrection();
             }
         }
 
         private bool CheckPathCorrection()
         {
-            int count = _buildingPath.Count;
+            int count = _rootBuildingPath.RootPath.Count;
             if (count < 2)
             {
                 return true;
@@ -120,9 +117,9 @@ namespace Assets.Scripts.RootS
             for (int i = 2; i < count; i++)
             {
                 //Add rules
-                Vector2 P1 = _buildingPath[i-2];
-                Vector2 P2 = _buildingPath[i-1];
-                Vector2 P3 = _buildingPath[i];
+                Vector2 P1 = _rootBuildingPath.RootPath[i-2];
+                Vector2 P2 = _rootBuildingPath.RootPath[i-1];
+                Vector2 P3 = _rootBuildingPath.RootPath[i];
 
 
                 float cosTheta = Vector3.Dot(P2-P1, P3-P2);
@@ -137,18 +134,18 @@ namespace Assets.Scripts.RootS
 
         private void DecreasePath()
         {
-            _buildingPath.RemoveAt(_buildingPath.Count-1);
+            _rootBuildingPath.RootPath.RemoveAt(_rootBuildingPath.RootPath.Count-1);
         }
 
         private void CreatePathNode(Vector2 mousePos)
         {
-            _buildingPath.Add(mousePos);
+            _rootBuildingPath.RootPath.Add(mousePos);
         }
 
         private bool IsCreating(Vector2 mousePos)
         {
-            Vector2 lastVector = (_buildingPath[_buildingPath.Count - 1] - _buildingPath[_buildingPath.Count - 2]).normalized;
-            Vector2 newVector = (mousePos - _buildingPath[_buildingPath.Count - 1]).normalized;
+            Vector2 lastVector = (_rootBuildingPath.RootPath[_rootBuildingPath.RootPath.Count - 1] - _rootBuildingPath.RootPath[_rootBuildingPath.RootPath.Count - 2]).normalized;
+            Vector2 newVector = (mousePos - _rootBuildingPath.RootPath[_rootBuildingPath.RootPath.Count - 1]).normalized;
 
             float dot = Vector2.Dot(lastVector, newVector);
             if(dot < 0)
