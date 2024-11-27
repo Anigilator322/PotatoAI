@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms;
 using Zenject;
 
 namespace Assets.Scripts.RootS
@@ -89,7 +90,7 @@ namespace Assets.Scripts.RootS
             {
                 if(IsCreating(mousePos))
                 {
-                    CreatePathNode(mousePos);
+                    CreateNewPathNode(mousePos);
                 }
                 else
                 {
@@ -97,6 +98,18 @@ namespace Assets.Scripts.RootS
                 }
                 RootBuildingPath.IsPathCorrect = CheckPathCorrection();
             }
+        }
+
+        private bool CheckAngleCorrecction(Vector2 node1, Vector2 node2, Vector2 newNode)
+        {
+            float cosTheta = Vector3.Dot(node2 - node1, newNode - node2);
+            float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
+            if (angle > _maxBuildAngle)
+            {
+                return false;
+            }
+            else
+                return true;
         }
 
         private bool CheckPathCorrection()
@@ -107,32 +120,21 @@ namespace Assets.Scripts.RootS
             {
                 return true;
             }
-
+            bool isCorrect = true;
             for (int i = 2; i < count; i++)
             {
-                //Add rules
-                Vector2 P1 = RootBuildingPath.RootPath[i-2];
-                Vector2 P2 = RootBuildingPath.RootPath[i-1];
-                Vector2 P3 = RootBuildingPath.RootPath[i];
-
-                float cosTheta = Vector3.Dot(P2-P1, P3-P2);
-                float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
-                if (angle > _maxBuildAngle)
+                isCorrect = CheckAngleCorrecction(RootBuildingPath.RootPath[i - 2], RootBuildingPath.RootPath[i - 1], RootBuildingPath.RootPath[i]);
+                if(!isCorrect)
                 {
-                    return false;
+                    break;
                 }
             }
-            return true;
+            return isCorrect;
         }
 
         private void DecreasePath()
         {
             RootBuildingPath.RootPath.RemoveAt(RootBuildingPath.RootPath.Count-1);
-        }
-
-        private void CreatePathNode(Vector2 mousePos)
-        {
-            RootBuildingPath.RootPath.Add(mousePos);
         }
 
         private bool IsCreating(Vector2 mousePos)
