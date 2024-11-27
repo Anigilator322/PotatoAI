@@ -7,15 +7,24 @@ using Zenject;
 
 namespace Assets.Scripts.RootS
 {
+    public enum BlueprintingState
+    {
+        Idle,
+        Creating,
+        Removing,
+        Canceling
+    }
     public class RootBluePrintingSystem : MonoBehaviour
     {
         private PlayerInputActions _playerInputActions;
         private GridPartition<RootNode> _gridPartition;
 
         private bool _isDragging = false;
+        private BlueprintingState _currentState = BlueprintingState.Idle;
         private float _clickedNodeSearchRadius = 2f;
         private float _distanceToBuildNewNode = 2f;
         private float _maxBuildAngle = 90f;
+        private float _minRemoveAngle = 90f;
         public RootBuildingPath RootBuildingPath;
 
         private bool IsClickedOnRoot(Vector2 mousePos)
@@ -86,24 +95,48 @@ namespace Assets.Scripts.RootS
 
             Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
 
-            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count-1]) > _distanceToBuildNewNode)
+            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) > _distanceToBuildNewNode)
             {
-                if(IsCreating(mousePos))
+                float angle = CalculateAngleBetweenNodes(RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2],
+                            RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1],
+                            mousePos);
+                if (IsCreating(mousePos))
                 {
-                    CreateNewPathNode(mousePos);
+                    if (angle < _maxBuildAngle)
+                    {
+                        CreateNewPathNode(mousePos);
+                    }
+                    else
+                    {
+                        CreateNewPathNode(FindMaxAllowedPathNode(RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2],
+                            RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1], angle));
+                    }
                 }
-                else
-                {
-                    DecreasePath();
-                }
-                RootBuildingPath.IsPathCorrect = CheckPathCorrection();
             }
+        }
+
+        private Vector2 FindMaxAllowedPathNode(Vector2 P1, Vector2 P2, float angle)
+        {
+            Vector2 v = (P2 - P1).normalized;
+            float angleRad = angle * Mathf.Deg2Rad;
+
+            Vector2 rotatedV = new Vector2(v.x * Mathf.Cos(angleRad) - v.y * Mathf.Sin(angleRad),
+                                           v.x * Mathf.Sin(angleRad) + v.y * Mathf.Cos(angleRad));
+            Vector2 newNode = P2 + rotatedV * _distanceToBuildNewNode;
+            return newNode;
+        }
+
+        public float CalculateAngleBetweenNodes(Vector2 node1, Vector2 node2, Vector2 newNode)
+        {
+            
+            float cosTheta = Vector2.Dot((node2 - node1).normalized, (newNode - node2).normalized);
+            float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
+            return angle;
         }
 
         private bool CheckAngleCorrecction(Vector2 node1, Vector2 node2, Vector2 newNode)
         {
-            float cosTheta = Vector3.Dot(node2 - node1, newNode - node2);
-            float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
+            float angle = CalculateAngleBetweenNodes(node1, node2, newNode);
             if (angle > _maxBuildAngle)
             {
                 return false;
