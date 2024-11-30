@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
-    public class RootBuildingPath
-    {
+    public class RootBuildingPath : IIdentifiable
+    {    
+        RootType RootType { get; set; }
+
         private Stack<Vector2> _rootPath = new Stack<Vector2>();
         public List<Vector2> RootPath 
         {
@@ -17,7 +20,5 @@ namespace Assets.Scripts.RootS
             }
             private set { }
         }
-
-
     }
 }

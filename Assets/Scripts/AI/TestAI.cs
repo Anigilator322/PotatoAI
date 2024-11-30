@@ -5,7 +5,7 @@ using UnityEngine;
 
 public enum GoalStatus
 {
-    Inactive = default,
+    Inactive = 0,
     Active = 1,
     Completed = 2,
     Failed = 3
@@ -23,6 +23,7 @@ public enum GoalStatus
 
 public abstract class Goal
 {
+    public int PlantId { get; protected set; }
     public GoalStatus Status { get; protected set; } = GoalStatus.Inactive;
 
     public abstract void Activate();
