@@ -46,7 +46,11 @@ namespace Assets.Scripts.RootS
         {
             if (!_isDragging)
                 return;
-            TryBlueprint();
+            Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
+            if (mousePos.magnitude / _distanceToBuildNewNode < 10)
+                TryBlueprint(mousePos);
+            else
+                TryBlueprintWhileCan(mousePos);
         }
 
         private void PrepareBlueprint(Vector2 mousePosition)
@@ -82,9 +86,8 @@ namespace Assets.Scripts.RootS
             RootBuildingPath.AddInPath(position);
         }
 
-        private void TryBlueprint()
+        private void TryBlueprint(Vector2 mousePos)
         {
-            Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
             if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) <= _distanceToBuildNewNode)
                 return;
             
@@ -109,6 +112,35 @@ namespace Assets.Scripts.RootS
             else
             {
                 DecreasePath();
+            }
+        }
+
+        private void TryBlueprintWhileCan(Vector2 mousePos)
+        {
+            while(Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) <= _distanceToBuildNewNode)
+            {
+                Vector2 lastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1];
+                Vector2 secondLastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2];
+                Vector2 directionToMouse = (mousePos - lastPoint).normalized;
+                Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
+
+                if (IsCreating(directionOfPath, directionToMouse))
+                {
+                    float angle = Vector2.Angle(directionToMouse, directionOfPath);
+                    if (angle < _maxBuildAngle)
+                    {
+                        CreateNewPathNode(lastPoint + directionToMouse);
+                    }
+                    else
+                    {
+                        Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToMouse);
+                        CreateNewPathNode(lastPoint + correctedPathNode);
+                    }
+                }
+                else
+                {
+                    DecreasePath();
+                }
             }
         }
 
