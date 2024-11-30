@@ -7,20 +7,12 @@ using Zenject;
 
 namespace Assets.Scripts.RootS
 {
-    public enum BlueprintingState
-    {
-        Idle,
-        Creating,
-        Removing,
-        Canceling
-    }
     public class RootBluePrintingSystem : MonoBehaviour
     {
         private PlayerInputActions _playerInputActions;
         private GridPartition<RootNode> _gridPartition;
 
         private bool _isDragging = false;
-        private BlueprintingState _currentState = BlueprintingState.Idle;
         private float _clickedNodeSearchRadius = 2f;
         private float _distanceToBuildNewNode = 2f;
         private float _maxBuildAngle = 90f;
