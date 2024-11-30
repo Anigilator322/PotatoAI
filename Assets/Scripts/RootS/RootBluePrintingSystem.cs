@@ -86,10 +86,10 @@ namespace Assets.Scripts.RootS
             RootBuildingPath.AddInPath(position);
         }
 
-        private void TryBlueprint(Vector2 mousePos)
+        private bool TryBlueprint(Vector2 mousePos)
         {
             if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) <= _distanceToBuildNewNode)
-                return;
+                return false;
             
             Vector2 lastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1];
             Vector2 secondLastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2];
@@ -113,34 +113,14 @@ namespace Assets.Scripts.RootS
             {
                 DecreasePath();
             }
+            return true;
         }
 
         private void TryBlueprintWhileCan(Vector2 mousePos)
         {
-            while(Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) <= _distanceToBuildNewNode)
+            while(TryBlueprint(mousePos))
             {
-                Vector2 lastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1];
-                Vector2 secondLastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2];
-                Vector2 directionToMouse = (mousePos - lastPoint).normalized;
-                Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
-
-                if (IsCreating(directionOfPath, directionToMouse))
-                {
-                    float angle = Vector2.Angle(directionToMouse, directionOfPath);
-                    if (angle < _maxBuildAngle)
-                    {
-                        CreateNewPathNode(lastPoint + directionToMouse);
-                    }
-                    else
-                    {
-                        Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToMouse);
-                        CreateNewPathNode(lastPoint + correctedPathNode);
-                    }
-                }
-                else
-                {
-                    DecreasePath();
-                }
+                
             }
         }
 
