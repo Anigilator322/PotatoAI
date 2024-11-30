@@ -85,6 +85,8 @@ namespace Assets.Scripts.RootS
 
         private void CreateNewPathNode(Vector2 position)
         {
+            position.Normalize();
+            position *= _distanceToBuildNewNode;
             RootBuildingPath.AddInPath(position);
         }
 
