@@ -1,9 +1,8 @@
 ﻿using Assets.Scripts.Map;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.SocialPlatforms;
-using Zenject;
+
 
 namespace Assets.Scripts.RootS
 {
@@ -16,7 +15,6 @@ namespace Assets.Scripts.RootS
         private float _clickedNodeSearchRadius = 2f;
         private float _distanceToBuildNewNode = 2f;
         private float _maxBuildAngle = 90f;
-        private float _minRemoveAngle = 90f;
         public RootBuildingPath RootBuildingPath;
 
         private bool IsClickedOnRoot(Vector2 mousePos)
@@ -46,6 +44,8 @@ namespace Assets.Scripts.RootS
 
         private void Update()
         {
+            if (!_isDragging)
+                return;
             TryBlueprint();
         }
 
@@ -84,40 +84,48 @@ namespace Assets.Scripts.RootS
 
         private void TryBlueprint()
         {
-            if (!_isDragging)
-                return;
-
             Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
-
-            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) > _distanceToBuildNewNode)
+            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) <= _distanceToBuildNewNode)
+                return;
+            
+            Vector2 lastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1];
+            Vector2 secondLastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2];
+            Vector2 directionToMouse = (mousePos - lastPoint).normalized;
+            Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
+            
+            if (IsCreating(directionOfPath,directionToMouse))
             {
-                float angle = CalculateAngleBetweenNodes(RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2],
-                            RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1],
-                            mousePos);
-                if (IsCreating(mousePos))
+                float angle = Vector2.Angle(directionToMouse, directionOfPath);
+                if (angle < _maxBuildAngle)
                 {
-                    if (angle < _maxBuildAngle)
-                    {
-                        CreateNewPathNode(mousePos);
-                    }
-                    else
-                    {
-                        CreateNewPathNode(FindMaxAllowedPathNode(RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2],
-                            RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1], angle));
-                    }
+                    CreateNewPathNode(lastPoint + directionToMouse);
                 }
+                else
+                {
+                    Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToMouse);
+                    CreateNewPathNode(lastPoint + correctedPathNode);
+                }
+            }
+            else
+            {
+                DecreasePath();
             }
         }
 
-        private Vector2 FindMaxAllowedPathNode(Vector2 P1, Vector2 P2, float angle)
+        private Vector2 RotateVector(Vector2 v, float angle)
         {
-            Vector2 v = (P2 - P1).normalized;
-            float angleRad = angle * Mathf.Deg2Rad;
+            float rad = angle * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(rad);
+            float sin = Mathf.Sin(rad);
+            return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
 
-            Vector2 rotatedV = new Vector2(v.x * Mathf.Cos(angleRad) - v.y * Mathf.Sin(angleRad),
-                                           v.x * Mathf.Sin(angleRad) + v.y * Mathf.Cos(angleRad));
-            Vector2 newNode = P2 + rotatedV * _distanceToBuildNewNode;
-            return newNode;
+        }
+
+        private Vector2 FindMaxAllowedPathNode(Vector2 directionOfPath, Vector2 directionToMouse)
+        {
+            float sign = Mathf.Sign(Vector2.SignedAngle(directionOfPath, directionToMouse));
+            Vector2 correctedDirection = RotateVector(directionOfPath, sign * _maxBuildAngle);
+            return correctedDirection;
         }
 
         public float CalculateAngleBetweenNodes(Vector2 node1, Vector2 node2, Vector2 newNode)
@@ -128,50 +136,16 @@ namespace Assets.Scripts.RootS
             return angle;
         }
 
-        private bool CheckAngleCorrecction(Vector2 node1, Vector2 node2, Vector2 newNode)
-        {
-            float angle = CalculateAngleBetweenNodes(node1, node2, newNode);
-            if (angle > _maxBuildAngle)
-            {
-                return false;
-            }
-            else
-                return true;
-        }
-
-        private bool CheckPathCorrection()
-        {
-            int count = RootBuildingPath.RootPath.Count;
-
-            if (count < 2)
-            {
-                return true;
-            }
-            bool isCorrect = true;
-            for (int i = 2; i < count; i++)
-            {
-                isCorrect = CheckAngleCorrecction(RootBuildingPath.RootPath[i - 2], RootBuildingPath.RootPath[i - 1], RootBuildingPath.RootPath[i]);
-                if(!isCorrect)
-                {
-                    break;
-                }
-            }
-            return isCorrect;
-        }
-
         private void DecreasePath()
         {
             RootBuildingPath.RootPath.RemoveAt(RootBuildingPath.RootPath.Count-1);
         }
 
-        private bool IsCreating(Vector2 mousePos)
+        private bool IsCreating(Vector2 path, Vector2 mousePos)
         {
-            Vector2 lastVector = (RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1] - RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2]).normalized;
-            Vector2 newVector = (mousePos - RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]).normalized;
-
-            float dot = Vector2.Dot(lastVector, newVector);
-
-            if(dot < 0)
+            Vector2 projection = Vector2.Dot(mousePos, path) / Vector2.Dot(path, path) * path;
+            float dot = Vector2.Dot(projection, path);
+            if (dot < 0)
             {
                 return false;
             }    
