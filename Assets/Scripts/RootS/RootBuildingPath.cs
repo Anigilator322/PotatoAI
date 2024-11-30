@@ -6,9 +6,15 @@ namespace Assets.Scripts.RootS
 {
     public class RootBuildingPath
     {
+        public RootType RootType;
         public List<Vector2> RootPath { get; private set; } = new List<Vector2>();
         public bool IsNewProcess;
         public bool IsPathCorrect;
+
+        public RootBuildingPath(RootType rootType)
+        {
+            RootType = rootType;
+        }
 
         public void AddInPath(Vector2 pathPoint)
         {

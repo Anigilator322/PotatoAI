@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
-    public class RootBluePrintingSystem : MonoBehaviour
+    public class RootBlueprintingSystem : MonoBehaviour
     {
         private PlayerInputActions _playerInputActions;
         private GridPartition<RootNode> _gridPartition;
@@ -14,6 +14,7 @@ namespace Assets.Scripts.RootS
         private float _clickedNodeSearchRadius = 2f;
         private float _distanceToBuildNewNode = 2f;
         private float _maxBuildAngle = 90f;
+        private RootType _currentRootType;
         public RootBuildingPath RootBuildingPath;
 
         private bool IsClickedOnRoot(Vector2 mousePos)
@@ -54,7 +55,7 @@ namespace Assets.Scripts.RootS
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
-            RootBuildingPath = new RootBuildingPath();
+            RootBuildingPath = new RootBuildingPath(_currentRootType);
             List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
             RootNode _clickedNode;
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
