@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace Assets.Scripts.RootS
 {
     public class RootBluePrintingSystem : MonoBehaviour
@@ -79,20 +78,23 @@ namespace Assets.Scripts.RootS
             return closestNode;
         }
 
-        private void CreateNewPathNode(Vector2 position)
+        private void CreateNewPathNode(Vector2 newNodePosition, Vector2 lastNodePosition)
         {
-            position.Normalize();
-            position *= _distanceToBuildNewNode;
-            RootBuildingPath.AddInPath(position);
+            newNodePosition.Normalize();
+            RootBuildingPath.AddInPath((lastNodePosition + newNodePosition) * _distanceToBuildNewNode);
         }
 
         private bool TryBlueprint(Vector2 mousePos)
         {
-            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1]) <= _distanceToBuildNewNode)
+            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[^1]) <= _distanceToBuildNewNode)
                 return false;
-            
-            Vector2 lastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 1];
-            Vector2 secondLastPoint = RootBuildingPath.RootPath[RootBuildingPath.RootPath.Count - 2];
+            if(RootBuildingPath.RootPath.Count < 2)
+            {
+                CreateNewPathNode(mousePos, RootBuildingPath.RootPath[^1]);
+                return true;
+            }
+            Vector2 lastPoint = RootBuildingPath.RootPath[^1];
+            Vector2 secondLastPoint = RootBuildingPath.RootPath[^2];
             Vector2 directionToMouse = (mousePos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
@@ -101,12 +103,12 @@ namespace Assets.Scripts.RootS
                 float angle = Vector2.Angle(directionToMouse, directionOfPath);
                 if (angle < _maxBuildAngle)
                 {
-                    CreateNewPathNode(lastPoint + directionToMouse);
+                    CreateNewPathNode(directionToMouse,lastPoint);
                 }
                 else
                 {
                     Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToMouse);
-                    CreateNewPathNode(lastPoint + correctedPathNode);
+                    CreateNewPathNode(directionToMouse, lastPoint);
                 }
             }
             else
@@ -118,10 +120,7 @@ namespace Assets.Scripts.RootS
 
         private void TryBlueprintWhileCan(Vector2 mousePos)
         {
-            while(TryBlueprint(mousePos))
-            {
-                
-            }
+            while (TryBlueprint(mousePos)) ;
         }
 
         private Vector2 RotateVector(Vector2 v, float angle)
