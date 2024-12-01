@@ -14,6 +14,7 @@ namespace Assets.Scripts.RootS
         private RootBlueprintingSystem _rootBlueprintingSystem;
         private RootNode _clickedNode;
         private RootType _selectedType;
+
         void Start()
         {
             _playerInputActions.PlayerMap.LBMPressed.performed += _ =>
