@@ -7,7 +7,8 @@ namespace Assets.Scripts.RootS
 {
     public class RootBuildingPath : IIdentifiable
     {    
-        RootType RootType { get; set; }
+        public string Id { get; set; } 
+        public RootType RootType { get; set; }
 
         private Stack<Vector2> _rootPath = new Stack<Vector2>();
         public List<Vector2> RootPath 
@@ -20,5 +21,7 @@ namespace Assets.Scripts.RootS
             }
             private set { }
         }
+
+        
     }
 }

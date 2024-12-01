@@ -2,6 +2,8 @@
 using Assets.Scripts.RootS;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Assets.Scripts
 {
@@ -18,7 +20,7 @@ namespace Assets.Scripts
     interface IRootGrowthSystem
     {
         void StartGrowth(RootBuildingPath rootPath);
-        void CancelGrowth(string id);
+        bool CancelGrowth(string id);
     }
 
     public class RootGrowthSystem : IRootGrowthSystem
@@ -27,35 +29,49 @@ namespace Assets.Scripts
 
         //конфигурация скорости роста и т.п.
 
-        public void StartGrowth(string id, RootNode rootNode)
+        public void StartGrowth(RootBuildingPath rootPath)
         {
-            _growingRoots.Roots[id] = new GrowingRoot(rootNode)
+            _growingRoots.Roots.Add(new GrowingRoot()
             {
-                State = GrowthState.Growing
-            };
+                State = GrowthState.Growing,
+                Path = rootPath
+            });
         }
 
-        public void CancelGrowth(string id)
+        public GrowthState GetGrowingRootState(string id)
         {
-            _growingRoots.Roots[id].State = GrowthState.Canceled;
+            return _growingRoots.Roots
+                .Single(x => x.Path.Id == id)
+                .State;
+        }
+
+        public bool CancelGrowth(string id)
+        {
+            GrowingRoot root = _growingRoots.Roots.SingleOrDefault(x => x.Path.Id == id);
+            if(root is null)
+            {
+                return false;
+            }
+            else
+            {
+                root.State = GrowthState.Canceled;
+                return true;
+            }
         }
     }
 
-    public class GrowingRoot
+    public class GrowingRoot : RootBuildingPath
     {
-        public GrowingRoot(RootNode rootNodes)
-        {
-            Nodes = rootNodes;
-        }
-
         public GrowthState State { get; set; }
-        // Id, Сам отросток
-        public RootNode Nodes { get; private set; }
+
+        public RootBuildingPath Path { get; set; }
+
+        public int BuildingNodeIndex { get; set; } = 0; 
     }
 
     public class GrowingRoots
     {
         // Id, Сам отросток
-        public Dictionary<string, GrowingRoot> Roots { get; private set; }
+        public List<GrowingRoot> Roots { get; private set; }
     }
 }

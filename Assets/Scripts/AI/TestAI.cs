@@ -26,6 +26,9 @@ public abstract class Goal
     public int PlantId { get; protected set; }
     public GoalStatus Status { get; protected set; } = GoalStatus.Inactive;
 
+    /// <summary>
+    ///     Activate - is to replan
+    /// </summary>
     public abstract void Activate();
     public abstract GoalStatus Process();
     public abstract void Terminate();

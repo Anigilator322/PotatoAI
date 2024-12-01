@@ -8,35 +8,34 @@ namespace Assets.Scripts.AI
 {
     public class Goal_Explore : Goal
     {
-        private const string GROWING_ROOT_ID_PREFIX = "exploration root";
         private readonly RootGrowthSystem _rootGrowthSystem;
-        public IScoreMap exploraionValueMap { get; private set; }
                         
-        ExplorationTarget _explorationTarget  = null;
+        ExplorationTarget _explorationTarget;
 
-        RootNode _explorationRoot = null;
+        private const string GROWING_ROOT_ID_PREFIX = "exploration root";
+
         string _growingReconId;
-        
+
+        public Goal_Explore(ExplorationTarget explorationTarget)
+        {
+            _explorationTarget = explorationTarget;
+        }
+
         public override void Activate()
         {
             Status = GoalStatus.Active;
 
-            //==== Выбрать цель для открытия - точка интереса ===
-            _explorationTarget = new ExplorationTarget(this.PlantId) 
-            {
-                Position = exploraionValueMap.GetMostScoredPosition() 
-            };
-
-
             //==== Запустить рост корня-разведчика ===
 
-            //Рассчитать BluePrint корня
+            //[][][] Рассчитать BluePrint корня
+            var explorationRoot = new RootBuildingPath();
 
-            _explorationRoot = new RootNode(new Vector2 (0, 1));
-            _explorationRoot.Type = RootType.Recon;
+            //Status = GoalStatus.Failed;
 
             _growingReconId = GROWING_ROOT_ID_PREFIX + "_" + Guid.NewGuid().ToString();
-            _rootGrowthSystem.StartGrowth(_growingReconId, _explorationRoot);
+            explorationRoot.Id = _growingReconId;
+
+            _rootGrowthSystem.StartGrowth(explorationRoot);
         }
 
         public override GoalStatus Process()
@@ -51,16 +50,16 @@ namespace Assets.Scripts.AI
             {
                 Activate();
             }
-
-            //Следить за исполнением плана строительства
-            if(_rootGrowthSystem.State == GrowthState.Completed 
-                || _rootGrowthSystem.State == GrowthState.Failed)
+            else
             {
-                //Если рост корня заканчивается, то 
-                //Иначе - перепланировать стройку корня
-
-                //А если перепланирование невозможно - отменить выполнение
-                Status = GoalStatus.Failed;
+                //Следить за исполнением плана строительства
+                var rootState = _rootGrowthSystem.GetGrowingRootState(_growingReconId);
+                if (rootState == GrowthState.Completed
+                    || rootState == GrowthState.Failed)
+                {
+                    //Если рост корня заканчивается, то спланировать рост нового корня
+                    Activate();
+                }
             }
 
             return Status;
@@ -70,9 +69,9 @@ namespace Assets.Scripts.AI
         {
             //Остановить стройку корня
             _rootGrowthSystem.CancelGrowth(_growingReconId);
-            
-            //Удалить цель для открытия
 
+            //Удалить цель для открытия
+            _explorationTarget.IsDismissed = true;
         }
     }
 }
