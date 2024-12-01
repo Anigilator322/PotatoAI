@@ -1,127 +1,67 @@
-﻿using Assets.Scripts.Map;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
-    public class RootBlueprintingSystem : MonoBehaviour
+    public class RootBlueprintingSystem
     {
-        private PlayerInputActions _playerInputActions;
-        private GridPartition<RootNode> _gridPartition;
+        public float _distanceToBuildNewNode { get; private set; } = 2f;
+        public float _maxBuildAngle { get; private set; } = 90f;
 
-        private bool _isDragging = false;
-        private float _clickedNodeSearchRadius = 2f;
-        private float _distanceToBuildNewNode = 2f;
-        private float _maxBuildAngle = 90f;
-        private RootType _currentRootType;
-        public RootBuildingPath RootBuildingPath;
-
-        private bool IsClickedOnRoot(Vector2 mousePos)
+        private void Initialize(RootBuildingPath rootBuildingPath,RootNode prevNode)
         {
-            if (_gridPartition.Query(_clickedNodeSearchRadius, mousePos).Count != 0)
+            rootBuildingPath.IsNewProcess = prevNode.nextNodes.Count != 0;
+            if(prevNode.prevNode != null)
+                rootBuildingPath.AddInPath(prevNode.prevNode.Position);
+            rootBuildingPath.AddInPath(prevNode.Position);
+        }
+
+        private void CreateNewPathNode(RootBuildingPath path,Vector2 targetVector, Vector2 lastNodePosition)
+        {
+            targetVector.Normalize();
+            path.AddInPath((lastNodePosition + targetVector) * _distanceToBuildNewNode);
+        }
+
+        public bool TryBlueprint(RootBuildingPath path, Vector2 targetPos)
+        {
+            if (Vector2.Distance(targetPos, path.RootPath[^1]) <= _distanceToBuildNewNode)
+                return false;
+            if(path.RootPath.Count < 2)
             {
+                CreateNewPathNode(path,targetPos, path.RootPath[^1]);
                 return true;
             }
-            else
-            {
-                return false;
-            }
-        }
-
-        private void Start()
-        {
-            _playerInputActions.PlayerMap.LBMPressed.performed += _ => 
-            { 
-                if (IsClickedOnRoot(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()))
-                {
-                    _isDragging = true; 
-                    PrepareBlueprint(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()); 
-                } 
-            };
-            _playerInputActions.PlayerMap.LBMPressed.canceled += _ => { _isDragging = false; CancelBluePrinting(); };
-        }
-
-        private void Update()
-        {
-            if (!_isDragging)
-                return;
-            Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
-            if (mousePos.magnitude / _distanceToBuildNewNode < 10)
-                TryBlueprint(mousePos);
-            else
-                TryBlueprintWhileCan(mousePos);
-        }
-
-        private void PrepareBlueprint(Vector2 mousePosition)
-        {
-            RootBuildingPath = new RootBuildingPath(_currentRootType);
-            List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
-            RootNode _clickedNode;
-            _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
-            RootBuildingPath.IsNewProcess = _clickedNode.nextNodes.Count != 0;
-            RootBuildingPath.AddInPath(_clickedNode.prevNode.Position);
-            RootBuildingPath.AddInPath(_clickedNode.Position);
-        }
-
-        private RootNode FindClosestNodeToMouse(List<RootNode> rootNodes, Vector2 mousePosition)
-        {
-            RootNode closestNode = rootNodes[0];
-            float distance = Vector2.Distance(mousePosition, closestNode.Position);
-            foreach (RootNode node in rootNodes)
-            {
-                if (Vector2.Distance(node.Position, mousePosition) < distance)
-                {
-                    closestNode = node;
-                    distance = Vector2.Distance(node.Position, mousePosition);
-                }
-            }
-            return closestNode;
-        }
-
-        private void CreateNewPathNode(Vector2 newNodePosition, Vector2 lastNodePosition)
-        {
-            newNodePosition.Normalize();
-            RootBuildingPath.AddInPath((lastNodePosition + newNodePosition) * _distanceToBuildNewNode);
-        }
-
-        private bool TryBlueprint(Vector2 mousePos)
-        {
-            if (Vector2.Distance(mousePos, RootBuildingPath.RootPath[^1]) <= _distanceToBuildNewNode)
-                return false;
-            if(RootBuildingPath.RootPath.Count < 2)
-            {
-                CreateNewPathNode(mousePos, RootBuildingPath.RootPath[^1]);
-                return true;
-            }
-            Vector2 lastPoint = RootBuildingPath.RootPath[^1];
-            Vector2 secondLastPoint = RootBuildingPath.RootPath[^2];
-            Vector2 directionToMouse = (mousePos - lastPoint).normalized;
+            Vector2 lastPoint = path.RootPath[^1];
+            Vector2 secondLastPoint = path.RootPath[^2];
+            Vector2 directionToTarget = (targetPos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
-            if (IsCreating(directionOfPath,directionToMouse))
+            if (IsCreating(directionOfPath, directionToTarget))
             {
-                float angle = Vector2.Angle(directionToMouse, directionOfPath);
+                float angle = Vector2.Angle(directionToTarget, directionOfPath);
                 if (angle < _maxBuildAngle)
                 {
-                    CreateNewPathNode(directionToMouse,lastPoint);
+                    CreateNewPathNode(path, directionToTarget, lastPoint);
                 }
                 else
                 {
-                    Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToMouse);
-                    CreateNewPathNode(directionToMouse, lastPoint);
+                    Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
+                    CreateNewPathNode(path, directionToTarget, lastPoint);
                 }
             }
             else
             {
-                DecreasePath();
+                DecreasePath(path);
             }
             return true;
         }
 
-        private void TryBlueprintWhileCan(Vector2 mousePos)
+        public RootBuildingPath TryBlueprintWhileCan(RootType type, RootNode parentNode, Vector2 targetPos)
         {
-            while (TryBlueprint(mousePos)) ;
+            RootBuildingPath rootBuildingPath = new RootBuildingPath(type);
+            Initialize(rootBuildingPath, parentNode);
+            while (TryBlueprint(rootBuildingPath, targetPos)) ;
+
+            return rootBuildingPath;
         }
 
         private Vector2 RotateVector(Vector2 v, float angle)
@@ -133,9 +73,9 @@ namespace Assets.Scripts.RootS
 
         }
 
-        private Vector2 FindMaxAllowedPathNode(Vector2 directionOfPath, Vector2 directionToMouse)
+        private Vector2 FindMaxAllowedPathNode(Vector2 directionOfPath, Vector2 directionToTarget)
         {
-            float sign = Mathf.Sign(Vector2.SignedAngle(directionOfPath, directionToMouse));
+            float sign = Mathf.Sign(Vector2.SignedAngle(directionOfPath, directionToTarget));
             Vector2 correctedDirection = RotateVector(directionOfPath, sign * _maxBuildAngle);
             return correctedDirection;
         }
@@ -148,28 +88,20 @@ namespace Assets.Scripts.RootS
             return angle;
         }
 
-        private void DecreasePath()
+        private void DecreasePath(RootBuildingPath path)
         {
-            RootBuildingPath.RootPath.RemoveAt(RootBuildingPath.RootPath.Count-1);
+            path.RootPath.RemoveAt(path.RootPath.Count-1);
         }
 
-        private bool IsCreating(Vector2 path, Vector2 mousePos)
+        private bool IsCreating(Vector2 path, Vector2 targetPos)
         {
-            Vector2 projection = Vector2.Dot(mousePos, path) / Vector2.Dot(path, path) * path;
+            Vector2 projection = Vector2.Dot(targetPos, path) / Vector2.Dot(path, path) * path;
             float dot = Vector2.Dot(projection, path);
             if (dot < 0)
             {
                 return false;
             }    
             return true;
-        }
-
-        /// <summary>
-        /// RootGrowthSystem.GrowRoot(_rootBuildingPath);
-        /// </summary>
-        private void CancelBluePrinting()
-        {
-            
         }
     }
 }
