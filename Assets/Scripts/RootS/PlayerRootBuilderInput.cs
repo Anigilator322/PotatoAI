@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
-    public class RootBlueprintingSystemInput: MonoBehaviour
+    public class PlayerRootBuilderInput: MonoBehaviour
     {
         private PlayerInputActions _playerInputActions;
         private bool _isDragging = false;
@@ -13,7 +13,7 @@ namespace Assets.Scripts.RootS
         private GridPartition<RootNode> _gridPartition;
         private RootBlueprintingSystem _rootBlueprintingSystem;
         private RootNode _clickedNode;
-        private RootType _selectedType;
+        private RootType _selectedType = RootType.Harvester;
 
         void Start()
         {
