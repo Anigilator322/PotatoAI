@@ -43,13 +43,14 @@ namespace Assets.Scripts.RootS
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            _rootBlueprintingSystem.Create(_selectedType, _clickedNode, mousePos);
         }
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
             List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
+
+            _rootBlueprintingSystem.Create(_selectedType,_clickedNode);
         }
 
         private bool IsClickedOnRoot(Vector2 mousePos)
