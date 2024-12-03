@@ -17,9 +17,14 @@ namespace Assets.Scripts.RootS
 
         public List<Vector2> RootPath { get; private set; } = new List<Vector2>();
 
-        public RootBlueprint(RootType rootType)
+        public RootBlueprint(RootType rootType, RootNode rootNode)
         {
+            RootNode = rootNode;
             RootType = rootType;
+
+            if(RootNode.parent != null) 
+                RootPath.Add(rootNode.parent.Position);
+            RootPath.Add(rootNode.Position);
         }
 
         public void AddInPath(Vector2 pathPoint)

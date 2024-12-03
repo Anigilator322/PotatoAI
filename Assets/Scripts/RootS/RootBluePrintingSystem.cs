@@ -7,31 +7,23 @@ namespace Assets.Scripts.RootS
         public float _distanceToBuildNewNode { get; private set; } = 2f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
-        private void Initialize(RootBlueprint rootBuildingPath,RootNode prevNode)
-        {
-            //rootBuildingPath.IsNewProcess = prevNode.nextNodes.Count != 0;
-            //if(prevNode.prevNode != null)
-            //    rootBuildingPath.AddInPath(prevNode.prevNode.Position);
-            rootBuildingPath.AddInPath(prevNode.Position);
-        }
-
-        private void CreateNewPathNode(RootBlueprint path,Vector2 targetVector, Vector2 lastNodePosition)
+        private void CreateNewPathNode(RootBlueprint rootBlueprint,Vector2 targetVector, Vector2 lastNodePosition)
         {
             targetVector.Normalize();
-            path.AddInPath((lastNodePosition + targetVector) * _distanceToBuildNewNode);
+            rootBlueprint.AddInPath((lastNodePosition + targetVector) * _distanceToBuildNewNode);
         }
 
-        public bool TryBlueprint(RootBlueprint path, Vector2 targetPos)
+        private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
         {
-            if (Vector2.Distance(targetPos, path.RootPath[^1]) <= _distanceToBuildNewNode)
+            if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _distanceToBuildNewNode)
                 return false;
-            if(path.RootPath.Count < 2)
+            if(rootBlueprint.RootPath.Count < 2)
             {
-                CreateNewPathNode(path,targetPos, path.RootPath[^1]);
+                CreateNewPathNode(rootBlueprint,targetPos, rootBlueprint.RootPath[^1]);
                 return true;
             }
-            Vector2 lastPoint = path.RootPath[^1];
-            Vector2 secondLastPoint = path.RootPath[^2];
+            Vector2 lastPoint = rootBlueprint.RootPath[^1];
+            Vector2 secondLastPoint = rootBlueprint.RootPath[^2];
             Vector2 directionToTarget = (targetPos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
@@ -40,28 +32,33 @@ namespace Assets.Scripts.RootS
                 float angle = Vector2.Angle(directionToTarget, directionOfPath);
                 if (angle < _maxBuildAngle)
                 {
-                    CreateNewPathNode(path, directionToTarget, lastPoint);
+                    CreateNewPathNode(rootBlueprint, directionToTarget, lastPoint);
                 }
                 else
                 {
                     Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
-                    CreateNewPathNode(path, directionToTarget, lastPoint);
+                    CreateNewPathNode(rootBlueprint, directionToTarget, lastPoint);
                 }
             }
             else
             {
-                DecreasePath(path);
+                DecreasePath(rootBlueprint);
             }
             return true;
         }
 
-        public RootBlueprint TryBlueprintWhileCan(RootType type, RootNode parentNode, Vector2 targetPos)
+        public RootBlueprint Create(RootType type, RootNode parentNode)
         {
-            RootBlueprint rootBuildingPath = new RootBlueprint(type);
-            Initialize(rootBuildingPath, parentNode);
-            while (TryBlueprint(rootBuildingPath, targetPos)) ;
+            RootBlueprint rootBlueprint = new RootBlueprint(type, parentNode);
 
-            return rootBuildingPath;
+            return rootBlueprint;
+        }
+
+        public RootBlueprint Update(RootBlueprint rootBlueprint, Vector2 targetPos)
+        {
+            while (TryBlueprint(rootBlueprint, targetPos)) ;
+
+            return rootBlueprint;
         }
 
         private Vector2 RotateVector(Vector2 v, float angle)
@@ -88,9 +85,9 @@ namespace Assets.Scripts.RootS
             return angle;
         }
 
-        private void DecreasePath(RootBlueprint path)
+        private void DecreasePath(RootBlueprint rootBlueprint)
         {
-            path.RootPath.RemoveAt(path.RootPath.Count-1);
+            rootBlueprint.RootPath.RemoveAt(rootBlueprint.RootPath.Count-1);
         }
 
         private bool IsCreating(Vector2 path, Vector2 targetPos)

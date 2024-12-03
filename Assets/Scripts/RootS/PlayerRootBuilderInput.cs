@@ -43,7 +43,7 @@ namespace Assets.Scripts.RootS
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            _rootBlueprintingSystem.TryBlueprintWhileCan(_selectedType, _clickedNode, mousePos);
+            _rootBlueprintingSystem.Create(_selectedType, _clickedNode, mousePos);
         }
 
         private void PrepareBlueprint(Vector2 mousePosition)
