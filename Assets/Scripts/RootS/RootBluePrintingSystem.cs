@@ -7,6 +7,14 @@ namespace Assets.Scripts.RootS
         public float _distanceToBuildNewNode { get; private set; } = 2f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
+        private void Initialize(RootBlueprint rootBuildingPath,RootNode prevNode)
+        {
+            //rootBuildingPath.IsNewProcess = prevNode.nextNodes.Count != 0;
+            //if(prevNode.prevNode != null)
+            //    rootBuildingPath.AddInPath(prevNode.prevNode.Position);
+            rootBuildingPath.AddInPath(prevNode.Position);
+        }
+
         private void CreateNewPathNode(RootBlueprint path,Vector2 targetVector, Vector2 lastNodePosition)
         {
             targetVector.Normalize();
@@ -49,17 +57,11 @@ namespace Assets.Scripts.RootS
 
         public RootBlueprint TryBlueprintWhileCan(RootType type, RootNode parentNode, Vector2 targetPos)
         {
-            RootBlueprint rootBuildingPath = new RootBlueprint(type, parentNode);
+            RootBlueprint rootBuildingPath = new RootBlueprint(type);
+            Initialize(rootBuildingPath, parentNode);
             while (TryBlueprint(rootBuildingPath, targetPos)) ;
 
             return rootBuildingPath;
-        }
-
-        public RootBlueprint Create()
-
-        public void UpdateBlueprint(RootBlueprint oldPath, Vector2 targetPos)
-        {
-            while (TryBlueprint(oldPath, targetPos)) ;
         }
 
         private Vector2 RotateVector(Vector2 v, float angle)

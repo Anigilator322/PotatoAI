@@ -1,38 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.RootS.Plants;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
-    public class RootBlueprint
-    {
-        public RootType RootType;
-        public RootNode origin;
-        public List<Vector2> RootPath { get; private set; } = new List<Vector2>();
-        public bool IsNewProcess;
-        public bool IsPathCorrect;
 
-        public RootBlueprint(RootType rootType, RootNode origin)
+    public class RootBlueprint : IIdentifiable
+    {    
+        public string Id { get; set; }
+        
+        public RootType RootType;
+
+        public RootNode RootNode { get; set; }
+
+        public List<Vector2> RootPath { get; private set; } = new List<Vector2>();
+
+        public RootBlueprint(RootType rootType)
         {
             RootType = rootType;
-            this.origin = origin;
-
-            IsNewProcess = origin.nextNodes.Count != 0;
-            if (origin.prevNode != null)
-                AddInPath(origin.prevNode.Position);
-            AddInPath(origin.Position);
         }
 
         public void AddInPath(Vector2 pathPoint)
         {
             RootPath.Add(pathPoint);
         }
+        
         public void RemoveFromPathLastPoint()
         {
             RootPath.RemoveAt(RootPath.Count-1);
         }
-
-        
-
     }
 }
