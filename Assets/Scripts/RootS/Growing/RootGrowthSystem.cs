@@ -16,41 +16,30 @@ namespace Assets.Scripts
         Canceled = 4,
     }
 
-
-    interface IRootGrowthSystem
-    {
-        void StartGrowth(RootBlueprint rootPath);
-
-        RootBlueprint GetBlueprint(string id);
-
-        bool CancelGrowth(string id);
-    }
-
     public class RootGrowthSystem : IRootGrowthSystem
     {
         GrowingRoots _growingRoots;
 
         //конфигурация скорости роста и т.п.
 
-        public void StartGrowth(RootBlueprint rootPath)
+        public void StartGrowth(RootBlueprint blueprint)
         {
-            _growingRoots.Roots.Add(new GrowingRoot()
+            _growingRoots.Blueprints.Add(blueprint.Id,new GrowingRoot()
             {
                 State = GrowthState.Growing,
-                Blueprint = rootPath
+                Blueprint = blueprint
             });
         }
 
         public GrowthState GetGrowingRootState(string id)
         {
-            return _growingRoots.Roots
-                .Single(x => x.Blueprint.Id == id)
+            return _growingRoots.Blueprints[id]
                 .State;
         }
 
         public bool CancelGrowth(string id)
         {
-            GrowingRoot root = _growingRoots.Roots.SingleOrDefault(x => x.Blueprint.Id == id);
+            GrowingRoot root = _growingRoots.Blueprints[id];
             if(root is null)
             {
                 return false;
@@ -64,20 +53,23 @@ namespace Assets.Scripts
 
         public RootBlueprint GetBlueprint(string id)
         {
-            throw new NotImplementedException();
+            RootBlueprint blueprint = _growingRoots.Blueprints[id].Blueprint;
+            if (blueprint is null)
+                throw new Exception("Trying to get rootBlueprint with wrong ID");
+            else
+                return blueprint;
         }
     }
 
-    public class GrowingRoot
+    internal class GrowingRoot
     {
         public GrowthState State { get; set; }
 
         public RootBlueprint Blueprint { get; set; }
     }
 
-    public class GrowingRoots
+    internal class GrowingRoots
     {
-        // Id, Сам отросток
-        public List<GrowingRoot> Roots { get; private set; }
+        public Dictionary<string,GrowingRoot> Blueprints { get; private set; }
     }
 }
