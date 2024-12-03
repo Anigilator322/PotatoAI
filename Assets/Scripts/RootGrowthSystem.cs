@@ -19,7 +19,10 @@ namespace Assets.Scripts
 
     interface IRootGrowthSystem
     {
-        void StartGrowth(RootBuildingPath rootPath);
+        void StartGrowth(RootBlueprint rootPath);
+
+        RootBlueprint GetBlueprint(string id);
+
         bool CancelGrowth(string id);
     }
 
@@ -29,25 +32,25 @@ namespace Assets.Scripts
 
         //конфигурация скорости роста и т.п.
 
-        public void StartGrowth(RootBuildingPath rootPath)
+        public void StartGrowth(RootBlueprint rootPath)
         {
             _growingRoots.Roots.Add(new GrowingRoot()
             {
                 State = GrowthState.Growing,
-                Path = rootPath
+                Blueprint = rootPath
             });
         }
 
         public GrowthState GetGrowingRootState(string id)
         {
             return _growingRoots.Roots
-                .Single(x => x.Path.Id == id)
+                .Single(x => x.Blueprint.Id == id)
                 .State;
         }
 
         public bool CancelGrowth(string id)
         {
-            GrowingRoot root = _growingRoots.Roots.SingleOrDefault(x => x.Path.Id == id);
+            GrowingRoot root = _growingRoots.Roots.SingleOrDefault(x => x.Blueprint.Id == id);
             if(root is null)
             {
                 return false;
@@ -58,15 +61,18 @@ namespace Assets.Scripts
                 return true;
             }
         }
+
+        public RootBlueprint GetBlueprint(string id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    public class GrowingRoot : RootBuildingPath
+    public class GrowingRoot
     {
         public GrowthState State { get; set; }
 
-        public RootBuildingPath Path { get; set; }
-
-        public int BuildingNodeIndex { get; set; } = 0; 
+        public RootBlueprint Blueprint { get; set; }
     }
 
     public class GrowingRoots

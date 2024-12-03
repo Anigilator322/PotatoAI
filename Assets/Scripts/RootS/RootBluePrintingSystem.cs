@@ -7,21 +7,21 @@ namespace Assets.Scripts.RootS
         public float _distanceToBuildNewNode { get; private set; } = 2f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
-        private void Initialize(RootBuildingPath rootBuildingPath,RootNode prevNode)
+        private void Initialize(RootBlueprint rootBuildingPath,RootNode prevNode)
         {
-            rootBuildingPath.IsNewProcess = prevNode.nextNodes.Count != 0;
-            if(prevNode.prevNode != null)
-                rootBuildingPath.AddInPath(prevNode.prevNode.Position);
+            //rootBuildingPath.IsNewProcess = prevNode.nextNodes.Count != 0;
+            //if(prevNode.prevNode != null)
+            //    rootBuildingPath.AddInPath(prevNode.prevNode.Position);
             rootBuildingPath.AddInPath(prevNode.Position);
         }
 
-        private void CreateNewPathNode(RootBuildingPath path,Vector2 targetVector, Vector2 lastNodePosition)
+        private void CreateNewPathNode(RootBlueprint path,Vector2 targetVector, Vector2 lastNodePosition)
         {
             targetVector.Normalize();
             path.AddInPath((lastNodePosition + targetVector) * _distanceToBuildNewNode);
         }
 
-        public bool TryBlueprint(RootBuildingPath path, Vector2 targetPos)
+        public bool TryBlueprint(RootBlueprint path, Vector2 targetPos)
         {
             if (Vector2.Distance(targetPos, path.RootPath[^1]) <= _distanceToBuildNewNode)
                 return false;
@@ -55,9 +55,9 @@ namespace Assets.Scripts.RootS
             return true;
         }
 
-        public RootBuildingPath TryBlueprintWhileCan(RootType type, RootNode parentNode, Vector2 targetPos)
+        public RootBlueprint TryBlueprintWhileCan(RootType type, RootNode parentNode, Vector2 targetPos)
         {
-            RootBuildingPath rootBuildingPath = new RootBuildingPath(type);
+            RootBlueprint rootBuildingPath = new RootBlueprint(type);
             Initialize(rootBuildingPath, parentNode);
             while (TryBlueprint(rootBuildingPath, targetPos)) ;
 
@@ -88,7 +88,7 @@ namespace Assets.Scripts.RootS
             return angle;
         }
 
-        private void DecreasePath(RootBuildingPath path)
+        private void DecreasePath(RootBlueprint path)
         {
             path.RootPath.RemoveAt(path.RootPath.Count-1);
         }

@@ -28,7 +28,7 @@ namespace Assets.Scripts.AI
             //==== Запустить рост корня-разведчика ===
 
             //[][][] Рассчитать BluePrint корня
-            var explorationRoot = new RootBuildingPath();
+            var explorationRoot = new RootBlueprint(RootType.Recon);
 
             //Status = GoalStatus.Failed;
 
