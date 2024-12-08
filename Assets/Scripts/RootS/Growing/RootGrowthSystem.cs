@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -25,7 +26,7 @@ namespace Assets.Scripts
         private RootSpawnSystem _rootSpawnSystem;
         private float _growthTickTime = 1f;
 
-        private List<UniTask> _activeGrowingTasks = new List<UniTask>();
+        private CancellationTokenSource _growRootsCancellationTokenSource = new CancellationTokenSource();
         //конфигурация скорости роста и т.п.
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -34,10 +35,30 @@ namespace Assets.Scripts
             {
                 State = GrowthState.Growing
             });
-            if(_growingRoots.Blueprints.Count == 1)
+            StartGrowingCoroutine();
+        }
+
+        private bool IsCoroutineRunning()
+        {
+            return _growRootsCancellationTokenSource != null;
+        }
+
+        private void StartGrowingCoroutine()
+        {
+            if(_growingRoots.Blueprints.Count > 0 && !IsCoroutineRunning())
             {
-                var task = GrowRoots();
-                _activeGrowingTasks.Add(task);
+                _growRootsCancellationTokenSource = new CancellationTokenSource();
+                UniTask.RunOnThreadPool(() => GrowRoots(_growRootsCancellationTokenSource.Token));
+            }
+        }
+
+        private void StopGrowingCoroutine()
+        {
+            if(IsCoroutineRunning())
+            {
+                _growRootsCancellationTokenSource.Cancel();
+                _growRootsCancellationTokenSource.Dispose();
+                _growRootsCancellationTokenSource = null;
             }
         }
 
@@ -70,9 +91,9 @@ namespace Assets.Scripts
                 return blueprint;
         }
 
-        private async UniTask GrowRoots()
+        private async UniTask GrowRoots(CancellationToken cancellationToken)
         {
-            while(_growingRoots.Blueprints.Count > 0)
+            while(_growingRoots.Blueprints.Count > 0 || cancellationToken.IsCancellationRequested)
             {
                 foreach (var growingRoot in _growingRoots.Blueprints)
                 {
@@ -85,13 +106,13 @@ namespace Assets.Scripts
 
                             break;
                         case GrowthState.Canceled:
-                            CancelGrowth(growingRoot.Value);
+                            _growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                         case GrowthState.Failed:
-                            CancelGrowth(growingRoot.Value);
+                            _growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                         case GrowthState.Completed:
-                            CancelGrowth(growingRoot.Value);
+                            _growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                     }
                     if (growingRoot.Value.Blueprint.RootPath.Count == 0)
@@ -101,24 +122,29 @@ namespace Assets.Scripts
                 }
                 await UniTask.Delay(TimeSpan.FromSeconds(_growthTickTime));
             }
+            StopGrowingCoroutine();
         }
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
-
             RootNode node = _rootSpawnSystem.TrySpawnRoot(growingRoot);
             growingRoot.Blueprint.RootPath.RemoveAt(0);
             growingRoot.Blueprint.RootNode = node;
-        }
 
-        private void CancelGrowth(GrowingRoot root)
-        {
-            _growingRoots.Blueprints.Remove(root.Blueprint.Id);
+            if (growingRoot.Blueprint.RootPath.Count == 0)
+            {
+                growingRoot.State = GrowthState.Completed;
+            }
         }
     }
 
     internal class GrowingRoots
     {
         public Dictionary<string,GrowingRoot> Blueprints { get; private set; }
+
+        public void RemoveBlueprint(GrowingRoot root)
+        {
+            Blueprints.Remove(root.Blueprint.Id);
+        }
     }
 }
