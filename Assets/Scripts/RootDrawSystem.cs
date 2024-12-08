@@ -293,17 +293,14 @@ public class RootDrawSystem : MonoBehaviour
 
     float EvaluateNodeWidth(RootNode node)
     {
-        if (node.nextNodes == null || node.nextNodes.Count == 0)
-        {
-            float leafArea = _standardIncrement;
-            rootWidths[node] = Mathf.Sqrt(leafArea / Mathf.PI);
-            return leafArea;
-        }
-
         float totalChildAreas = 0f;
-        foreach (var child in node.nextNodes)
+
+        if(!(node.nextNodes is null))
         {
-            totalChildAreas += EvaluateNodeWidth(child);
+            foreach (var child in node.nextNodes)
+            {
+                totalChildAreas += EvaluateNodeWidth(child);
+            }
         }
 
         float nodeArea = totalChildAreas + _standardIncrement;
