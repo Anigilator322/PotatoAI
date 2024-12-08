@@ -14,12 +14,12 @@ namespace Assets.Scripts.RootS
             _gridPartition = gridPartition;
         }
 
-        public bool TrySpawnRoot(RootNode parent,Vector2 position, RootType rootType)
+        public RootNode TrySpawnRoot(GrowingRoot root)
         {
-            RootNode newRoot = new RootNode(position, parent, rootType);
+            RootNode newRoot = new RootNode(root.Blueprint.RootPath[0], root.Blueprint.RootNode, root.Blueprint.RootType);
             _plantRoots.Nodes.Add(newRoot);
             _gridPartition.Insert(newRoot);
-            return true;
+            return newRoot;
         }
     }
 }

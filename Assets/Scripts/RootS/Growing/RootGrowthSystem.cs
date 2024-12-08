@@ -69,7 +69,7 @@ namespace Assets.Scripts
 
         private async UniTask GrowRoot(GrowingRoot growingRoot)
         {
-            while(growingRoot.RemainingNodes.Count > 0)
+            while(growingRoot.Blueprint.RootPath.Count > 0)
             {
                 switch (growingRoot.State)
                 {
@@ -97,31 +97,15 @@ namespace Assets.Scripts
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
-            
-            if(!_rootSpawnSystem.TrySpawnRoot(growingRoot.ParentOfFirstInQueue,growingRoot.RemainingNodes.Dequeue(), growingRoot.Blueprint.RootType));
-                growingRoot.State = GrowthState.Failed;
-            //создание узла
+
+            RootNode node = _rootSpawnSystem.TrySpawnRoot(growingRoot);
+            growingRoot.Blueprint.RootPath.RemoveAt(0);
+            growingRoot.Blueprint.RootNode = node;
         }
 
         private void CancelGrowth(GrowingRoot root)
         {
             _growingRoots.Blueprints.Remove(root.Blueprint.Id);
-        }
-    }
-
-    internal class GrowingRoot
-    {
-        public GrowthState State { get; set; }
-
-        public RootBlueprint Blueprint { get; set; }
-        public Queue<Vector2> RemainingNodes { get; private set; }
-        public RootNode ParentOfFirstInQueue { get; set; }
-
-        public GrowingRoot(RootBlueprint blueprint)
-        {
-            Blueprint = blueprint;
-            ParentOfFirstInQueue = blueprint.RootNode;
-            RemainingNodes = new Queue<Vector2>(Blueprint.RootPath);
         }
     }
 
