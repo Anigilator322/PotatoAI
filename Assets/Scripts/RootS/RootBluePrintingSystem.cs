@@ -4,18 +4,18 @@ namespace Assets.Scripts.RootS
 {
     public class RootBlueprintingSystem
     {
-        public float _distanceToBuildNewNode { get; private set; } = 2f;
+        public float _rootSegmentLength { get; private set; } = 2f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
-        private void CreateNewPathNode(RootBlueprint rootBlueprint,Vector2 targetVector, Vector2 lastNodePosition)
+        private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 targetVector, Vector2 lastNodePosition)
         {
             targetVector.Normalize();
-            rootBlueprint.AddInPath((lastNodePosition + targetVector) * _distanceToBuildNewNode);
+            rootBlueprint.AddInPath((lastNodePosition + targetVector) * _rootSegmentLength);
         }
 
         private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
         {
-            if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _distanceToBuildNewNode)
+            if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _rootSegmentLength)
                 return false;
             if(rootBlueprint.RootPath.Count < 2)
             {
@@ -27,7 +27,7 @@ namespace Assets.Scripts.RootS
             Vector2 directionToTarget = (targetPos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
-            if (IsCreating(directionOfPath, directionToTarget))
+            if (IsCodirected(directionOfPath, directionToTarget))
             {
                 float angle = Vector2.Angle(directionToTarget, directionOfPath);
                 if (angle < _maxBuildAngle)
@@ -77,9 +77,8 @@ namespace Assets.Scripts.RootS
             return correctedDirection;
         }
 
-        public float CalculateAngleBetweenNodes(Vector2 node1, Vector2 node2, Vector2 newNode)
+        private float CalculateAngleBetweenNodes(Vector2 node1, Vector2 node2, Vector2 newNode)
         {
-            
             float cosTheta = Vector2.Dot((node2 - node1).normalized, (newNode - node2).normalized);
             float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
             return angle;
@@ -90,7 +89,7 @@ namespace Assets.Scripts.RootS
             rootBlueprint.RootPath.RemoveAt(rootBlueprint.RootPath.Count-1);
         }
 
-        private bool IsCreating(Vector2 path, Vector2 targetPos)
+        private bool IsCodirected(Vector2 path, Vector2 targetPos)
         {
             Vector2 projection = Vector2.Dot(targetPos, path) / Vector2.Dot(path, path) * path;
             float dot = Vector2.Dot(projection, path);
