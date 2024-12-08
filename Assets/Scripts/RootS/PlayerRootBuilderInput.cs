@@ -76,13 +76,13 @@ namespace Assets.Scripts.RootS
         private RootNode FindClosestNodeToMouse(List<RootNode> rootNodes, Vector2 mousePosition)
         {
             RootNode closestNode = rootNodes[0];
-            float distance = Vector2.Distance(mousePosition, closestNode.Position);
+            float minDistance = Vector2.Distance(mousePosition, closestNode.Position);
             foreach (RootNode node in rootNodes)
             {
-                if (Vector2.Distance(node.Position, mousePosition) < distance)
+                if (Vector2.Distance(node.Position, mousePosition) < minDistance)
                 {
                     closestNode = node;
-                    distance = Vector2.Distance(node.Position, mousePosition);
+                    minDistance = Vector2.Distance(node.Position, mousePosition);
                 }
             }
             return closestNode;
