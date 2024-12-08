@@ -34,8 +34,11 @@ namespace Assets.Scripts
             {
                 State = GrowthState.Growing
             });
-            var task = GrowRoot(_growingRoots.Blueprints[blueprint.Id]);
-            _activeGrowingTasks.Add(task);
+            if(_growingRoots.Blueprints.Count == 1)
+            {
+                var task = GrowRoots();
+                _activeGrowingTasks.Add(task);
+            }
         }
 
         public GrowthState GetGrowingRootState(string id)
@@ -67,32 +70,37 @@ namespace Assets.Scripts
                 return blueprint;
         }
 
-        private async UniTask GrowRoot(GrowingRoot growingRoot)
+        private async UniTask GrowRoots()
         {
-            while(growingRoot.Blueprint.RootPath.Count > 0)
+            while(_growingRoots.Blueprints.Count > 0)
             {
-                switch (growingRoot.State)
+                foreach (var growingRoot in _growingRoots.Blueprints)
                 {
-                    case GrowthState.Growing:
-                        SpawnNode(growingRoot);
-                        await UniTask.Delay(TimeSpan.FromSeconds(_growthTickTime));
-                        break;
-                    case GrowthState.Paused:
-                        await UniTask.WaitWhile(() => growingRoot.State == GrowthState.Paused);
-                        break;
-                    case GrowthState.Canceled:
-                        CancelGrowth(growingRoot);
-                        return;
-                    case GrowthState.Failed:
-                        CancelGrowth(growingRoot);
-                        return;
-                    case GrowthState.Completed:
-                        CancelGrowth(growingRoot);
-                        return;
+                    switch (growingRoot.Value.State)
+                    {
+                        case GrowthState.Growing:
+                            SpawnNode(growingRoot.Value);
+                            break;
+                        case GrowthState.Paused:
+
+                            break;
+                        case GrowthState.Canceled:
+                            CancelGrowth(growingRoot.Value);
+                            break;
+                        case GrowthState.Failed:
+                            CancelGrowth(growingRoot.Value);
+                            break;
+                        case GrowthState.Completed:
+                            CancelGrowth(growingRoot.Value);
+                            break;
+                    }
+                    if (growingRoot.Value.Blueprint.RootPath.Count == 0)
+                    {
+                        growingRoot.Value.State = GrowthState.Completed;
+                    }
                 }
+                await UniTask.Delay(TimeSpan.FromSeconds(_growthTickTime));
             }
-            growingRoot.State = GrowthState.Completed;
-            CancelGrowth(growingRoot);
         }
 
         private void SpawnNode(GrowingRoot growingRoot)
