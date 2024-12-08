@@ -7,11 +7,11 @@ namespace Assets.Scripts.RootS
         public float _rootSegmentLength { get; private set; } = 2f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
-        private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 targetDirection)
+        private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 direction)
         {
             Vector2 lastNodePosition = rootBlueprint.RootPath[^1];
-            targetDirection.Normalize();
-            rootBlueprint.AddInPath(targetDirection + lastNodePosition * _rootSegmentLength);
+            direction.Normalize();
+            rootBlueprint.AddInPath(lastNodePosition + direction * _rootSegmentLength);
         }
 
         private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
@@ -28,7 +28,7 @@ namespace Assets.Scripts.RootS
             Vector2 directionToTarget = (targetPos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
-            if (IsCodirected(directionOfPath, directionToTarget))
+            if (IsCoDirected(directionOfPath, directionToTarget))
             {
                 float angle = Vector2.Angle(directionToTarget, directionOfPath);
                 if (angle < _maxBuildAngle)
@@ -90,7 +90,7 @@ namespace Assets.Scripts.RootS
             rootBlueprint.RootPath.RemoveAt(rootBlueprint.RootPath.Count-1);
         }
 
-        private bool IsCodirected(Vector2 path, Vector2 targetPos)
+        private bool IsCoDirected(Vector2 path, Vector2 targetPos)
         {
             Vector2 projection = Vector2.Dot(targetPos, path) / Vector2.Dot(path, path) * path;
             float dot = Vector2.Dot(projection, path);
