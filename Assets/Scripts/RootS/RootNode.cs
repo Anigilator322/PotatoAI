@@ -8,7 +8,7 @@ namespace Assets.Scripts.RootS
         public RootType Type;
         public bool IsRootBase;
         public RootNode Parent;
-        public List<RootNode> nextNodes = new List<RootNode>();
+        public List<RootNode> Childs = new List<RootNode>();
 
         public RootNode(Vector2 position)
         {
@@ -29,7 +29,7 @@ namespace Assets.Scripts.RootS
 
         public void SetChildren(RootNode child)
         {
-            nextNodes.Add(child);
+            Childs.Add(child);
         }
     }
 }

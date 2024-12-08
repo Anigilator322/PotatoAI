@@ -56,7 +56,7 @@ namespace Assets.Scripts.RootS
             RootNode _clickedNode;
             _clickedNode = FindClosestNodeToMouse(quiredNodes, mousePosition);
 
-            if(_clickedNode.nextNodes.Count == 0)
+            if(_clickedNode.Childs.Count == 0)
             {
                 _isNewProcess = false;
                 _buildingPath.Add(_clickedNode.prevNode.Position);
