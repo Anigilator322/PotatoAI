@@ -22,8 +22,8 @@ namespace Assets.Scripts.RootS
             RootNode = rootNode;
             RootType = rootType;
 
-            if(RootNode.parent != null) 
-                RootPath.Add(rootNode.parent.Position);
+            if(RootNode.Parent != null) 
+                RootPath.Add(rootNode.Parent.Position);
             RootPath.Add(rootNode.Position);
         }
 
