@@ -1,0 +1,385 @@
+using Assets.Scripts;
+using Assets.Scripts.Map;
+using Assets.Scripts.RootS;
+using PlasticPipe.PlasticProtocol.Messages;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UIElements;
+using Cysharp.Threading.Tasks;
+using System.Threading;
+using System;
+using System.Runtime.InteropServices;
+using static TreeEditor.TreeGroup;
+
+
+
+public class RootDrawSystem : MonoBehaviour
+{
+    //[SerializeField]
+    //GrowingRoots growingRoots;
+
+    public List<RootBlueprint> temporaryDrawnBlueprints = new();
+
+    [SerializeField]
+    MeshFilter blueprintsMesh;
+
+
+    PlantRoots plantRoots;
+
+    [SerializeField]
+    MeshFilter plantRootsMesh;
+
+    const float standardIncrement = 0.02f;
+    const float blueprintWidth = standardIncrement * 0.75f;
+
+    Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
+
+    private void Start()
+    {
+        plantRoots = new PlantRoots() { Nodes = InitializeFancyPlantRoots() };
+        temporaryDrawnBlueprints.Add(CreateTestRootBlueprint(lastNode));
+        secondTickCTS = new CancellationTokenSource();
+
+        UniTask.RunOnThreadPool(() => TickCoroutine());
+    }
+
+    private void OnApplicationQuit()
+    {
+        secondTickCTS.Cancel();
+        secondTickCTS.Dispose();
+        secondTickCTS = null;
+    }
+
+    CancellationTokenSource secondTickCTS = new CancellationTokenSource();
+    public async UniTaskVoid TickCoroutine()
+    {
+        while ((secondTickCTS != null) 
+            && (secondTickCTS.IsCancellationRequested == false))
+        {
+            tickFlag = true;
+            await UniTask.Delay(500);
+        }
+    }
+
+    bool tickFlag = false;
+
+    private void Tick()
+    {
+        EvaluateAllWidths();
+        plantRootsMesh.mesh = GenerateRootMesh();
+        blueprintsMesh.mesh = GenerateBluprintMesh();
+    }
+
+    private void Update()
+    {
+        blueprintsMesh.mesh = GenerateBluprintMesh();
+        if (tickFlag)
+        {
+            tickFlag = false;
+            Tick();
+        }
+    }
+
+    #region Mesh Generation
+    Mesh CreateMesh(List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
+    {
+        // Create the mesh
+        Mesh rootMesh = new Mesh
+        {
+            vertices = vertices.ToArray(),
+            triangles = triangles.ToArray(),
+            uv = uvs.ToArray()
+        };
+
+        rootMesh.RecalculateNormals();
+        rootMesh.RecalculateBounds();
+
+        return rootMesh;
+    }
+
+    Mesh GenerateRootMesh()
+    {
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
+        List<Vector2> uvs = new List<Vector2>();
+
+        foreach (var rootBase in plantRoots.Nodes)
+        {
+            if (rootBase.isRootBase)
+            {
+                GenerateBranchMesh(rootBase, null, vertices, triangles, uvs);
+            }
+        }
+
+        Mesh rootMesh = CreateMesh(vertices, triangles, uvs);
+
+        return rootMesh;
+    }
+
+    float GetThinerPartWidth(float nodeWidth)
+    {
+        float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
+        return Mathf.Sqrt((crossSectionalArea - standardIncrement) / Mathf.PI);
+    }
+
+    void GenerateBranchMesh(
+        RootNode node,
+        RootNode parent,
+        List<Vector3> vertices,
+        List<int> triangles,
+        List<Vector2> uvs)
+    {
+        // Fetch node width from rootWidths, default to standardIncrement if not found
+        if (!rootWidths.TryGetValue(node, out float nodeWidth))
+            nodeWidth = standardIncrement;
+
+        // Get parent position and width from rootWidths
+        Vector2 parentPos = parent != null ? parent.Position : node.Position;
+
+        // Generate straight segment vertices
+        Vector2 direction = (node.Position - parentPos).normalized;
+        Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+
+        int baseVertexIndex = vertices.Count;
+
+        float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
+        float thinerPartWidth = Mathf.Sqrt((crossSectionalArea - standardIncrement) / Mathf.PI);
+
+        Vector3 v1 = parentPos + perpendicular * nodeWidth / 2;
+        Vector3 v2 = parentPos - perpendicular * nodeWidth / 2;
+        Vector3 v3 = node.Position + perpendicular * thinerPartWidth / 2;
+        Vector3 v4 = node.Position - perpendicular * thinerPartWidth / 2;
+
+        // Add the four vertices
+        vertices.Add(v1);
+        vertices.Add(v2);
+        vertices.Add(v3);
+        vertices.Add(v4);
+
+        // Create triangles for the current segment
+        triangles.Add(baseVertexIndex);
+        triangles.Add(baseVertexIndex + 2);
+        triangles.Add(baseVertexIndex + 1);
+        triangles.Add(baseVertexIndex + 1);
+        triangles.Add(baseVertexIndex + 2);
+        triangles.Add(baseVertexIndex + 3);
+
+        // Add UVs
+        uvs.Add(new Vector2(0, 0));
+        uvs.Add(new Vector2(1, 0));
+        uvs.Add(new Vector2(0, 1));
+        uvs.Add(new Vector2(1, 1));
+
+        // Handle merging for nodes with multiple children
+        if (node.nextNodes.Count > 1)
+        {
+            GenerateMergeCaps(node, vertices, triangles, uvs);
+        }
+
+        // Process all children nodes recursively
+        foreach (var child in node.nextNodes)
+        {
+            GenerateBranchMesh(child, node, vertices, triangles, uvs);
+        }
+    }
+
+    Mesh GenerateBluprintMesh()
+    {
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
+        List<Vector2> uvs = new List<Vector2>();
+
+        foreach(var blueprint in temporaryDrawnBlueprints)
+        {
+            for (int i = 0; i < blueprint.RootPath.Count; i++)
+            {
+                // Get parent position and width from rootWidths
+                Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.RootNode.Position;
+
+                // Generate straight segment vertices
+                Vector2 direction = (blueprint.RootPath[i] - parentPos).normalized;
+                Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+
+                int baseVertexIndex = vertices.Count;
+
+                Vector3 v1 = parentPos + perpendicular * blueprintWidth / 2;
+                Vector3 v2 = parentPos - perpendicular * blueprintWidth / 2;
+                Vector3 v3 = blueprint.RootPath[i] + perpendicular * blueprintWidth / 2;
+                Vector3 v4 = blueprint.RootPath[i] - perpendicular * blueprintWidth / 2;
+
+                // Add the four vertices
+                vertices.Add(v1);
+                vertices.Add(v2);
+                vertices.Add(v3);
+                vertices.Add(v4);
+
+                // Create triangles for the current segment
+                triangles.Add(baseVertexIndex);
+                triangles.Add(baseVertexIndex + 2);
+                triangles.Add(baseVertexIndex + 1);
+                triangles.Add(baseVertexIndex + 1);
+                triangles.Add(baseVertexIndex + 2);
+                triangles.Add(baseVertexIndex + 3);
+
+                // Add UVs
+                uvs.Add(new Vector2(0, 0));
+                uvs.Add(new Vector2(1, 0));
+                uvs.Add(new Vector2(0, 1));
+                uvs.Add(new Vector2(1, 1));
+            }
+        }
+
+        var mesh = CreateMesh(vertices, triangles, uvs);
+        return mesh;
+    }
+
+    void GenerateMergeCaps(
+        RootNode node,
+        List<Vector3> vertices,
+        List<int> triangles,
+        List<Vector2> uvs)
+    {
+        if (!rootWidths.TryGetValue(node, out float mergeWidth))
+            mergeWidth = standardIncrement;
+
+        mergeWidth = GetThinerPartWidth(mergeWidth);
+
+        Vector2 mergeCenter = node.Position;
+
+        int segments = 20; // Number of segments for the semi-circle (higher = smoother)
+        float angleStep = Mathf.PI / segments;
+
+        if (node.parent is null)
+            return;
+
+        Vector2 direction = (node.parent.Position - node.Position).normalized;
+
+        int startIndex = vertices.Count;
+
+        float angleOffset = Mathf.Atan2(direction.y, direction.x);
+
+        // Generate vertices for the semi-circle
+        for (int i = 0; i <= segments; i++)
+        {
+            float angle = angleOffset + Mathf.PI / 2 + i * angleStep; // Semi-circle angles
+            Vector2 offset = new Vector2(
+                Mathf.Cos(angle) * mergeWidth / 2,
+                Mathf.Sin(angle) * mergeWidth / 2);
+
+            vertices.Add(mergeCenter + offset);
+            uvs.Add(new Vector2(i / (float)segments, 1)); // Optional UV mapping
+        }
+
+        // Create triangles connecting the semi-circle to the parent root
+        for (int i = 0; i < segments; i++)
+        {
+            triangles.Add(startIndex + i + 1);
+            triangles.Add(startIndex + i);
+            triangles.Add(startIndex); // Center of the semi-circle
+        }
+    }
+
+    #endregion Mesh Generation
+
+    void EvaluateAllWidths()
+    {
+        foreach (var rootBase in plantRoots.Nodes.Where(node => node.isRootBase))
+        {
+            EvaluateNodeWidth(rootBase);
+        }
+    }
+
+    float EvaluateNodeWidth(RootNode node)
+    {
+        if (node.nextNodes == null || node.nextNodes.Count == 0)
+        {
+            float leafArea = standardIncrement;
+            rootWidths[node] = Mathf.Sqrt(leafArea / Mathf.PI);
+            return leafArea;
+        }
+
+        float totalChildAreas = 0f;
+        foreach (var child in node.nextNodes)
+        {
+            totalChildAreas += EvaluateNodeWidth(child);
+        }
+
+        float nodeArea = totalChildAreas + standardIncrement;
+
+        rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
+
+        return nodeArea;
+    }
+
+    public List<RootNode> InitializeFancyPlantRoots()
+    {
+        const int depth = 4; // Number of levels
+        const float segmentLength = 1f; // Vertical distance between levels
+        const float branchSpacing = 0.5f; // Horizontal spacing between nodes
+
+        List<RootNode> allNodes = new List<RootNode>();
+
+        for (int level = 0; level < depth; level++)
+        {
+            int nodesInLevel = (int)Mathf.Pow(2, level); // Number of nodes at this level
+            float levelY = -level * segmentLength; // Y position for this level
+            float startX = -((nodesInLevel - 1) * branchSpacing) / 2; // Center the level horizontally
+
+            for (int i = 0; i < nodesInLevel; i++)
+            {
+                float x = startX + i * branchSpacing;
+
+                // Create the new RootNode
+                RootNode node = new RootNode
+                {
+                    Position = new Vector2(x, levelY),
+                    Type = RootType.Harvester,
+                    isRootBase = level == 0, // The top node is the base
+                    parent = null, // Will be set later for non-root nodes
+                    nextNodes = new List<RootNode>()
+                };
+
+                lastNode = node;
+
+                // Add to the overall list of nodes
+                allNodes.Add(node);
+
+                // Link to the parent node
+                if (level > 0) // Skip root level
+                {
+                    int parentIndex = (i / 2) + ((int)Mathf.Pow(2, level - 1) - 1); // Calculate parent index
+                    RootNode parentNode = allNodes[parentIndex];
+
+                    // Set parent for the current node
+                    node.parent = parentNode;
+
+                    // Add the current node to the parent's children
+                    parentNode.nextNodes.Add(node);
+                }
+            }
+        }
+
+        return allNodes;
+    }
+
+    RootNode lastNode;
+
+    private RootBlueprint CreateTestRootBlueprint(RootNode RootNode)
+    {
+        var basePoint = RootNode.Position;
+
+        return new RootBlueprint(
+            new List<Vector2>()
+            {
+                basePoint + new Vector2(0.4f, -1),
+                basePoint + new Vector2(-0.4f, -1.6f),
+            }
+        )
+        {
+            RootNode = RootNode,
+            RootType = RootType.Harvester,
+        };
+    }
+}
