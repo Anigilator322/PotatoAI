@@ -7,10 +7,11 @@ namespace Assets.Scripts.RootS
         public float _rootSegmentLength { get; private set; } = 2f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
-        private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 targetVector, Vector2 lastNodePosition)
+        private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 targetDirection)
         {
-            targetVector.Normalize();
-            rootBlueprint.AddInPath((lastNodePosition + targetVector) * _rootSegmentLength);
+            Vector2 lastNodePosition = rootBlueprint.RootPath[^1];
+            targetDirection.Normalize();
+            rootBlueprint.AddInPath(targetDirection + lastNodePosition * _rootSegmentLength);
         }
 
         private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
@@ -19,7 +20,7 @@ namespace Assets.Scripts.RootS
                 return false;
             if(rootBlueprint.RootPath.Count < 2)
             {
-                CreateNewPathNode(rootBlueprint,targetPos, rootBlueprint.RootPath[^1]);
+                CreateNewPathNode(rootBlueprint,targetPos);
                 return true;
             }
             Vector2 lastPoint = rootBlueprint.RootPath[^1];
@@ -32,12 +33,12 @@ namespace Assets.Scripts.RootS
                 float angle = Vector2.Angle(directionToTarget, directionOfPath);
                 if (angle < _maxBuildAngle)
                 {
-                    CreateNewPathNode(rootBlueprint, directionToTarget, lastPoint);
+                    CreateNewPathNode(rootBlueprint, directionToTarget);
                 }
                 else
                 {
                     Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
-                    CreateNewPathNode(rootBlueprint, directionToTarget, lastPoint);
+                    CreateNewPathNode(rootBlueprint, directionToTarget);
                 }
             }
             else
