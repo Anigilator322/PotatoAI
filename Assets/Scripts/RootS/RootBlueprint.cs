@@ -29,7 +29,8 @@ namespace Assets.Scripts.RootS
 
             if(RootNode.Parent != null) 
                 RootPath.Add(rootNode.Parent.Position);
-            RootPath.Add(rootNode.Position
+
+            RootPath.Add(rootNode.Position);
         }
 
         public void AddInPath(Vector2 pathPoint)
