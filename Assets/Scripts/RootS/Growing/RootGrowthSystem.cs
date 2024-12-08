@@ -1,8 +1,13 @@
-﻿using Assets.Scripts.RootS;
+﻿
+using Assets.Scripts.RootS;
+using Cysharp.Threading.Tasks;
+using ModestTree;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using UnityEngine;
 
 namespace Assets.Scripts
 {
@@ -17,17 +22,44 @@ namespace Assets.Scripts
 
     public class RootGrowthSystem : IRootGrowthSystem
     {
-        GrowingRoots _growingRoots;
+        private GrowingRoots _growingRoots;
+        private RootSpawnSystem _rootSpawnSystem;
+        private float _growthTickTime = 1f;
 
+        private CancellationTokenSource _growRootsCancellationTokenSource = new CancellationTokenSource();
         //конфигурация скорости роста и т.п.
 
         public void StartGrowth(RootBlueprint blueprint)
         {
-            _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot()
+            _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot(blueprint)
             {
-                State = GrowthState.Growing,
-                Blueprint = blueprint
+                State = GrowthState.Growing
             });
+            StartGrowingCoroutine();
+        }
+
+        private bool IsCoroutineRunning()
+        {
+            return _growRootsCancellationTokenSource != null;
+        }
+
+        private void StartGrowingCoroutine()
+        {
+            if(_growingRoots.Blueprints.Count > 0 && !IsCoroutineRunning())
+            {
+                _growRootsCancellationTokenSource = new CancellationTokenSource();
+                UniTask.RunOnThreadPool(() => GrowRoots(_growRootsCancellationTokenSource.Token));
+            }
+        }
+
+        private void StopGrowingCoroutine()
+        {
+            if(IsCoroutineRunning())
+            {
+                _growRootsCancellationTokenSource.Cancel();
+                _growRootsCancellationTokenSource.Dispose();
+                _growRootsCancellationTokenSource = null;
+            }
         }
 
         public GrowthState GetGrowingRootState(string id)
@@ -39,7 +71,7 @@ namespace Assets.Scripts
         public bool CancelGrowth(string id)
         {
             GrowingRoot root = _growingRoots.Blueprints[id];
-            if (root is null)
+            if(root is null)
             {
                 return false;
             }
@@ -58,17 +90,61 @@ namespace Assets.Scripts
             else
                 return blueprint;
         }
-    }
 
-    internal class GrowingRoot
-    {
-        public GrowthState State { get; set; }
+        private async UniTask GrowRoots(CancellationToken cancellationToken)
+        {
+            while(_growingRoots.Blueprints.Count > 0 || cancellationToken.IsCancellationRequested)
+            {
+                foreach (var growingRoot in _growingRoots.Blueprints)
+                {
+                    switch (growingRoot.Value.State)
+                    {
+                        case GrowthState.Growing:
+                            SpawnNode(growingRoot.Value);
+                            break;
+                        case GrowthState.Paused:
 
-        public RootBlueprint Blueprint { get; set; }
+                            break;
+                        case GrowthState.Canceled:
+                            _growingRoots.RemoveBlueprint(growingRoot.Value);
+                            break;
+                        case GrowthState.Failed:
+                            _growingRoots.RemoveBlueprint(growingRoot.Value);
+                            break;
+                        case GrowthState.Completed:
+                            _growingRoots.RemoveBlueprint(growingRoot.Value);
+                            break;
+                    }
+                    if (growingRoot.Value.Blueprint.RootPath.Count == 0)
+                    {
+                        growingRoot.Value.State = GrowthState.Completed;
+                    }
+                }
+                await UniTask.Delay(TimeSpan.FromSeconds(_growthTickTime));
+            }
+            StopGrowingCoroutine();
+        }
+
+        private void SpawnNode(GrowingRoot growingRoot)
+        {
+            RootNode node = _rootSpawnSystem.TrySpawnRoot(growingRoot);
+            growingRoot.Blueprint.RootPath.RemoveAt(0);
+            growingRoot.Blueprint.RootNode = node;
+
+            if (growingRoot.Blueprint.RootPath.Count == 0)
+            {
+                growingRoot.State = GrowthState.Completed;
+            }
+        }
     }
 
     internal class GrowingRoots
     {
-        public Dictionary<string, GrowingRoot> Blueprints { get; private set; }
+        public Dictionary<string,GrowingRoot> Blueprints { get; private set; }
+
+        public void RemoveBlueprint(GrowingRoot root)
+        {
+            Blueprints.Remove(root.Blueprint.Id);
+        }
     }
 }
