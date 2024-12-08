@@ -20,43 +20,43 @@ public class RootDrawSystem : MonoBehaviour
     //[SerializeField]
     //GrowingRoots growingRoots;
 
-    public List<RootBlueprint> temporaryDrawnBlueprints = new();
+    public List<RootBlueprint> _temporaryDrawnBlueprints = new();
 
     [SerializeField]
-    MeshFilter blueprintsMesh;
+    MeshFilter _blueprintsMesh;
 
 
-    PlantRoots plantRoots;
+    PlantRoots _plantRoots;
 
     [SerializeField]
-    MeshFilter plantRootsMesh;
+    MeshFilter _plantRootsMesh;
 
-    const float standardIncrement = 0.02f;
-    const float blueprintWidth = standardIncrement * 0.75f;
+    const float _standardIncrement = 0.02f;
+    const float _blueprintWidth = _standardIncrement * 0.75f;
 
     Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
 
     private void Start()
     {
-        plantRoots = new PlantRoots() { Nodes = InitializeFancyPlantRoots() };
-        temporaryDrawnBlueprints.Add(CreateTestRootBlueprint(lastNode));
-        secondTickCTS = new CancellationTokenSource();
+        _plantRoots = new PlantRoots() { Nodes = InitializeFancyPlantRoots() };
+        _temporaryDrawnBlueprints.Add(CreateTestRootBlueprint(lastNode));
+        _secondTickCTS = new CancellationTokenSource();
 
-        UniTask.RunOnThreadPool(() => TickCoroutine());
+        UniTask.RunOnThreadPool(() => TickCoroutine(_secondTickCTS.Token));
     }
 
     private void OnApplicationQuit()
     {
-        secondTickCTS.Cancel();
-        secondTickCTS.Dispose();
-        secondTickCTS = null;
+        _secondTickCTS.Cancel();
+        _secondTickCTS.Dispose();
+        _secondTickCTS = null;
     }
 
-    CancellationTokenSource secondTickCTS = new CancellationTokenSource();
-    public async UniTaskVoid TickCoroutine()
+    CancellationTokenSource _secondTickCTS = new CancellationTokenSource();
+    public async UniTaskVoid TickCoroutine(CancellationToken cancellationToken)
     {
-        while ((secondTickCTS != null) 
-            && (secondTickCTS.IsCancellationRequested == false))
+        while ((cancellationToken != null) 
+            && (cancellationToken.IsCancellationRequested == false))
         {
             tickFlag = true;
             await UniTask.Delay(500);
@@ -68,13 +68,13 @@ public class RootDrawSystem : MonoBehaviour
     private void Tick()
     {
         EvaluateAllWidths();
-        plantRootsMesh.mesh = GenerateRootMesh();
-        blueprintsMesh.mesh = GenerateBluprintMesh();
+        _plantRootsMesh.mesh = GenerateRootMesh();
+        _blueprintsMesh.mesh = GenerateBluprintMesh();
     }
 
     private void Update()
     {
-        blueprintsMesh.mesh = GenerateBluprintMesh();
+        _blueprintsMesh.mesh = GenerateBluprintMesh();
         if (tickFlag)
         {
             tickFlag = false;
@@ -105,7 +105,7 @@ public class RootDrawSystem : MonoBehaviour
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
 
-        foreach (var rootBase in plantRoots.Nodes)
+        foreach (var rootBase in _plantRoots.Nodes)
         {
             if (rootBase.isRootBase)
             {
@@ -121,7 +121,7 @@ public class RootDrawSystem : MonoBehaviour
     float GetThinerPartWidth(float nodeWidth)
     {
         float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
-        return Mathf.Sqrt((crossSectionalArea - standardIncrement) / Mathf.PI);
+        return Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
     }
 
     void GenerateBranchMesh(
@@ -133,7 +133,7 @@ public class RootDrawSystem : MonoBehaviour
     {
         // Fetch node width from rootWidths, default to standardIncrement if not found
         if (!rootWidths.TryGetValue(node, out float nodeWidth))
-            nodeWidth = standardIncrement;
+            nodeWidth = _standardIncrement;
 
         // Get parent position and width from rootWidths
         Vector2 parentPos = parent != null ? parent.Position : node.Position;
@@ -145,7 +145,7 @@ public class RootDrawSystem : MonoBehaviour
         int baseVertexIndex = vertices.Count;
 
         float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
-        float thinerPartWidth = Mathf.Sqrt((crossSectionalArea - standardIncrement) / Mathf.PI);
+        float thinerPartWidth = Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
 
         Vector3 v1 = parentPos + perpendicular * nodeWidth / 2;
         Vector3 v2 = parentPos - perpendicular * nodeWidth / 2;
@@ -191,7 +191,7 @@ public class RootDrawSystem : MonoBehaviour
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
 
-        foreach(var blueprint in temporaryDrawnBlueprints)
+        foreach(var blueprint in _temporaryDrawnBlueprints)
         {
             for (int i = 0; i < blueprint.RootPath.Count; i++)
             {
@@ -204,10 +204,10 @@ public class RootDrawSystem : MonoBehaviour
 
                 int baseVertexIndex = vertices.Count;
 
-                Vector3 v1 = parentPos + perpendicular * blueprintWidth / 2;
-                Vector3 v2 = parentPos - perpendicular * blueprintWidth / 2;
-                Vector3 v3 = blueprint.RootPath[i] + perpendicular * blueprintWidth / 2;
-                Vector3 v4 = blueprint.RootPath[i] - perpendicular * blueprintWidth / 2;
+                Vector3 v1 = parentPos + perpendicular * _blueprintWidth / 2;
+                Vector3 v2 = parentPos - perpendicular * _blueprintWidth / 2;
+                Vector3 v3 = blueprint.RootPath[i] + perpendicular * _blueprintWidth / 2;
+                Vector3 v4 = blueprint.RootPath[i] - perpendicular * _blueprintWidth / 2;
 
                 // Add the four vertices
                 vertices.Add(v1);
@@ -242,7 +242,7 @@ public class RootDrawSystem : MonoBehaviour
         List<Vector2> uvs)
     {
         if (!rootWidths.TryGetValue(node, out float mergeWidth))
-            mergeWidth = standardIncrement;
+            mergeWidth = _standardIncrement;
 
         mergeWidth = GetThinerPartWidth(mergeWidth);
 
@@ -285,7 +285,7 @@ public class RootDrawSystem : MonoBehaviour
 
     void EvaluateAllWidths()
     {
-        foreach (var rootBase in plantRoots.Nodes.Where(node => node.isRootBase))
+        foreach (var rootBase in _plantRoots.Nodes.Where(node => node.isRootBase))
         {
             EvaluateNodeWidth(rootBase);
         }
@@ -295,7 +295,7 @@ public class RootDrawSystem : MonoBehaviour
     {
         if (node.nextNodes == null || node.nextNodes.Count == 0)
         {
-            float leafArea = standardIncrement;
+            float leafArea = _standardIncrement;
             rootWidths[node] = Mathf.Sqrt(leafArea / Mathf.PI);
             return leafArea;
         }
@@ -306,7 +306,7 @@ public class RootDrawSystem : MonoBehaviour
             totalChildAreas += EvaluateNodeWidth(child);
         }
 
-        float nodeArea = totalChildAreas + standardIncrement;
+        float nodeArea = totalChildAreas + _standardIncrement;
 
         rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
 
