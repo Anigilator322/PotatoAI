@@ -22,9 +22,14 @@ namespace Assets.Scripts.RootS
             this.RootPath = RootPath;
         }
 
-        public RootBlueprint(RootType rootType)
+        public RootBlueprint(RootType rootType, RootNode rootNode)
         {
+            RootNode = rootNode;
             RootType = rootType;
+
+            if(RootNode.Parent != null) 
+                RootPath.Add(rootNode.Parent.Position);
+            RootPath.Add(rootNode.Position
         }
 
         public void AddInPath(Vector2 pathPoint)
