@@ -107,7 +107,7 @@ public class RootDrawSystem : MonoBehaviour
 
         foreach (var rootBase in _plantRoots.Nodes)
         {
-            if (rootBase.isRootBase)
+            if (rootBase.IsRootBase)
             {
                 GenerateBranchMesh(rootBase, null, vertices, triangles, uvs);
             }
@@ -126,7 +126,7 @@ public class RootDrawSystem : MonoBehaviour
 
     void GenerateBranchMesh(
         RootNode node,
-        RootNode parent,
+        RootNode Parent,
         List<Vector3> vertices,
         List<int> triangles,
         List<Vector2> uvs)
@@ -135,8 +135,8 @@ public class RootDrawSystem : MonoBehaviour
         if (!rootWidths.TryGetValue(node, out float nodeWidth))
             nodeWidth = _standardIncrement;
 
-        // Get parent position and width from rootWidths
-        Vector2 parentPos = parent != null ? parent.Position : node.Position;
+        // Get Parent position and width from rootWidths
+        Vector2 parentPos = Parent != null ? Parent.Position : node.Position;
 
         // Generate straight segment vertices
         Vector2 direction = (node.Position - parentPos).normalized;
@@ -173,13 +173,13 @@ public class RootDrawSystem : MonoBehaviour
         uvs.Add(new Vector2(1, 1));
 
         // Handle merging for nodes with multiple children
-        if (node.nextNodes.Count > 1)
+        if (node.Childs.Count > 1)
         {
             GenerateMergeCaps(node, vertices, triangles, uvs);
         }
 
         // Process all children nodes recursively
-        foreach (var child in node.nextNodes)
+        foreach (var child in node.Childs)
         {
             GenerateBranchMesh(child, node, vertices, triangles, uvs);
         }
@@ -195,7 +195,7 @@ public class RootDrawSystem : MonoBehaviour
         {
             for (int i = 0; i < blueprint.RootPath.Count; i++)
             {
-                // Get parent position and width from rootWidths
+                // Get Parent position and width from rootWidths
                 Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.RootNode.Position;
 
                 // Generate straight segment vertices
@@ -251,10 +251,10 @@ public class RootDrawSystem : MonoBehaviour
         int segments = 20; // Number of segments for the semi-circle (higher = smoother)
         float angleStep = Mathf.PI / segments;
 
-        if (node.parent is null)
+        if (node.Parent is null)
             return;
 
-        Vector2 direction = (node.parent.Position - node.Position).normalized;
+        Vector2 direction = (node.Parent.Position - node.Position).normalized;
 
         int startIndex = vertices.Count;
 
@@ -272,7 +272,7 @@ public class RootDrawSystem : MonoBehaviour
             uvs.Add(new Vector2(i / (float)segments, 1)); // Optional UV mapping
         }
 
-        // Create triangles connecting the semi-circle to the parent root
+        // Create triangles connecting the semi-circle to the Parent root
         for (int i = 0; i < segments; i++)
         {
             triangles.Add(startIndex + i + 1);
@@ -285,7 +285,7 @@ public class RootDrawSystem : MonoBehaviour
 
     void EvaluateAllWidths()
     {
-        foreach (var rootBase in _plantRoots.Nodes.Where(node => node.isRootBase))
+        foreach (var rootBase in _plantRoots.Nodes.Where(node => node.IsRootBase))
         {
             EvaluateNodeWidth(rootBase);
         }
@@ -295,9 +295,9 @@ public class RootDrawSystem : MonoBehaviour
     {
         float totalChildAreas = 0f;
 
-        if(!(node.nextNodes is null))
+        if(!(node.Childs is null))
         {
-            foreach (var child in node.nextNodes)
+            foreach (var child in node.Childs)
             {
                 totalChildAreas += EvaluateNodeWidth(child);
             }
@@ -329,13 +329,13 @@ public class RootDrawSystem : MonoBehaviour
                 float x = startX + i * branchSpacing;
 
                 // Create the new RootNode
-                RootNode node = new RootNode
+                RootNode node = new RootNode()
                 {
                     Position = new Vector2(x, levelY),
                     Type = RootType.Harvester,
-                    isRootBase = level == 0, // The top node is the base
-                    parent = null, // Will be set later for non-root nodes
-                    nextNodes = new List<RootNode>()
+                    IsRootBase = level == 0, // The top node is the base
+                    Parent = null, // Will be set later for non-root nodes
+                    Childs = new List<RootNode>()
                 };
 
                 lastNode = node;
@@ -343,17 +343,17 @@ public class RootDrawSystem : MonoBehaviour
                 // Add to the overall list of nodes
                 allNodes.Add(node);
 
-                // Link to the parent node
+                // Link to the Parent node
                 if (level > 0) // Skip root level
                 {
-                    int parentIndex = (i / 2) + ((int)Mathf.Pow(2, level - 1) - 1); // Calculate parent index
+                    int parentIndex = (i / 2) + ((int)Mathf.Pow(2, level - 1) - 1); // Calculate Parent index
                     RootNode parentNode = allNodes[parentIndex];
 
-                    // Set parent for the current node
-                    node.parent = parentNode;
+                    // Set Parent for the current node
+                    node.Parent = parentNode;
 
-                    // Add the current node to the parent's children
-                    parentNode.nextNodes.Add(node);
+                    // Add the current node to the Parent's children
+                    parentNode.Childs.Add(node);
                 }
             }
         }

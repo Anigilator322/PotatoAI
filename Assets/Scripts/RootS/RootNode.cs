@@ -29,6 +29,10 @@ namespace Assets.Scripts.RootS
             this.Parent = parent;
         }
 
+        public RootNode()
+        {
+        }
+
         public void SetChildren(RootNode child)
         {
             Childs.Add(child);
