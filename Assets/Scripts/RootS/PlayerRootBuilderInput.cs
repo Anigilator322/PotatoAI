@@ -3,6 +3,7 @@ using Assets.Scripts.RootS.Metabolics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.RootS
 {
@@ -10,11 +11,11 @@ namespace Assets.Scripts.RootS
     {
         [SerializeField] private float _clickedNodeSearchRadius = 2f;
 
-        private PlayerInputActions _playerInputActions;
-        private GridPartition<RootNode> _gridPartition;
-        private RootBlueprintingSystem _rootBlueprintingSystem;
-        private RootGrowthSystem _rootGrowthSystem;
-        private MetabolicSystem _metabolicSystem;
+        [Inject] private PlayerInputActions _playerInputActions;
+        [Inject] private GridPartition<RootNode> _gridPartition;
+        [Inject] private RootBlueprintingSystem _rootBlueprintingSystem;
+        [Inject] private RootGrowthSystem _rootGrowthSystem;
+        [Inject] private MetabolicSystem _metabolicSystem;
 
         private bool _isDragging = false;
         private RootNode _clickedNode;

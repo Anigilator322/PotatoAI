@@ -29,6 +29,12 @@ namespace Assets.Scripts
         private CancellationTokenSource _growRootsCancellationTokenSource = new CancellationTokenSource();
         //конфигурация скорости роста и т.п.
 
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem)
+        {
+            _growingRoots = new GrowingRoots();
+            _rootSpawnSystem = rootSpawnSystem;
+        }
+
         public void StartGrowth(RootBlueprint blueprint)
         {
             _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot(blueprint)

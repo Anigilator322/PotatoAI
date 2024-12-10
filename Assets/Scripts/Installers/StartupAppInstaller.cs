@@ -1,12 +1,16 @@
 using Assets.Scripts.RootS.Plants;
+using Assets.Scripts.RootS.Plants.Factories;
 using UnityEngine;
 using Zenject;
 
-public class StartupAppInstaller : MonoInstaller
+namespace Assets.Scripts.Installers
 {
-    public override void InstallBindings()
+    public class StartupAppInstaller : MonoInstaller
     {
-        InputInstaller.Install(Container);
-        PlantInstaller.Install(Container);
+        public override void InstallBindings()
+        {
+            InputInstaller.Install(Container);
+            GameSystemsInstaller.Install(Container);
+        }
     }
 }

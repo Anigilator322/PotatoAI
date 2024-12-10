@@ -451,11 +451,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1676800508}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb4bd063ee69721439ecde5c3ab14fe4, type: 3}
+  m_Script: {fileID: 11500000, guid: 4bffb7a5c6858534fb3b92a8df8fb119, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blueprintsMesh: {fileID: 1150235082}
-  plantRootsMesh: {fileID: 1217768683}
+  _blueprintsMesh: {fileID: 1217768683}
+  _plantRootsMesh: {fileID: 1150235082}
 --- !u!4 &1676800510
 Transform:
   m_ObjectHideFlags: 0

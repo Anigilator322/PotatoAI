@@ -1,20 +1,30 @@
 using Assets.Scripts.Map;
 using Assets.Scripts.RootS;
+using Assets.Scripts.RootS.Metabolics;
 using Assets.Scripts.RootS.Plants;
+using Assets.Scripts.RootS.Plants.Factories;
 using UnityEngine;
 using Zenject;
 
-public class PlantInstaller : Installer<PlantInstaller>
+namespace Assets.Scripts.Installers
 {
-
-    private Plant _plantPrefab;
-    private Transform _plantSpawnPosition;
-
-    public override void InstallBindings()
+    public class PlantInstaller : MonoInstaller
     {
-        Container.Bind<PlantRoots>().FromNew().AsSingle();
-        Container.Bind<GridPartition<RootNode>>().FromNew().AsSingle().WithArguments(1);
-        Plant plant = Container.InstantiatePrefabForComponent<Plant>(_plantPrefab,_plantSpawnPosition.position,Quaternion.identity,null);
-    }
+        [SerializeField]
+        private Plant _plantPrefab;
+        
+        public override void InstallBindings()
+        {
+            Container.Bind<PlantRoots>().FromNew().AsSingle().NonLazy();
+            Container.Bind<RootBlueprintingSystem>().FromNew().AsSingle();
+            Container.Bind<RootSpawnSystem>().FromNew().AsSingle();
+            Container.Bind<RootGrowthSystem>().FromNew().AsSingle();
+            Container.Bind<MetabolicSystem>().FromNew().AsSingle();
 
+            
+
+            Plant plant = Container.InstantiatePrefabForComponent<Plant>(_plantPrefab);
+        }
+
+    }
 }
