@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3580541365569960983}
   - component: {fileID: 2676730505666247869}
   - component: {fileID: 3544074514704336328}
+  - component: {fileID: -1273471741907450153}
   m_Layer: 0
   m_Name: Plant
   m_TagString: Untagged
@@ -58,3 +59,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _clickedNodeSearchRadius: 1
+--- !u!114 &-1273471741907450153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4281526611647259930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 376157fff1e596a46a4f3a6b591aaca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  plant: {fileID: 2676730505666247869}
