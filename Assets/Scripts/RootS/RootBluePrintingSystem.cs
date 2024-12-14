@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
@@ -6,6 +7,8 @@ namespace Assets.Scripts.RootS
     {
         public float _rootSegmentLength { get; private set; } = 0.1f;
         public float _maxBuildAngle { get; private set; } = 90f;
+        private int _maxIters = 100;
+        private int _curIters = 0;
 
         private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 direction)
         {
@@ -16,6 +19,9 @@ namespace Assets.Scripts.RootS
 
         private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
         {
+            if(_curIters >= _maxIters)
+                return false;
+            _curIters++;
             Debug.Log("Trying to blueprint");
             if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _rootSegmentLength)
                 return false;
@@ -58,6 +64,7 @@ namespace Assets.Scripts.RootS
 
         public RootBlueprint Update(RootBlueprint rootBlueprint, Vector2 targetPos)
         {
+            _curIters = 0;
             while (TryBlueprint(rootBlueprint, targetPos)) ;
 
             return rootBlueprint;

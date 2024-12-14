@@ -24,10 +24,9 @@ namespace Assets.Scripts
     {
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
-        private float _growthTickTime = 1f;
+        private float _growthTickTime = 0.3f;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
-        //конфигурация скорости роста и т.п.
 
         public RootGrowthSystem(RootSpawnSystem rootSpawnSystem)
         {
@@ -62,6 +61,7 @@ namespace Assets.Scripts
         private void StopGrowingCoroutine()
         {
             Debug.Log("Stopping coroutine");
+            Debug.Log("Is coroutine Running?: "+ IsCoroutineRunning());
             if (IsCoroutineRunning())
             {
                 _growRootsCancellationTokenSource.Cancel();
@@ -102,7 +102,7 @@ namespace Assets.Scripts
         private async UniTask GrowRoots(CancellationToken cancellationToken)
         {
             Debug.Log("Start growing roots");
-            while (_growingRoots.Blueprints.Count > 0 || cancellationToken.IsCancellationRequested)
+            while (_growingRoots.Blueprints.Count > 0 && !cancellationToken.IsCancellationRequested)
             {
                 foreach (var growingRoot in _growingRoots.Blueprints)
                 {
@@ -123,8 +123,8 @@ namespace Assets.Scripts
                             //_growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                         case GrowthState.Completed:
-                            _growingRoots.RemoveBlueprint(growingRoot.Value);
-                            StopGrowingCoroutine();
+                            //StopGrowingCoroutine();
+                            //_growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                     }
                 }
