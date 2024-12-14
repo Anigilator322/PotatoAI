@@ -14,7 +14,7 @@ namespace Assets.Scripts.RootS.Metabolics
         public bool IsAbleToBuild(RootBlueprint blueprint)
         {
             int price = CalculateBlueprintPrice(blueprint);
-            if (price < Callories)
+            if (price <= Callories)
             {
                 return true;
             }

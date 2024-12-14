@@ -5,7 +5,7 @@ namespace Assets.Scripts.RootS
 {
     public class RootNode : PositionedObject
     {
-        public RootType Type;
+        public RootType Type = RootType.Harvester;
 
         public bool IsRootBase;
         public RootNode Parent;

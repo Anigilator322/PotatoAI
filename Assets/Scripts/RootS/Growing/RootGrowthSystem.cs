@@ -22,16 +22,15 @@ namespace Assets.Scripts
 
     public class RootGrowthSystem : IRootGrowthSystem
     {
-        private GrowingRoots _growingRoots;
+        private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
         private float _growthTickTime = 1f;
 
-        private CancellationTokenSource _growRootsCancellationTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _growRootsCancellationTokenSource;
         //конфигурация скорости роста и т.п.
 
         public RootGrowthSystem(RootSpawnSystem rootSpawnSystem)
         {
-            _growingRoots = new GrowingRoots();
             _rootSpawnSystem = rootSpawnSystem;
         }
 
@@ -41,6 +40,7 @@ namespace Assets.Scripts
             {
                 State = GrowthState.Growing
             });
+            Debug.Log("Blueprint added to growing roots, rootPath count: " + blueprint.RootPath.Count);
             StartGrowingCoroutine();
         }
 
@@ -53,6 +53,7 @@ namespace Assets.Scripts
         {
             if(_growingRoots.Blueprints.Count > 0 && !IsCoroutineRunning())
             {
+                Debug.Log("Starting coroutine");
                 _growRootsCancellationTokenSource = new CancellationTokenSource();
                 UniTask.RunOnThreadPool(() => GrowRoots(_growRootsCancellationTokenSource.Token));
             }
@@ -60,7 +61,8 @@ namespace Assets.Scripts
 
         private void StopGrowingCoroutine()
         {
-            if(IsCoroutineRunning())
+            Debug.Log("Stopping coroutine");
+            if (IsCoroutineRunning())
             {
                 _growRootsCancellationTokenSource.Cancel();
                 _growRootsCancellationTokenSource.Dispose();
@@ -99,10 +101,13 @@ namespace Assets.Scripts
 
         private async UniTask GrowRoots(CancellationToken cancellationToken)
         {
-            while(_growingRoots.Blueprints.Count > 0 || cancellationToken.IsCancellationRequested)
+            Debug.Log("Start growing roots");
+            while (_growingRoots.Blueprints.Count > 0 || cancellationToken.IsCancellationRequested)
             {
                 foreach (var growingRoot in _growingRoots.Blueprints)
                 {
+                    Debug.Log("Growing root " + growingRoot.Key);
+                    
                     switch (growingRoot.Value.State)
                     {
                         case GrowthState.Growing:
@@ -112,18 +117,15 @@ namespace Assets.Scripts
 
                             break;
                         case GrowthState.Canceled:
-                            _growingRoots.RemoveBlueprint(growingRoot.Value);
+                            //_growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                         case GrowthState.Failed:
-                            _growingRoots.RemoveBlueprint(growingRoot.Value);
+                            //_growingRoots.RemoveBlueprint(growingRoot.Value);
                             break;
                         case GrowthState.Completed:
                             _growingRoots.RemoveBlueprint(growingRoot.Value);
+                            StopGrowingCoroutine();
                             break;
-                    }
-                    if (growingRoot.Value.Blueprint.RootPath.Count == 0)
-                    {
-                        growingRoot.Value.State = GrowthState.Completed;
                     }
                 }
                 await UniTask.Delay(TimeSpan.FromSeconds(_growthTickTime));
@@ -136,7 +138,6 @@ namespace Assets.Scripts
             RootNode node = _rootSpawnSystem.TrySpawnRoot(growingRoot);
             growingRoot.Blueprint.RootPath.RemoveAt(0);
             growingRoot.Blueprint.RootNode = node;
-
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {
                 growingRoot.State = GrowthState.Completed;
@@ -146,7 +147,7 @@ namespace Assets.Scripts
 
     internal class GrowingRoots
     {
-        public Dictionary<string,GrowingRoot> Blueprints { get; private set; }
+        public Dictionary<string,GrowingRoot> Blueprints { get; private set; } = new Dictionary<string, GrowingRoot>();
 
         public void RemoveBlueprint(GrowingRoot root)
         {

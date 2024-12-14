@@ -37,14 +37,19 @@ namespace Assets.Scripts.RootS
 
         void Update()
         {
+            Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
+            Debug.Log("Mouse position: " + mousePos);
+            Debug.Log("Worlds mousePos: " + Camera.main.ScreenToWorldPoint(mousePos));
             if (!_isDragging)
                 return;
-            Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
+            Debug.Log("Drawing trajectory");
+            //Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
             DrawTrajectory(mousePos);
         }
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
+            mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
             List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
@@ -53,17 +58,21 @@ namespace Assets.Scripts.RootS
 
         private void DrawTrajectory(Vector2 mousePos)
         {
+            mousePos = Camera.main.ScreenToWorldPoint(mousePos);
             _currentBlueprint = _rootBlueprintingSystem.Update(_currentBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
         {
+            if (_currentBlueprint == null)
+                return;
             if (_metabolicSystem.IsAbleToBuild(_currentBlueprint))
                 _rootGrowthSystem.StartGrowth(_currentBlueprint);
         }
 
         private bool IsClickedOnRoot(Vector2 mousePos)
         {
+            mousePos = Camera.main.ScreenToWorldPoint(mousePos);
             if (_gridPartition.Query(_clickedNodeSearchRadius, mousePos).Count != 0)
             {
                 return true;

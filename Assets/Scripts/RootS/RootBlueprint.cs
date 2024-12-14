@@ -26,8 +26,8 @@ namespace Assets.Scripts.RootS
         {
             RootNode = rootNode;
             RootType = rootType;
-
-            if(RootNode.Parent != null) 
+            Id = System.Guid.NewGuid().ToString(); // Test purposes
+            if (RootNode.Parent != null) 
                 RootPath.Add(rootNode.Parent.Position);
 
             RootPath.Add(rootNode.Position);

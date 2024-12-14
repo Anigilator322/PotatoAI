@@ -4,7 +4,7 @@ namespace Assets.Scripts.RootS
 {
     public class RootBlueprintingSystem
     {
-        public float _rootSegmentLength { get; private set; } = 2f;
+        public float _rootSegmentLength { get; private set; } = 0.1f;
         public float _maxBuildAngle { get; private set; } = 90f;
 
         private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 direction)
@@ -16,6 +16,7 @@ namespace Assets.Scripts.RootS
 
         private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
         {
+            Debug.Log("Trying to blueprint");
             if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _rootSegmentLength)
                 return false;
             if(rootBlueprint.RootPath.Count < 2)
