@@ -12,34 +12,38 @@ using System.Threading;
 using System;
 using System.Runtime.InteropServices;
 using static TreeEditor.TreeGroup;
+using Zenject;
 
 
 
-public class RootDrawSystem : MonoBehaviour
+public class RootDrawSystem : ITickable, IInitializable
 {
-    //[SerializeField]
-    //GrowingRoots growingRoots;
-
     public List<RootBlueprint> _temporaryDrawnBlueprints = new();
 
-    [SerializeField]
+    [Inject(Id = "RootBlueprintsMesh")]
     MeshFilter _blueprintsMesh;
 
-
-    PlantRoots _plantRoots;
-
-    [SerializeField]
+    [Inject(Id = "RootsMesh")]
     MeshFilter _plantRootsMesh;
+
+    [Inject] PlantRoots _plantRoots;
+
+    [Inject] private GridPartition<RootNode> _gridPartition;
 
     const float _standardIncrement = 0.02f;
     const float _blueprintWidth = _standardIncrement * 0.75f;
 
     Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
 
-    private void Start()
+    #region MonoBeh stuff
+    public void Start()
     {
-        _plantRoots = new PlantRoots() { Nodes = InitializeFancyPlantRoots() };
-        _temporaryDrawnBlueprints.Add(CreateTestRootBlueprint(lastNode));
+        var rootNodes = InitializeFancyPlantRoots();
+        _plantRoots.Nodes.AddRange(rootNodes);
+        foreach (var rootNode in rootNodes)
+            _gridPartition.Insert(rootNode);
+
+        //_temporaryDrawnBlueprints.Add(CreateTestRootBlueprint(lastNode));
         _secondTickCTS = new CancellationTokenSource();
 
         UniTask.RunOnThreadPool(() => TickCoroutine(_secondTickCTS.Token));
@@ -51,6 +55,16 @@ public class RootDrawSystem : MonoBehaviour
         _secondTickCTS.Dispose();
         _secondTickCTS = null;
     }
+
+    private void Update()
+    {
+        if (tickFlag)
+        {
+            tickFlag = false;
+            //Tick();
+        }
+    }
+    #endregion MonoBeh stuff
 
     CancellationTokenSource _secondTickCTS = new CancellationTokenSource();
     public async UniTaskVoid TickCoroutine(CancellationToken cancellationToken)
@@ -65,20 +79,20 @@ public class RootDrawSystem : MonoBehaviour
 
     bool tickFlag = false;
 
-    private void Tick()
+    public void Initialize()
     {
-        EvaluateAllWidths();
-        _plantRootsMesh.mesh = GenerateRootMesh();
-        _blueprintsMesh.mesh = GenerateBluprintMesh();
+        Start();
     }
 
-    private void Update()
+
+    void ITickable.Tick()
     {
-        _blueprintsMesh.mesh = GenerateBluprintMesh();
         if (tickFlag)
         {
             tickFlag = false;
-            Tick();
+            EvaluateAllWidths();
+            _plantRootsMesh.mesh = GenerateRootMesh();
+            _blueprintsMesh.mesh = GenerateBluprintMesh();
         }
     }
 

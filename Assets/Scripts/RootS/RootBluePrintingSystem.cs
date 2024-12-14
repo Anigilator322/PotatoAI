@@ -5,7 +5,7 @@ namespace Assets.Scripts.RootS
 {
     public class RootBlueprintingSystem
     {
-        public float _rootSegmentLength { get; private set; } = 0.1f;
+        public float _rootSegmentLength { get; private set; } = 0.8f;
         public float _maxBuildAngle { get; private set; } = 90f;
         private int _maxIters = 100;
         private int _curIters = 0;

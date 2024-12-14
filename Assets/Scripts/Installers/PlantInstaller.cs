@@ -21,10 +21,27 @@ namespace Assets.Scripts.Installers
             Container.Bind<RootGrowthSystem>().FromNew().AsSingle();
             Container.Bind<MetabolicSystem>().FromNew().AsSingle();
 
-            
-
             Plant plant = Container.InstantiatePrefabForComponent<Plant>(_plantPrefab);
-        }
+            for (int i = 0; i < plant.transform.childCount; i++)
+            {
+                var child = plant.transform.GetChild(i);
 
+                if (child.name == "Roots")
+                {
+                    Container.Bind<MeshFilter>()
+                        .WithId("RootsMesh")
+                        .FromInstance(child.GetComponent<MeshFilter>()).AsCached();
+                }
+                else if (child.name == "RootBlueprints")
+                {
+                    Container.Bind<MeshFilter>()
+                        .WithId("RootBlueprintsMesh")
+                        .FromInstance(child.GetComponent<MeshFilter>()).AsCached();
+                }
+            }
+
+            Container.BindInterfacesAndSelfTo<RootDrawSystem>().FromNew().AsSingle();
+            Container.Bind<PlayerRootBuilderInput>().FromNewComponentOn(plant.gameObject).AsSingle().NonLazy();
+        }
     }
 }

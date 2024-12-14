@@ -16,11 +16,12 @@ namespace Assets.Scripts.RootS
 
         public RootNode TrySpawnRoot(GrowingRoot root)
         {
-            RootNode newRoot = new RootNode(root.Blueprint.RootPath[0], root.Blueprint.RootNode, root.Blueprint.RootType);
-            Debug.Log("Trying to spawn root at position: " + newRoot.Position);
-            _plantRoots.Nodes.Add(newRoot);
-            _gridPartition.Insert(newRoot);
-            return newRoot;
+            RootNode newRootNode = new RootNode(root.Blueprint.RootPath[0], root.Blueprint.RootNode, root.Blueprint.RootType);
+            root.Blueprint.RootNode.Childs.Add(newRootNode);
+            Debug.Log("Trying to spawn root at position: " + newRootNode.Position);
+            _plantRoots.Nodes.Add(newRootNode);
+            _gridPartition.Insert(newRootNode);
+            return newRootNode;
         }
     }
 }

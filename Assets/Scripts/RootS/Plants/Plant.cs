@@ -13,8 +13,8 @@ namespace Assets.Scripts.RootS.Plants
 
         private void Start()
         {
-            Roots.Nodes.Add(new RootNode(gameObject.transform.position));
-            GridPartition.Insert(Roots.Nodes[0]);
+            //Roots.Nodes.Add(new RootNode(gameObject.transform.position));
+            //GridPartition.Insert(Roots.Nodes[0]);
         }
     }
 }

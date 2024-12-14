@@ -104,30 +104,31 @@ namespace Assets.Scripts
             Debug.Log("Start growing roots");
             while (_growingRoots.Blueprints.Count > 0 && !cancellationToken.IsCancellationRequested)
             {
-                foreach (var growingRoot in _growingRoots.Blueprints)
+                var ids = _growingRoots.Blueprints.Keys.ToArray();
+                for (int i = 0; i < ids.Length; i++ )
                 {
-                    Debug.Log("Growing root " + growingRoot.Key);
-                    
-                    switch (growingRoot.Value.State)
+                    var id = ids[i];
+                    var growingRoot = _growingRoots.Blueprints[ids[i]];
+                    Debug.Log("Growing root " + id);
+
+                    switch (growingRoot.State)
                     {
                         case GrowthState.Growing:
-                            SpawnNode(growingRoot.Value);
+                            SpawnNode(growingRoot);
                             break;
+                        
                         case GrowthState.Paused:
+                            break;
 
-                            break;
                         case GrowthState.Canceled:
-                            //_growingRoots.RemoveBlueprint(growingRoot.Value);
-                            break;
                         case GrowthState.Failed:
-                            //_growingRoots.RemoveBlueprint(growingRoot.Value);
-                            break;
                         case GrowthState.Completed:
-                            //StopGrowingCoroutine();
-                            //_growingRoots.RemoveBlueprint(growingRoot.Value);
+                            _growingRoots.RemoveBlueprint(id);
+
                             break;
                     }
                 }
+
                 await UniTask.Delay(TimeSpan.FromSeconds(_growthTickTime));
             }
             StopGrowingCoroutine();
@@ -151,7 +152,12 @@ namespace Assets.Scripts
 
         public void RemoveBlueprint(GrowingRoot root)
         {
-            Blueprints.Remove(root.Blueprint.Id);
+            RemoveBlueprint(root.Blueprint.Id);
+        }
+
+        public void RemoveBlueprint(string id)
+        {
+            Blueprints.Remove(id);
         }
     }
 }

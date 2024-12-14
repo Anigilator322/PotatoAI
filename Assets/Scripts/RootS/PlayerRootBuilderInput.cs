@@ -16,15 +16,25 @@ namespace Assets.Scripts.RootS
         [Inject] private RootBlueprintingSystem _rootBlueprintingSystem;
         [Inject] private RootGrowthSystem _rootGrowthSystem;
         [Inject] private MetabolicSystem _metabolicSystem;
+        [Inject] private RootDrawSystem _rootDrawSystem;
 
         private bool _isDragging = false;
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
         private RootBlueprint _currentBlueprint;
+        private RootBlueprint currentBlueprint
+        {
+            get => _currentBlueprint;
+            set 
+            {
+                _currentBlueprint = value;
+                _rootDrawSystem._temporaryDrawnBlueprints = new List<RootBlueprint> { _currentBlueprint };
+            }
+        }
+
 
         void Start()
         {
-
             _playerInputActions.PlayerMap.MousePosition.Enable();
             _playerInputActions.PlayerMap.LBMPressed.performed += _ =>
             {
@@ -52,20 +62,20 @@ namespace Assets.Scripts.RootS
             List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
-            _currentBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            currentBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            _currentBlueprint = _rootBlueprintingSystem.Update(_currentBlueprint, mousePos);
+            currentBlueprint = _rootBlueprintingSystem.Update(currentBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
         {
-            if (_currentBlueprint == null)
+            if (currentBlueprint == null)
                 return;
-            if (_metabolicSystem.IsAbleToBuild(_currentBlueprint))
-                _rootGrowthSystem.StartGrowth(_currentBlueprint);
+            if (_metabolicSystem.IsAbleToBuild(currentBlueprint))
+                _rootGrowthSystem.StartGrowth(currentBlueprint);
         }
 
         private bool IsClickedOnRoot(Vector2 mousePos)
