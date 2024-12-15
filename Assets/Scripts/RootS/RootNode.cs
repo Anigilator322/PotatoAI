@@ -13,6 +13,7 @@ namespace Assets.Scripts.RootS
 
         public RootNode(Vector2 position)
         {
+            IsRootBase = true;
             Position = position;
         }
         

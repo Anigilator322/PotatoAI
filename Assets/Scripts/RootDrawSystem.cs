@@ -38,11 +38,11 @@ public class RootDrawSystem : ITickable, IInitializable
     #region MonoBeh stuff
     public void Start()
     {
-        var rootNodes = InitializeFancyPlantRoots();
+        /*var rootNodes = InitializeFancyPlantRoots();
         _plantRoots.Nodes.AddRange(rootNodes);
         foreach (var rootNode in rootNodes)
             _gridPartition.Insert(rootNode);
-
+        */
         //_temporaryDrawnBlueprints.Add(CreateTestRootBlueprint(lastNode));
         _secondTickCTS = new CancellationTokenSource();
 
@@ -56,14 +56,6 @@ public class RootDrawSystem : ITickable, IInitializable
         _secondTickCTS = null;
     }
 
-    private void Update()
-    {
-        if (tickFlag)
-        {
-            tickFlag = false;
-            //Tick();
-        }
-    }
     #endregion MonoBeh stuff
 
     CancellationTokenSource _secondTickCTS = new CancellationTokenSource();
