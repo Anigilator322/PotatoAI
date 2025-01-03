@@ -7,11 +7,11 @@ namespace Assets.Scripts.RootS
     {
         public RootType Type { get; }
 
-        public bool IsRootBase { get; }
+        public bool IsRootBase => Parent is null;
         public RootNode Parent { get; }
         public List<RootNode> Childs { get; } = new List<RootNode>();
 
-        public RootNode(Vector2 position, RootNode parent, RootType type, bool isRootBase)
+        public RootNode(Vector2 position, RootNode parent, RootType type)
         {
             this.Position = position;
             this.Type = type;
@@ -23,13 +23,10 @@ namespace Assets.Scripts.RootS
             }
         }
 
-        public RootNode(Vector2 position, RootNode parent, RootType type)
-            : this(position, parent, type, false) { }
-
         public RootNode(Vector2 position, RootNode parent)
-            : this(position, parent, type: default, false) {}
+            : this(position, parent, type: default) {}
 
         public RootNode(Vector2 position)
-            : this(position, null, type: default, false) { }
+            : this(position, null, type: default) { }
     }
 }

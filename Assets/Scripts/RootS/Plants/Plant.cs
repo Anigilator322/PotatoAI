@@ -26,14 +26,20 @@ namespace Assets.Scripts.RootS.Plants
                 _plantsModel = plantsModel;
             }
 
-            public Plant Create()
+            public Plant Create(string id)
             {
                 Plant plant = GameObject.Instantiate(_plantPrefab);
+                plant.Id = id;
 
                 PlantRoots plantRoots = _rootsFactory.Create(plant);
                 plant.Roots = plantRoots;
                 _plantsModel.Plants.Add(plant);
                 return plant;
+            }
+
+            public Plant Create()
+            {
+                return Create(id: null);
             }
         }
     }

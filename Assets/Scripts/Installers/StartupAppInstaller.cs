@@ -15,8 +15,7 @@ namespace Assets.Scripts.Installers
         public override void InstallBindings()
         {
             GameSystemsInstaller.Install(Container);
-
-            //Container.Bind<Plant>().WithId(DITools.prefab).FromComponentInNewPrefab(prefabs.plantPrefab).AsSingle();
+            InputInstaller.Install(Container);
 
             Container.Bind<PlantsModel>().FromNew().AsSingle();
 
@@ -28,12 +27,8 @@ namespace Assets.Scripts.Installers
                 .FromMethod(x => Container.Resolve<Plant.Factory>().Create())
                 .AsTransient();
 
-            InputInstaller.Install(Container);
-
-            //var factory = Container.Resolve<Plant.Factory>();
-            Plant plant = Container.Resolve<Plant>();
-
-            Container.Bind<PlayerRootBuilderInput>().FromNewComponentOn(plant.gameObject).AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle();
         }
     }
 }

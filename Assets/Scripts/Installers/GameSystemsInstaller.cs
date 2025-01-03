@@ -17,7 +17,7 @@ namespace Assets.Scripts.Installers
             Container.Bind<RootSpawnSystem>().FromNew().AsSingle();
             Container.Bind<RootGrowthSystem>().FromNew().AsSingle();
             Container.Bind<MetabolicSystem>().FromNew().AsSingle();
-            Container.Bind<RootDrawSystem>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<RootDrawSystem>().FromNew().AsSingle();
         }
     }
 }

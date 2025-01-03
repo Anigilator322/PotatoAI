@@ -46,7 +46,7 @@ public class RootDrawSystem : ITickable, IInitializable
             && (cancellationToken.IsCancellationRequested == false))
         {
             tickFlag = true;
-            await UniTask.Delay(500);
+            await UniTask.Delay(100);
         }
     }
 
@@ -67,11 +67,11 @@ public class RootDrawSystem : ITickable, IInitializable
 
                     if (child.name == "Roots")
                     {
-                        plant.transform.GetComponent<MeshFilter>().mesh = GenerateRootMesh(plant.Roots);
+                        child.GetComponent<MeshFilter>().mesh = GenerateRootMesh(plant.Roots);
                     }
                     else if (child.name == "RootBlueprints")
                     {
-                        plant.transform.GetComponent<MeshFilter>().mesh = GenerateBluprintMesh();
+                        child.GetComponent<MeshFilter>().mesh = GenerateBluprintMesh();
                     }
                 }
             }

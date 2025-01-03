@@ -27,7 +27,7 @@ namespace Assets.Scripts
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
         private PlantsModel PlantsModel { get; }
-        private float _growthTickTime = 0.3f;
+        private float _growthTickTime = 0.1f;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
 

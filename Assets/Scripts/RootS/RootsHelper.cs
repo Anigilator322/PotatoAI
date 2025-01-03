@@ -40,8 +40,7 @@ namespace Assets.Scripts.RootS
                     RootNode node = new RootNode(
                         new Vector2(x, levelY),
                         parent,
-                        RootType.Harvester,
-                        isRootBase: level == 0
+                        RootType.Harvester
                     );
 
                     // Add to the overall list of nodes

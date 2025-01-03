@@ -36,6 +36,11 @@ namespace Assets.Scripts.Map
             _gridPartition.Insert(rootNode);
         }
 
+        public List<RootNode> GetNodesFromCircle(float circleRadius, Vector2 circleCenter)
+        {
+            return _gridPartition.Query(circleRadius, circleCenter);
+        }
+
         public class Factory : IFactory<Plant, PlantRoots>
         {
             public PlantRoots Create(Plant plant)
