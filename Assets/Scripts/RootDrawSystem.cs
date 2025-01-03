@@ -39,6 +39,13 @@ public class RootDrawSystem : ITickable, IInitializable
         _drawTickCoroutineCTS = new CancellationTokenSource();
         UniTask.RunOnThreadPool(() => TickCoroutine(_drawTickCoroutineCTS.Token));
     }
+    
+    private void OnApplicationQuit()
+    {
+        _drawTickCoroutineCTS.Cancel();
+        _drawTickCoroutineCTS.Dispose();
+        _drawTickCoroutineCTS = null;
+    }
 
     public async UniTaskVoid TickCoroutine(CancellationToken cancellationToken)
     {
