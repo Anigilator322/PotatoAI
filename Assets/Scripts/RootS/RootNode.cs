@@ -5,37 +5,31 @@ namespace Assets.Scripts.RootS
 {
     public class RootNode : PositionedObject
     {
-        public RootType Type = RootType.Harvester;
+        public RootType Type { get; }
 
-        public bool IsRootBase;
-        public RootNode Parent;
-        public List<RootNode> Childs = new List<RootNode>();
+        public bool IsRootBase { get; }
+        public RootNode Parent { get; }
+        public List<RootNode> Childs { get; } = new List<RootNode>();
 
-        public RootNode(Vector2 position)
-        {
-            Position = position;
-        }
-        
-        public RootNode(Vector2 position, RootNode parent, RootType type)
+        public RootNode(Vector2 position, RootNode parent, RootType type, bool isRootBase)
         {
             this.Position = position;
-            this.Parent = parent;
             this.Type = type;
+
+            if(parent is not null)
+            {
+                this.Parent = parent;
+                parent.Childs.Add(this);
+            }
         }
+
+        public RootNode(Vector2 position, RootNode parent, RootType type)
+            : this(position, parent, type, false) { }
 
         public RootNode(Vector2 position, RootNode parent)
-        {
-            Position = position;
-            this.Parent = parent;
-        }
+            : this(position, parent, type: default, false) {}
 
-        public RootNode()
-        {
-        }
-
-        public void SetChildren(RootNode child)
-        {
-            Childs.Add(child);
-        }
+        public RootNode(Vector2 position)
+            : this(position, null, type: default, false) { }
     }
 }

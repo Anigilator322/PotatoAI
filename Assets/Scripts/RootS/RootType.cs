@@ -2,7 +2,7 @@
 {
     public enum RootType
     {
-        Harvester,
+        Harvester = 0, //default value
         Recon,
         Wall
     }

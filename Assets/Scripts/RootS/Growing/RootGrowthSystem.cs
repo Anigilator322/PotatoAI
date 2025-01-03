@@ -1,5 +1,7 @@
 ﻿
+using Assets.Scripts.Map;
 using Assets.Scripts.RootS;
+using Assets.Scripts.RootS.Plants;
 using Cysharp.Threading.Tasks;
 using ModestTree;
 using System;
@@ -24,21 +26,28 @@ namespace Assets.Scripts
     {
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
+        private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.3f;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
-        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem)
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel)
         {
+            PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
         {
-            _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot(blueprint)
+            Plant plant = PlantsModel.Plants
+                .SingleOrDefault(r => r.Roots.Nodes.Contains(blueprint.RootNode))
+                ?? throw new Exception($"No {nameof(Plant)} for {nameof(RootBlueprint)} trying to grow found");
+
+            _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot(blueprint, plant)
             {
                 State = GrowthState.Growing
             });
+
             Debug.Log("Blueprint added to growing roots, rootPath count: " + blueprint.RootPath.Count);
             StartGrowingCoroutine();
         }
@@ -136,9 +145,15 @@ namespace Assets.Scripts
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
-            RootNode node = _rootSpawnSystem.TrySpawnRoot(growingRoot);
+            RootNode parent = growingRoot.Blueprint.RootNode;
+            Vector2 position = growingRoot.Blueprint.RootPath[0];
+            RootType type = growingRoot.Blueprint.RootType;
+
+            RootNode node = _rootSpawnSystem.SpawnRootNode(growingRoot.Plant.Roots, parent, position, type);
+
             growingRoot.Blueprint.RootPath.RemoveAt(0);
             growingRoot.Blueprint.RootNode = node;
+
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {
                 growingRoot.State = GrowthState.Completed;
@@ -148,7 +163,7 @@ namespace Assets.Scripts
 
     internal class GrowingRoots
     {
-        public Dictionary<string,GrowingRoot> Blueprints { get; private set; } = new Dictionary<string, GrowingRoot>();
+        public Dictionary<string, GrowingRoot> Blueprints { get; private set; } = new Dictionary<string, GrowingRoot>();
 
         public void RemoveBlueprint(GrowingRoot root)
         {

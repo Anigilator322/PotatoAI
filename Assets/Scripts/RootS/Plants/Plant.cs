@@ -4,17 +4,37 @@ using Zenject;
 
 namespace Assets.Scripts.RootS.Plants
 {
-    public class Plant : MonoBehaviour
+    public class Plant : MonoBehaviour, IIdentifiable
     {
-        [Inject]
-        public PlantRoots Roots;
-        [Inject]
-        GridPartition<RootNode> GridPartition; // This field used for testing purposes
+        public string Id { get; set; }
 
-        private void Start()
+        public PlantRoots Roots { get; private set; }
+
+        public class Factory : IFactory<Plant>
         {
-            //Roots.Nodes.Add(new RootNode(gameObject.transform.position));
-            //GridPartition.Insert(Roots.Nodes[0]);
+            private readonly PlantRoots.Factory _rootsFactory;
+            private readonly Plant _plantPrefab;
+            private readonly PlantsModel _plantsModel;
+
+            public Factory(
+                Plant plantPrefab, 
+                PlantRoots.Factory rootsFactory,
+                PlantsModel plantsModel)
+            {
+                _plantPrefab = plantPrefab;
+                _rootsFactory = rootsFactory;
+                _plantsModel = plantsModel;
+            }
+
+            public Plant Create()
+            {
+                Plant plant = GameObject.Instantiate(_plantPrefab);
+
+                PlantRoots plantRoots = _rootsFactory.Create(plant);
+                plant.Roots = plantRoots;
+                _plantsModel.Plants.Add(plant);
+                return plant;
+            }
         }
     }
 }

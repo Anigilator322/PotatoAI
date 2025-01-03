@@ -13,19 +13,17 @@ using System;
 using System.Runtime.InteropServices;
 using static TreeEditor.TreeGroup;
 using Zenject;
-using Assets.Scripts.RootS.Plants;
-using System.ComponentModel;
 
 
 
 public class RootDrawSystem : ITickable, IInitializable
 {
-    //TODO: Separate the drawing of roots and blueprints
+    //TODO: Detach it from drawing only one plantRoots at a time
+    // ? Separate the drawing of roots and blueprints ?
 
     [Inject]
-    private PlantsModel PlantsModel { get; }
-
-    public List<RootBlueprint> BlueprintsToDraw { get; set; } = new();
+    PlantsModel PlantsModel;
+    public List<RootBlueprint> _temporaryDrawnBlueprints = new();
 
     const float _standardIncrement = 0.02f;
     const float _blueprintWidth = _standardIncrement * 0.75f;
@@ -36,7 +34,13 @@ public class RootDrawSystem : ITickable, IInitializable
 
     public void Initialize()
     {
+        var rootNodes = InitializeFancyPlantRoots();
+        _plantRoots.Nodes.AddRange(rootNodes);
+        foreach (var rootNode in rootNodes)
+            _gridPartition.Insert(rootNode);
+
         _drawTickCoroutineCTS = new CancellationTokenSource();
+
         UniTask.RunOnThreadPool(() => TickCoroutine(_drawTickCoroutineCTS.Token));
     }
 
@@ -58,23 +62,8 @@ public class RootDrawSystem : ITickable, IInitializable
         {
             tickFlag = false;
             EvaluateAllWidths();
-
-            foreach(Plant plant in PlantsModel.Plants)
-            {
-                for (int i = 0; i < plant.transform.childCount; i++)
-                {
-                    var child = plant.transform.GetChild(i);
-
-                    if (child.name == "Roots")
-                    {
-                        plant.transform.GetComponent<MeshFilter>().mesh = GenerateRootMesh(plant.Roots);
-                    }
-                    else if (child.name == "RootBlueprints")
-                    {
-                        plant.transform.GetComponent<MeshFilter>().mesh = GenerateBluprintMesh();
-                    }
-                }
-            }
+            _plantRootsMesh.mesh = GenerateRootMesh();
+            _blueprintsMesh.mesh = GenerateBluprintMesh();
         }
     }
 
@@ -95,13 +84,13 @@ public class RootDrawSystem : ITickable, IInitializable
         return rootMesh;
     }
 
-    Mesh GenerateRootMesh(PlantRoots plantRoots)
+    Mesh GenerateRootMesh()
     {
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
 
-        foreach (var rootBase in plantRoots.Nodes)
+        foreach (var rootBase in _plantRoots.Nodes)
         {
             if (rootBase.IsRootBase)
             {
@@ -187,7 +176,7 @@ public class RootDrawSystem : ITickable, IInitializable
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
 
-        foreach(var blueprint in BlueprintsToDraw)
+        foreach(var blueprint in _temporaryDrawnBlueprints)
         {
             for (int i = 0; i < blueprint.RootPath.Count; i++)
             {
@@ -281,12 +270,7 @@ public class RootDrawSystem : ITickable, IInitializable
 
     void EvaluateAllWidths()
     {
-        var PlantRootBases = PlantsModel.Plants
-            .Select(p => p.Roots)
-            .SelectMany(r => r.Nodes
-                .Where(n => n.IsRootBase));
-
-        foreach (var rootBase in PlantRootBases)
+        foreach (var rootBase in _plantRoots.Nodes.Where(node => node.IsRootBase))
         {
             EvaluateNodeWidth(rootBase);
         }
@@ -309,5 +293,49 @@ public class RootDrawSystem : ITickable, IInitializable
         rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
 
         return nodeArea;
+    }
+
+
+    //TODO: move to a better place. maybe a factory helper or something
+    public List<RootNode> InitializeFancyPlantRoots()
+    {
+        const int depth = 4; // Number of levels
+        const float segmentLength = 1f; // Vertical distance between levels
+        const float branchSpacing = 0.5f; // Horizontal spacing between nodes
+
+        List<RootNode> allNodes = new List<RootNode>();
+
+        for (int level = 0; level < depth; level++)
+        {
+            int nodesInLevel = (int)Mathf.Pow(2, level); // Number of nodes at this level
+            float levelY = -level * segmentLength; // Y position for this level
+            float startX = -((nodesInLevel - 1) * branchSpacing) / 2; // Center the level horizontally
+
+            for (int i = 0; i < nodesInLevel; i++)
+            {
+                float x = startX + i * branchSpacing;
+
+                RootNode parent = null;
+
+                // Link to the Parent node
+                if (level > 0) // Skip root level
+                {
+                    int parentIndex = (i / 2) + ((int)Mathf.Pow(2, level - 1) - 1); // Calculate Parent index
+                    parent = allNodes[parentIndex];
+                }
+
+                RootNode node = new RootNode(
+                    new Vector2(x, levelY),
+                    parent,
+                    RootType.Harvester,
+                    isRootBase: level == 0
+                );
+
+                // Add to the overall list of nodes
+                allNodes.Add(node);
+            }
+        }
+
+        return allNodes;
     }
 }

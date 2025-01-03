@@ -16,10 +16,6 @@ namespace Assets.Scripts.Installers
         public override void InstallBindings()
         {
             Container.Bind<PlantRoots>().FromNew().AsSingle().NonLazy();
-            Container.Bind<RootBlueprintingSystem>().FromNew().AsSingle();
-            Container.Bind<RootSpawnSystem>().FromNew().AsSingle();
-            Container.Bind<RootGrowthSystem>().FromNew().AsSingle();
-            Container.Bind<MetabolicSystem>().FromNew().AsSingle();
 
             Plant plant = Container.InstantiatePrefabForComponent<Plant>(_plantPrefab);
             for (int i = 0; i < plant.transform.childCount; i++)
@@ -39,9 +35,6 @@ namespace Assets.Scripts.Installers
                         .FromInstance(child.GetComponent<MeshFilter>()).AsCached();
                 }
             }
-
-            Container.BindInterfacesAndSelfTo<RootDrawSystem>().FromNew().AsSingle();
-            Container.Bind<PlayerRootBuilderInput>().FromNewComponentOn(plant.gameObject).AsSingle().NonLazy();
         }
     }
 }

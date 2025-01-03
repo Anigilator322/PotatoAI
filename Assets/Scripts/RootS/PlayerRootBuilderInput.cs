@@ -28,7 +28,7 @@ namespace Assets.Scripts.RootS
             set 
             {
                 _currentBlueprint = value;
-                _rootDrawSystem._temporaryDrawnBlueprints = new List<RootBlueprint> { _currentBlueprint };
+                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint };
             }
         }
 

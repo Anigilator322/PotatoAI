@@ -7,7 +7,7 @@ namespace Assets.Scripts.Installers
     {
         public override void InstallBindings()
         {
-            PlayerInputActions actions = Container.Instantiate<PlayerInputActions>();
+            PlayerInputActions actions = new();
             Container.Bind<PlayerInputActions>().FromInstance(actions).NonLazy();
             actions.Enable();
         }
