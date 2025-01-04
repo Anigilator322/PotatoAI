@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using Assets.Scripts.RootS.Plants;
+using Assets.Scripts.Roots.Plants;
 
-namespace Assets.Scripts.RootS
+namespace Assets.Scripts.Roots.Tools
 {
     public class NodesGizmos : MonoBehaviour
     {

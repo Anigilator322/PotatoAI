@@ -1,12 +1,12 @@
 using Assets.Scripts.Map;
-using Assets.Scripts.RootS;
-using Assets.Scripts.RootS.Metabolics;
-using Assets.Scripts.RootS.Plants;
-using Assets.Scripts.RootS.Plants.Factories;
+using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Metabolics;
+using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.Roots.Plants.Factories;
 using UnityEngine;
 using Zenject;
 
-namespace Assets.Scripts.Installers
+namespace Assets.Scripts.Bootstrap.Installers
 {
     public class PlantInstaller : MonoInstaller
     {

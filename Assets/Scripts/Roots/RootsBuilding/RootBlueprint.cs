@@ -1,10 +1,7 @@
-﻿using Assets.Scripts.RootS.Plants;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Scripts.RootS
+namespace Assets.Scripts.Roots.RootsBuilding
 {
 
     public class RootBlueprint : IIdentifiable

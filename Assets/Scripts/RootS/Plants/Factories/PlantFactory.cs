@@ -1,6 +1,6 @@
 ﻿using Zenject;
 
-namespace Assets.Scripts.RootS.Plants.Factories
+namespace Assets.Scripts.Roots.Plants.Factories
 {
     public class PlantFactory : PlaceholderFactory<Plant>
     {

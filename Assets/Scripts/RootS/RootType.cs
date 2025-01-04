@@ -1,4 +1,4 @@
-﻿namespace Assets.Scripts.RootS
+﻿namespace Assets.Scripts.Roots
 {
     public enum RootType
     {

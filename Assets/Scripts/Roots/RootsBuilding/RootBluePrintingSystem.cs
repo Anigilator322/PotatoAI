@@ -1,7 +1,6 @@
-﻿using JetBrains.Annotations;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Assets.Scripts.RootS
+namespace Assets.Scripts.Roots.RootsBuilding
 {
     public class RootBlueprintingSystem
     {
