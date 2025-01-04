@@ -3,25 +3,30 @@ using UnityEngine;
 
 namespace Assets.Scripts.RootS
 {
+    //This system probably should just iterate over all root nodes prepared to spawn
     public class RootSpawnSystem
     {
-        private PlantRoots _plantRoots;
-        private GridPartition<RootNode> _gridPartition;
+        //TODO: How do we establish link between newly added RootNode and plant? 
+        //Why do we think it belongs to this instance of PlantRoots?
 
-        public RootSpawnSystem(PlantRoots plantRoots, GridPartition<RootNode> gridPartition)
+        public RootNode SpawnRootNode(PlantRoots plantRoots, RootNode parent, Vector2 position, RootType type)
         {
-            _plantRoots = plantRoots;
-            _gridPartition = gridPartition;
+            RootNode newRootNode = new RootNode(position, parent, type);
+
+            Spawn(plantRoots, newRootNode);
+            return newRootNode;
         }
 
-        public RootNode TrySpawnRoot(GrowingRoot root)
+        public RootNode SpawnRootNode(PlantRoots plantRoots, RootNode newRootNode)
         {
-            RootNode newRootNode = new RootNode(root.Blueprint.RootPath[0], root.Blueprint.RootNode, root.Blueprint.RootType);
-            root.Blueprint.RootNode.Childs.Add(newRootNode);
-            Debug.Log("Trying to spawn root at position: " + newRootNode.Position);
-            _plantRoots.Nodes.Add(newRootNode);
-            _gridPartition.Insert(newRootNode);
+            Spawn(plantRoots, newRootNode);
             return newRootNode;
+        }
+
+        private void Spawn(PlantRoots plantRoots, RootNode newRootNode)
+        {
+            Debug.Log("Trying to spawn root at position: " + newRootNode.Position);
+            plantRoots.AddNode(newRootNode);
         }
     }
 }

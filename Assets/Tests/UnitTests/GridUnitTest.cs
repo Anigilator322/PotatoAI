@@ -11,7 +11,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
     [SetUp]
     public void CommonInstall()
     {
-        PlantRoots rootSystem = new PlantRoots();
+        PlantRoots rootSystem = new PlantRoots(new Assets.Scripts.RootS.Plants.Plant());
         GridPartition<RootNode> grid = new GridPartition<RootNode>(1);
         Container.Bind<GridPartition<RootNode>>().FromInstance(grid).AsSingle();
         Container.Bind<PlantRoots>().FromInstance(rootSystem).AsSingle();
