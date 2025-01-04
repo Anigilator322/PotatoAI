@@ -1,14 +1,34 @@
+using Assets.Scripts.Map;
+using Assets.Scripts.RootS;
 using Assets.Scripts.RootS.Plants;
+using Assets.Scripts.RootS.Plants.Factories;
 using UnityEngine;
 using Zenject;
 
-
-
-public class StartupAppInstaller : MonoInstaller
+namespace Assets.Scripts.Installers
 {
-    public override void InstallBindings()
+    public class StartupAppInstaller : MonoInstaller
     {
-        InputInstaller.Install(Container);
-        PlantInstaller.Install(Container);
+        [SerializeField]
+        Prefabs prefabs;
+
+        public override void InstallBindings()
+        {
+            GameSystemsInstaller.Install(Container);
+            InputInstaller.Install(Container);
+
+            Container.Bind<PlantsModel>().FromNew().AsSingle();
+
+            Container.Bind<PlantRoots.Factory>().AsSingle();
+            Container.Bind<Plant.Factory>().AsSingle()
+                .WithArguments<Plant>(prefabs.plantPrefab);
+
+            Container.Bind<Plant>()
+                .FromMethod(x => Container.Resolve<Plant.Factory>().Create())
+                .AsTransient();
+
+            Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle();
+        }
     }
 }

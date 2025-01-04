@@ -1,20 +1,40 @@
 using Assets.Scripts.Map;
 using Assets.Scripts.RootS;
+using Assets.Scripts.RootS.Metabolics;
 using Assets.Scripts.RootS.Plants;
+using Assets.Scripts.RootS.Plants.Factories;
 using UnityEngine;
 using Zenject;
 
-public class PlantInstaller : Installer<PlantInstaller>
+namespace Assets.Scripts.Installers
 {
-
-    private Plant _plantPrefab;
-    private Transform _plantSpawnPosition;
-
-    public override void InstallBindings()
+    public class PlantInstaller : MonoInstaller
     {
-        Container.Bind<PlantRoots>().FromNew().AsSingle();
-        Container.Bind<GridPartition<RootNode>>().FromNew().AsSingle().WithArguments(1);
-        Plant plant = Container.InstantiatePrefabForComponent<Plant>(_plantPrefab,_plantSpawnPosition.position,Quaternion.identity,null);
-    }
+        [SerializeField]
+        private Plant _plantPrefab;
+        
+        public override void InstallBindings()
+        {
+            Container.Bind<PlantRoots>().FromNew().AsSingle().NonLazy();
 
+            Plant plant = Container.InstantiatePrefabForComponent<Plant>(_plantPrefab);
+            for (int i = 0; i < plant.transform.childCount; i++)
+            {
+                var child = plant.transform.GetChild(i);
+
+                if (child.name == "Roots")
+                {
+                    Container.Bind<MeshFilter>()
+                        .WithId("RootsMesh")
+                        .FromInstance(child.GetComponent<MeshFilter>()).AsCached();
+                }
+                else if (child.name == "RootBlueprints")
+                {
+                    Container.Bind<MeshFilter>()
+                        .WithId("RootBlueprintsMesh")
+                        .FromInstance(child.GetComponent<MeshFilter>()).AsCached();
+                }
+            }
+        }
+    }
 }

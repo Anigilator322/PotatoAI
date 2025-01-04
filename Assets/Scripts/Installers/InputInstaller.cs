@@ -1,12 +1,15 @@
 using UnityEngine;
 using Zenject;
 
-public class InputInstaller : Installer<InputInstaller>
+namespace Assets.Scripts.Installers
 {
-    public override void InstallBindings()
+    public class InputInstaller : Installer<InputInstaller>
     {
-        PlayerInputActions actions = Container.Instantiate<PlayerInputActions>();
-        Container.Bind<PlayerInputActions>().FromInstance(actions).AsSingle().NonLazy();
-        actions.Enable();
+        public override void InstallBindings()
+        {
+            PlayerInputActions actions = new();
+            Container.Bind<PlayerInputActions>().FromInstance(actions).NonLazy();
+            actions.Enable();
+        }
     }
 }

@@ -1,69 +1,116 @@
 ﻿using Assets.Scripts.Map;
 using Assets.Scripts.RootS.Metabolics;
+using Assets.Scripts.RootS.Plants;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using Zenject;
 
 namespace Assets.Scripts.RootS
 {
-    public class PlayerRootBuilderInput : MonoBehaviour
+    public class PlayerRootBuilderInput : IInitializable, ITickable
     {
+        public const string PLAYER_ID = "player_1";
+
         [SerializeField] private float _clickedNodeSearchRadius = 2f;
 
-        private PlayerInputActions _playerInputActions;
-        private GridPartition<RootNode> _gridPartition;
-        private RootBlueprintingSystem _rootBlueprintingSystem;
-        private RootGrowthSystem _rootGrowthSystem;
-        private MetabolicSystem _metabolicSystem;
+        [Inject] private PlayerInputActions _playerInputActions;
+        [Inject] private RootBlueprintingSystem _rootBlueprintingSystem;
+        [Inject] private RootGrowthSystem _rootGrowthSystem;
+        [Inject] private MetabolicSystem _metabolicSystem;
+        [Inject] private RootDrawSystem _rootDrawSystem;
+        [Inject] private PlantsModel _plantsModel;
 
         private bool _isDragging = false;
+        private PlantRoots _playersPlantRoots;
+        private PlantRoots PlayersPlantRoots 
+        { 
+            get
+            {
+                if (_playersPlantRoots is null)
+                {
+                    _playersPlantRoots = _plantsModel.Plants
+                        .Single(p => p.Id == PLAYER_ID)
+                            .Roots;
+                }
+
+                return _playersPlantRoots;
+            } 
+        }
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
         private RootBlueprint _currentBlueprint;
+        private InputAction _mousePositionAction;
 
-        void Start()
+        private RootBlueprint currentBlueprint
         {
-            _playerInputActions.PlayerMap.LBMPressed.performed += _ =>
+            get => _currentBlueprint;
+            set 
             {
-                if (IsClickedOnRoot(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>()))
-                {
-                    _isDragging = true;
-                    PrepareBlueprint(_playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>());
-                }
-            };
-            _playerInputActions.PlayerMap.LBMPressed.canceled += _ => { _isDragging = false; CancelBlueprinting(); };
+                _currentBlueprint = value;
+                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint };
+            }
         }
 
-        void Update()
+        private Vector2 GetMousePosition() => Camera.main.ScreenToWorldPoint(_mousePositionAction.ReadValue<Vector2>());
+
+        void IInitializable.Initialize()
+        {
+            _mousePositionAction = _playerInputActions.PlayerMap.MousePosition;
+            InputAction LBMPressedAction = _playerInputActions.PlayerMap.LBMPressed;
+
+            _mousePositionAction.Enable();
+
+            LBMPressedAction.performed += _ =>
+            {
+                Vector2 mousePosition = GetMousePosition();
+                if (IsClickedOnRoot(mousePosition))
+                {
+                    _isDragging = true;
+                    PrepareBlueprint(mousePosition);
+                }
+            };
+
+            LBMPressedAction.canceled += _ => { _isDragging = false; CancelBlueprinting(); };
+        }
+
+        void ITickable.Tick()
         {
             if (!_isDragging)
                 return;
-            Vector2 mousePos = _playerInputActions.PlayerMap.MousePosition.ReadValue<Vector2>();
+            Debug.Log("Drawing trajectory");
+            Debug.Log("Mouse position: " + GetMousePosition());
+            Vector2 mousePos = GetMousePosition();
             DrawTrajectory(mousePos);
         }
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
-            List<RootNode> queiriedNodes = _gridPartition.Query(_clickedNodeSearchRadius, mousePosition);
+            List<RootNode> queiriedNodes = PlayersPlantRoots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
-            _currentBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            currentBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            _currentBlueprint = _rootBlueprintingSystem.Update(_currentBlueprint, mousePos);
+            currentBlueprint = _rootBlueprintingSystem.Update(currentBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
         {
-            if (_metabolicSystem.IsAbleToBuild(_currentBlueprint))
-                _rootGrowthSystem.StartGrowth(_currentBlueprint);
+            if (currentBlueprint == null)
+                return;
+            if (_metabolicSystem.IsAbleToBuild(currentBlueprint))
+                _rootGrowthSystem.StartGrowth(currentBlueprint);
         }
 
-        private bool IsClickedOnRoot(Vector2 mousePos)
+        private bool IsClickedOnRoot(Vector2 mousePosition)
         {
-            if (_gridPartition.Query(_clickedNodeSearchRadius, mousePos).Count != 0)
+
+            if (PlayersPlantRoots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition).Count != 0)
             {
                 return true;
             }
@@ -87,6 +134,5 @@ namespace Assets.Scripts.RootS
             }
             return closestNode;
         }
-
     }
 }
