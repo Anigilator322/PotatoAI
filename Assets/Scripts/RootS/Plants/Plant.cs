@@ -1,8 +1,7 @@
-﻿using Assets.Scripts.Map;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
-namespace Assets.Scripts.RootS.Plants
+namespace Assets.Scripts.Roots.Plants
 {
     public class Plant : MonoBehaviour, IIdentifiable
     {

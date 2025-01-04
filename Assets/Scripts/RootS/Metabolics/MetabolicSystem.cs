@@ -1,10 +1,7 @@
-﻿using System;
+﻿using Assets.Scripts.Roots.RootsBuilding;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Assets.Scripts.RootS.Metabolics
+namespace Assets.Scripts.Roots.Metabolics
 {
     public class MetabolicSystem
     {

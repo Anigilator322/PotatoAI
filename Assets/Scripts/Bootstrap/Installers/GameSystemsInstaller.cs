@@ -1,12 +1,11 @@
-using Assets.Scripts.Map;
-using Assets.Scripts.RootS;
-using Assets.Scripts.RootS.Metabolics;
-using Assets.Scripts.RootS.Plants;
-using System;
-using UnityEngine;
+using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Metabolics;
+using Assets.Scripts.Roots.RootsBuilding;
+using Assets.Scripts.Roots.RootsBuilding.Growing;
+using Assets.Scripts.Roots.View;
 using Zenject;
 
-namespace Assets.Scripts.Installers
+namespace Assets.Scripts.Bootstrap.Installers
 {
     public class GameSystemsInstaller : Installer<GameSystemsInstaller>
     {

@@ -1,14 +1,16 @@
-﻿using Assets.Scripts.Map;
-using Assets.Scripts.RootS.Metabolics;
-using Assets.Scripts.RootS.Plants;
-using System;
+using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Metabolics;
+using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.Roots.RootsBuilding;
+using Assets.Scripts.Roots.RootsBuilding.Growing;
+using Assets.Scripts.Roots.View;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
 
-namespace Assets.Scripts.RootS
+namespace Assets.Scripts.UX
 {
     public class PlayerRootBuilderInput : IInitializable, ITickable
     {

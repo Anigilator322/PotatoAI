@@ -1,11 +1,9 @@
-using Assets.Scripts.Map;
-using Assets.Scripts.RootS;
-using Assets.Scripts.RootS.Plants;
-using Assets.Scripts.RootS.Plants.Factories;
+using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.UX;
 using UnityEngine;
 using Zenject;
 
-namespace Assets.Scripts.Installers
+namespace Assets.Scripts.Bootstrap.Installers
 {
     public class StartupAppInstaller : MonoInstaller
     {

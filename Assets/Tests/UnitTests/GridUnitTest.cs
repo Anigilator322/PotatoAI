@@ -3,7 +3,8 @@ using NUnit.Framework;
 using UnityEngine;
 using Assets.Scripts.Map;
 using System.Collections.Generic;
-using Assets.Scripts.RootS;
+using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Plants;
 
 [TestFixture]
 public class GridUnitTest : ZenjectUnitTestFixture
@@ -11,7 +12,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
     [SetUp]
     public void CommonInstall()
     {
-        PlantRoots rootSystem = new PlantRoots(new Assets.Scripts.RootS.Plants.Plant());
+        PlantRoots rootSystem = new PlantRoots(new Assets.Scripts.Roots.Plants.Plant());
         GridPartition<RootNode> grid = new GridPartition<RootNode>(1);
         Container.Bind<GridPartition<RootNode>>().FromInstance(grid).AsSingle();
         Container.Bind<PlantRoots>().FromInstance(rootSystem).AsSingle();
