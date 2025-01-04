@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.Roots.Plants;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;

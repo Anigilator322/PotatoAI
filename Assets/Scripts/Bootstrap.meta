@@ -1,8 +1,14 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/Prefabs_1.asset.meta
+guid: 40c371952987b264d830c67ca82f1d61
+NativeFormatImporter:
+========
 guid: d4730512b777c044fb93c474fe4a0be5
 folderAsset: yes
 DefaultImporter:
+>>>>>>>> PRICHESAL:Assets/Scripts/Bootstrap.meta
   externalObjects: {}
+  mainObjectFileID: 11400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 

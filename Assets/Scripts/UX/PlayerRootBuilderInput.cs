@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Roots;
+using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Metabolics;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
