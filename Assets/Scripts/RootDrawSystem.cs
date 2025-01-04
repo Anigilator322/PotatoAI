@@ -15,6 +15,8 @@ using static TreeEditor.TreeGroup;
 using Zenject;
 using Assets.Scripts.RootS.Plants;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 
 
 
@@ -27,8 +29,8 @@ public class RootDrawSystem : ITickable, IInitializable
 
     public List<RootBlueprint> BlueprintsToDraw { get; set; } = new();
 
-    const float _standardIncrement = 0.02f;
-    const float _blueprintWidth = _standardIncrement * 0.75f;
+    const float _standardIncrement = 0.01f;
+    const float _blueprintWidth = _standardIncrement * 1.75f;
 
     Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
 
@@ -102,11 +104,14 @@ public class RootDrawSystem : ITickable, IInitializable
         return rootMesh;
     }
 
+    float zOffset = 0f;
+    float zStep = 0.01f;
     Mesh GenerateRootMesh(PlantRoots plantRoots)
     {
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
+        zOffset = 0f;
 
         foreach (var rootBase in plantRoots.Nodes)
         {
@@ -134,51 +139,147 @@ public class RootDrawSystem : ITickable, IInitializable
         List<int> triangles,
         List<Vector2> uvs)
     {
-        // Fetch node width from rootWidths, default to standardIncrement if not found
-        if (!rootWidths.TryGetValue(node, out float nodeWidth))
-            nodeWidth = _standardIncrement;
+        if(Parent is not null)
+        {
+            var nodeWidth = rootWidths[node];
 
-        // Get Parent position and width from rootWidths
-        Vector2 parentPos = Parent != null ? Parent.Position : node.Position;
+            // Get Parent position
+            Vector2 parentPos = Parent.Position;
 
-        // Generate straight segment vertices
-        Vector2 direction = (node.Position - parentPos).normalized;
-        Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+            // Generate straight segment vertices
+            Vector2 direction = node.Position - parentPos;
+            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+            
+            var normalizedDirection = direction.normalized;
+            var normalizedperpendicular = perpendicular.normalized;
 
-        int baseVertexIndex = vertices.Count;
+            int baseVertexIndex = vertices.Count;
 
-        float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
-        float thinerPartWidth = Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
+            float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
 
-        Vector3 v1 = parentPos + perpendicular * nodeWidth / 2;
-        Vector3 v2 = parentPos - perpendicular * nodeWidth / 2;
-        Vector3 v3 = node.Position + perpendicular * thinerPartWidth / 2;
-        Vector3 v4 = node.Position - perpendicular * thinerPartWidth / 2;
+            float widerPartWidth = Mathf.Sqrt((crossSectionalArea + _standardIncrement) / Mathf.PI);
 
-        // Add the four vertices
-        vertices.Add(v1);
-        vertices.Add(v2);
-        vertices.Add(v3);
-        vertices.Add(v4);
+            var thinerPartOffest = perpendicular * ((nodeWidth/ 2) / perpendicular.magnitude);
+            
+            Vector3 v3 = node.Position + thinerPartOffest;
+            Vector3 v4 = node.Position - thinerPartOffest;
 
-        // Create triangles for the current segment
-        triangles.Add(baseVertexIndex);
-        triangles.Add(baseVertexIndex + 2);
-        triangles.Add(baseVertexIndex + 1);
-        triangles.Add(baseVertexIndex + 1);
-        triangles.Add(baseVertexIndex + 2);
-        triangles.Add(baseVertexIndex + 3);
+            //v1.z = v2.z = v3.z = v4.z = zOffset;
+            //zOffset += zStep;
 
-        // Add UVs
-        uvs.Add(new Vector2(0, 0));
-        uvs.Add(new Vector2(1, 0));
-        uvs.Add(new Vector2(0, 1));
-        uvs.Add(new Vector2(1, 1));
+            if (Parent.Childs.Count > 1 || Parent.Parent is null)
+            {
+                var widerPartOffest = perpendicular * ((widerPartWidth / 2) / perpendicular.magnitude);
+                Vector3 v1 = parentPos + widerPartOffest;
+                Vector3 v2 = parentPos - widerPartOffest;
 
-        // Handle merging for nodes with multiple children
+                vertices.Add(v1);
+                vertices.Add(v2);
+                vertices.Add(v3);
+                vertices.Add(v4);
+                uvs.Add(new Vector2(0, 0));
+                uvs.Add(new Vector2(1, 0));
+                uvs.Add(new Vector2(0, 1));
+                uvs.Add(new Vector2(1, 1));
+
+                // Create triangles for the current segment
+                triangles.Add(baseVertexIndex);
+                triangles.Add(baseVertexIndex + 2);
+                triangles.Add(baseVertexIndex + 1);
+                triangles.Add(baseVertexIndex + 1);
+                triangles.Add(baseVertexIndex + 2);
+                triangles.Add(baseVertexIndex + 3);
+            }
+            else
+            {
+                var angle = Vector2.SignedAngle(direction, parentPos - Parent.Parent.Position);
+
+                if (Mathf.Abs(angle) < 5)
+                {
+                    vertices.Add(v3);
+                    vertices.Add(v4);
+                    uvs.Add(new Vector2(0, 1));
+                    uvs.Add(new Vector2(1, 1));
+
+                    baseVertexIndex -= 2;
+                    triangles.Add(baseVertexIndex);
+                    triangles.Add(baseVertexIndex + 2);
+                    triangles.Add(baseVertexIndex + 1);
+                    triangles.Add(baseVertexIndex + 1);
+                    triangles.Add(baseVertexIndex + 2);
+                    triangles.Add(baseVertexIndex + 3);
+                }
+                else
+                {
+                    widerPartWidth = (vertices[^1] - vertices[^2]).magnitude;
+                    var widerPartOffest = perpendicular * ((widerPartWidth / 2) / perpendicular.magnitude);
+                    Vector3 v1 = parentPos + widerPartOffest;
+                    Vector3 v2 = parentPos - widerPartOffest;
+
+                    if (angle < 0)
+                    {
+                        var verticeToMove = vertices[^1];
+                        var vector = v2 - v4;
+                        var projectedPoint = FindIntersection(v2, v4, vertices[^3], verticeToMove);
+
+                        vertices[^1] = projectedPoint;
+
+                        vertices.Add(v1);
+                        vertices.Add(v3);
+                        vertices.Add(v4);
+                        uvs.Add(new Vector2(0, 0));
+                        uvs.Add(new Vector2(0, 1));
+                        uvs.Add(new Vector2(1, 1));
+
+                        // Create triangles for the current segment
+                        triangles.Add(baseVertexIndex - 2);
+                        triangles.Add(baseVertexIndex);
+                        triangles.Add(baseVertexIndex - 1);
+
+                        triangles.Add(baseVertexIndex);
+                        triangles.Add(baseVertexIndex + 1);
+                        triangles.Add(baseVertexIndex - 1);
+
+                        triangles.Add(baseVertexIndex - 1);
+                        triangles.Add(baseVertexIndex + 1);
+                        triangles.Add(baseVertexIndex + 2);
+                    }
+                    else
+                    {
+                        var verticeToMove = vertices[^2];
+                        var vector = v1 - v3;
+                        var projectedPoint = FindIntersection(v1, v3, vertices[^4], verticeToMove);
+                        vertices[^2] = projectedPoint;
+
+                        vertices.Add(v2);
+                        vertices.Add(v3);
+                        vertices.Add(v4);
+                        uvs.Add(new Vector2(1, 0));
+                        uvs.Add(new Vector2(0, 1));
+                        uvs.Add(new Vector2(1, 1));
+
+                        // Create triangles for the current segment
+                        triangles.Add(baseVertexIndex - 1);
+                        triangles.Add(baseVertexIndex - 2);
+                        triangles.Add(baseVertexIndex);
+
+                        triangles.Add(baseVertexIndex);
+                        triangles.Add(baseVertexIndex - 2);
+                        triangles.Add(baseVertexIndex + 1);
+
+                        triangles.Add(baseVertexIndex + 1);
+                        triangles.Add(baseVertexIndex + 2);
+                        triangles.Add(baseVertexIndex);
+                    }
+                }
+                
+            }
+        }
+
         if (node.Childs.Count > 1)
         {
-            GenerateMergeCaps(node, vertices, triangles, uvs);
+            //zOffset += zStep;
+            GenerateMergeCaps(node, vertices, triangles, uvs/*, zOffset*/);
         }
 
         // Process all children nodes recursively
@@ -199,7 +300,7 @@ public class RootDrawSystem : ITickable, IInitializable
             for (int i = 0; i < blueprint.RootPath.Count; i++)
             {
                 // Get Parent position and width from rootWidths
-                Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.RootNode.Position;
+                Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.StartRootNode.Position;
 
                 // Generate straight segment vertices
                 Vector2 direction = (blueprint.RootPath[i] - parentPos).normalized;
@@ -257,7 +358,9 @@ public class RootDrawSystem : ITickable, IInitializable
         if (node.Parent is null)
             return;
 
-        Vector2 direction = (node.Parent.Position - node.Position).normalized;
+        Vector2 direction = 
+            (node.Parent.Position - mergeCenter)
+            .normalized;
 
         int startIndex = vertices.Count;
 
@@ -270,6 +373,7 @@ public class RootDrawSystem : ITickable, IInitializable
             Vector2 offset = new Vector2(
                 Mathf.Cos(angle) * mergeWidth / 2,
                 Mathf.Sin(angle) * mergeWidth / 2);
+
 
             vertices.Add(mergeCenter + offset);
             uvs.Add(new Vector2(i / (float)segments, 1)); // Optional UV mapping
@@ -308,13 +412,34 @@ public class RootDrawSystem : ITickable, IInitializable
             foreach (var child in node.Childs)
             {
                 nodeArea += EvaluateNodeWidth(child);
+                nodeArea += _standardIncrement;
             }
         }
-
-        nodeArea += _standardIncrement;
 
         rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
 
         return nodeArea;
+    }
+
+    public static Vector2 FindIntersection(Vector2 start_1, Vector2 end_1, Vector2 start_2, Vector2 end_2)
+    {
+        double A1 = end_1.y - start_1.y;
+        double B1 = start_1.x - end_1.x;
+        double C1 = start_1.x * end_1.y - end_1.x * start_1.y;
+
+        double A2 = end_2.y - start_2.y;
+        double B2 = start_2.x - end_2.x;
+        double C2 = start_2.x * end_2.y - end_2.x * start_2.y;
+
+        //Gauss solution
+        double coef = -(A2 / A1);
+
+        B2 += B1 * coef;
+        C2 += C1 * coef;
+
+        double y = C2 / B2;
+        double x = (C1 - B1 * y) / A1;
+
+        return new Vector2((float)x, (float)y);
     }
 }

@@ -12,6 +12,7 @@ namespace Assets.Scripts.RootS
 {
     public class PlayerRootBuilderInput : IInitializable, ITickable
     {
+        // This class is a total mess of player UX logic. It should be completely refactored.
         public const string PLAYER_ID = "player_1";
 
         [SerializeField] private float _clickedNodeSearchRadius = 2f;
@@ -41,16 +42,16 @@ namespace Assets.Scripts.RootS
         }
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
-        private RootBlueprint _currentBlueprint;
+        private ScaffoldedRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 
-        private RootBlueprint currentBlueprint
+        private ScaffoldedRootBlueprint blueprintScaffold
         {
             get => _currentBlueprint;
             set 
             {
                 _currentBlueprint = value;
-                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint };
+                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint.blueprint };
             }
         }
 
@@ -91,20 +92,20 @@ namespace Assets.Scripts.RootS
             List<RootNode> queiriedNodes = PlayersPlantRoots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
-            currentBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            blueprintScaffold = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            currentBlueprint = _rootBlueprintingSystem.Update(currentBlueprint, mousePos);
+            blueprintScaffold = _rootBlueprintingSystem.Update(blueprintScaffold, mousePos);
         }
 
         private void CancelBlueprinting()
         {
-            if (currentBlueprint == null)
+            if (blueprintScaffold == null || blueprintScaffold.blueprint.RootPath.Count == 0)
                 return;
-            if (_metabolicSystem.IsAbleToBuild(currentBlueprint))
-                _rootGrowthSystem.StartGrowth(currentBlueprint);
+            if (_metabolicSystem.IsAbleToBuild(blueprintScaffold.blueprint))
+                _rootGrowthSystem.StartGrowth(blueprintScaffold.blueprint);
         }
 
         private bool IsClickedOnRoot(Vector2 mousePosition)

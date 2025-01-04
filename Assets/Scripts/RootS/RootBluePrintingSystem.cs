@@ -6,32 +6,32 @@ namespace Assets.Scripts.RootS
     public class RootBlueprintingSystem
     {
         public float _rootSegmentLength { get; private set; } = 0.8f;
-        public float _maxBuildAngle { get; private set; } = 90f;
+        public float _maxBuildAngle { get; private set; } = 40f;
         private int _maxIters = 100;
         private int _curIters = 0;
 
-        private void CreateNewPathNode(RootBlueprint rootBlueprint, Vector2 direction)
+        private void CreateNewPathNode(ScaffoldedRootBlueprint rootBlueprint, Vector2 direction)
         {
-            Vector2 lastNodePosition = rootBlueprint.RootPath[^1];
+            Vector2 lastNodePosition = rootBlueprint.ScaffoldedPath[^1];
             direction.Normalize();
-            rootBlueprint.AddInPath(lastNodePosition + direction * _rootSegmentLength);
+            rootBlueprint.AppendPoint(lastNodePosition + direction * _rootSegmentLength);
         }
 
-        private bool TryBlueprint(RootBlueprint rootBlueprint, Vector2 targetPos)
+        private bool TryBlueprint(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
         {
             if(_curIters >= _maxIters)
                 return false;
             _curIters++;
             Debug.Log("Trying to blueprint");
-            if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _rootSegmentLength)
+            if (Vector2.Distance(targetPos, rootBlueprint.ScaffoldedPath[^1]) <= _rootSegmentLength)
                 return false;
-            if(rootBlueprint.RootPath.Count < 2)
+            if(rootBlueprint.ScaffoldedPath.Count < 2)
             {
-                CreateNewPathNode(rootBlueprint,targetPos);
+                CreateNewPathNode(rootBlueprint, targetPos);
                 return true;
             }
-            Vector2 lastPoint = rootBlueprint.RootPath[^1];
-            Vector2 secondLastPoint = rootBlueprint.RootPath[^2];
+            Vector2 lastPoint = rootBlueprint.ScaffoldedPath[^1];
+            Vector2 secondLastPoint = rootBlueprint.ScaffoldedPath[^2];
             Vector2 directionToTarget = (targetPos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
@@ -55,14 +55,12 @@ namespace Assets.Scripts.RootS
             return true;
         }
 
-        public RootBlueprint Create(RootType type, RootNode parentNode)
+        public ScaffoldedRootBlueprint Create(RootType type, RootNode parentNode)
         {
-            RootBlueprint rootBlueprint = new RootBlueprint(type, parentNode);
-
-            return rootBlueprint;
+            return new ScaffoldedRootBlueprint(type, parentNode);
         }
 
-        public RootBlueprint Update(RootBlueprint rootBlueprint, Vector2 targetPos)
+        public ScaffoldedRootBlueprint Update(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
         {
             _curIters = 0;
             while (TryBlueprint(rootBlueprint, targetPos)) ;
@@ -93,9 +91,9 @@ namespace Assets.Scripts.RootS
             return angle;
         }
 
-        private void DecreasePath(RootBlueprint rootBlueprint)
+        private void DecreasePath(ScaffoldedRootBlueprint rootBlueprint)
         {
-            rootBlueprint.RootPath.RemoveAt(rootBlueprint.RootPath.Count-1);
+            rootBlueprint.RemoveLastPoint();
         }
 
         private bool IsCoDirected(Vector2 path, Vector2 targetPos)
