@@ -1,7 +1,7 @@
-﻿using Assets.Scripts.Map;
+﻿using Assets.Scripts.Roots.Plants;
 using UnityEngine;
 
-namespace Assets.Scripts.RootS
+namespace Assets.Scripts.Roots
 {
     //This system probably should just iterate over all root nodes prepared to spawn
     public class RootSpawnSystem

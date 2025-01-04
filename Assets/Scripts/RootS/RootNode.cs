@@ -1,7 +1,7 @@
 ﻿using Assets.Scripts.Map;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Assets.Scripts.RootS
+namespace Assets.Scripts.Roots
 {
     public class RootNode : PositionedObject
     {

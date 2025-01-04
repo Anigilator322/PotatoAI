@@ -1,14 +1,9 @@
-﻿
-using Assets.Scripts.RootS;
-using Assets.Scripts.RootS.Plants;
+﻿using Assets.Scripts.Map;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
-namespace Assets.Scripts.Map
+namespace Assets.Scripts.Roots.Plants
 {
     /// <summary>
     /// A class that holds all the roots of a plant.

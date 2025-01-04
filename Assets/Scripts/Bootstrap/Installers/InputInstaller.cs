@@ -1,7 +1,7 @@
 using UnityEngine;
 using Zenject;
 
-namespace Assets.Scripts.Installers
+namespace Assets.Scripts.Bootstrap.Installers
 {
     public class InputInstaller : Installer<InputInstaller>
     {

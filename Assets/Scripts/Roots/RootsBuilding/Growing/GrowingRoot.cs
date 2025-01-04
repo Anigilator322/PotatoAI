@@ -1,8 +1,6 @@
-﻿
-using Assets.Scripts.RootS;
-using Assets.Scripts.RootS.Plants;
+﻿using Assets.Scripts.Roots.Plants;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.Roots.RootsBuilding.Growing
 {
     public class GrowingRoot
     {

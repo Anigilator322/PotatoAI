@@ -1,6 +1,4 @@
-﻿using Assets.Scripts.RootS;
-
-namespace Assets.Scripts
+﻿namespace Assets.Scripts.Roots.RootsBuilding.Growing
 {
     interface IRootGrowthSystem
     {

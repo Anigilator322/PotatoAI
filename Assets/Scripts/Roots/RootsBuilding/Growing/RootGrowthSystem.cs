@@ -1,17 +1,12 @@
-﻿
-using Assets.Scripts.Map;
-using Assets.Scripts.RootS;
-using Assets.Scripts.RootS.Plants;
+﻿using Assets.Scripts.Roots.Plants;
 using Cysharp.Threading.Tasks;
-using ModestTree;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.Roots.RootsBuilding.Growing
 {
     public enum GrowthState
     {
