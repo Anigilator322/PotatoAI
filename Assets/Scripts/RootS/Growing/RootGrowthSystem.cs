@@ -40,7 +40,7 @@ namespace Assets.Scripts
         public void StartGrowth(RootBlueprint blueprint)
         {
             Plant plant = PlantsModel.Plants
-                .SingleOrDefault(r => r.Roots.Nodes.Contains(blueprint.RootNode))
+                .SingleOrDefault(r => r.Roots.Nodes.Contains(blueprint.StartRootNode))
                 ?? throw new Exception($"No {nameof(Plant)} for {nameof(RootBlueprint)} trying to grow found");
 
             _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot(blueprint, plant)
@@ -145,14 +145,14 @@ namespace Assets.Scripts
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
-            RootNode parent = growingRoot.Blueprint.RootNode;
+            RootNode parent = growingRoot.Blueprint.StartRootNode;
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;
 
             RootNode node = _rootSpawnSystem.SpawnRootNode(growingRoot.Plant.Roots, parent, position, type);
 
             growingRoot.Blueprint.RootPath.RemoveAt(0);
-            growingRoot.Blueprint.RootNode = node;
+            growingRoot.Blueprint.StartRootNode = node;
 
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {

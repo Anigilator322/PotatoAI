@@ -12,6 +12,7 @@ namespace Assets.Scripts.RootS
 {
     public class PlayerRootBuilderInput : IInitializable, ITickable
     {
+        // This class is a total mess of player UX logic. It should be completely refactored.
         public const string PLAYER_ID = "player_1";
 
         [SerializeField] private float _clickedNodeSearchRadius = 2f;
@@ -41,16 +42,16 @@ namespace Assets.Scripts.RootS
         }
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
-        private RootBlueprint _currentBlueprint;
+        private ScaffoldedRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 
-        private RootBlueprint currentBlueprint
+        private ScaffoldedRootBlueprint currentBlueprint
         {
             get => _currentBlueprint;
             set 
             {
                 _currentBlueprint = value;
-                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint };
+                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint.rootBlueprint };
             }
         }
 
@@ -101,10 +102,10 @@ namespace Assets.Scripts.RootS
 
         private void CancelBlueprinting()
         {
-            if (currentBlueprint == null)
+            if (currentBlueprint == null || currentBlueprint.RootPath.Count == 0)
                 return;
-            if (_metabolicSystem.IsAbleToBuild(currentBlueprint))
-                _rootGrowthSystem.StartGrowth(currentBlueprint);
+            if (_metabolicSystem.IsAbleToBuild(currentBlueprint.rootBlueprint))
+                _rootGrowthSystem.StartGrowth(currentBlueprint.rootBlueprint);
         }
 
         private bool IsClickedOnRoot(Vector2 mousePosition)
