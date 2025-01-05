@@ -1,6 +1,10 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/AOSFogWar.meta
 guid: d85d0a3126fee604797afc1b50de6670
 folderAsset: yes
+========
+guid: 91b0b4c77fdd1d24aa1af646e9d29960
+>>>>>>>> main:Assets/Plugins/Zenject/OptionalExtras/ReflectionBaking/Zenject-ReflectionBaking.csproj.meta
 DefaultImporter:
   externalObjects: {}
   userData: 
