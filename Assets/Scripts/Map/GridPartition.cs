@@ -9,7 +9,7 @@ using Zenject;
 namespace Assets.Scripts.Map
 {
 
-    public class GridPartition<T> : IObjectsQuery<T>, ICellQuery<T>
+    public class GridPartition<T> : IObjectsQuery<T>
         where T : PositionedObject
     {
         private int _cellSize;
@@ -111,49 +111,6 @@ namespace Assets.Scripts.Map
         public int GetCellSize()
         {
             return _cellSize;
-        }
-
-        public Cell<T> QueryCellDirectly(Vector2 worldPosition)
-        {
-            var coordinates = GetCellCoordinates(worldPosition);
-            if(!_grid.ContainsKey(coordinates))
-            {
-                return null;
-            }
-            return _grid[coordinates];
-        }
-
-        public List<Cell<T>> QueryCellsByCircle(float radius, Vector2 center)
-        {
-            Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
-            Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
-
-            List<Cell<T>> cells = new List<Cell<T>>();
-
-            for (int x = minCell.x; x <= maxCell.x; x++)
-            {
-                for (int y = minCell.y; y <= maxCell.y; y++)
-                {
-                    Vector2Int cellCoordinates = new Vector2Int(x, y);
-
-                    // Если ячейка существует
-                    if (_grid.ContainsKey(cellCoordinates))
-                    {
-                        cells.AddRange(_grid[cellCoordinates].GetIndexes());
-                    }
-                }
-            }
-            return ;
-        }
-
-        public List<Cell<T>> QueryCellsByRectangle(Vector2 size, Vector2 center)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public List<Cell<T>> QueryCellsByCapsule(Vector2 start, Vector2 end, float radius)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }
