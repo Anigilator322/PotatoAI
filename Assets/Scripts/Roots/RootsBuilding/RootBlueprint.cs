@@ -3,41 +3,31 @@ using UnityEngine;
 
 namespace Assets.Scripts.Roots.RootsBuilding
 {
-
     public class RootBlueprint : IIdentifiable
     {    
-        public string Id { get; set; }
+        public string Id { get; }
         
-        public RootType RootType;
+        public RootType RootType { get; }
 
-        public RootNode RootNode { get; set; }
+        public RootNode StartRootNode { get; set; }
 
-        public List<Vector2> RootPath { get; private set; } = new List<Vector2>();
+        public List<Vector2> RootPath { get; } = new List<Vector2>();
 
-        public RootBlueprint(List<Vector2> RootPath)
+        public RootBlueprint(RootType rootType, RootNode startRootNode)
         {
-            this.RootPath = RootPath;
-        }
-
-        public RootBlueprint(RootType rootType, RootNode rootNode)
-        {
-            RootNode = rootNode;
+            Id = System.Guid.NewGuid().ToString();
+            StartRootNode = startRootNode;
             RootType = rootType;
-            Id = System.Guid.NewGuid().ToString(); // Test purposes
-            if (RootNode.Parent != null) 
-                RootPath.Add(rootNode.Parent.Position);
-
-            RootPath.Add(rootNode.Position);
         }
 
-        public void AddInPath(Vector2 pathPoint)
+        public void AppendPoint(Vector2 pathPoint)
         {
             RootPath.Add(pathPoint);
         }
-        
-        public void RemoveFromPathLastPoint()
+
+        public void RemoveLastPoint()
         {
-            RootPath.RemoveAt(RootPath.Count-1);
+            RootPath.RemoveAt(RootPath.Count - 1);
         }
     }
 }
