@@ -8,29 +8,8 @@ using UnityEngine.UIElements;
 using Zenject;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T> where T : PositionedObject
-    {
-        private List<T> _positionedObjects;
-        public Cell()
-        {
-            _positionedObjects = new List<T>();
-        }
-        public Cell(T point)
-        {
-            _positionedObjects = new List<T>();
-            _positionedObjects.Add(point);
-        }
-        public void AddIndex(T point)
-        {
-            _positionedObjects.Add(point);
-        }
-        public List<T> GetIndexes()
-        {
-            return _positionedObjects;
-        }
-    }
 
-    public class GridPartition<T> 
+    public class GridPartition<T> : IObjectsQuery<T>, ICellQuery<T>
         where T : PositionedObject
     {
         private int _cellSize;
@@ -90,19 +69,20 @@ namespace Assets.Scripts.Map
             return false;
         }
 
-        public List<T> Query(Vector2 worldPosition)
+        public List<T> QueryDirectly(Vector2 worldPosition)
         {
             Vector2Int cellCoordinates = GetCellCoordinates(worldPosition);
             return GetPointsInCell(cellCoordinates);
         }
-        public List<T> Query(float radius, Vector2 center)
+
+        public List<T> QueryByCircle(float radius, Vector2 center)
         {
 
             // ¬ычисл€ем диапазон €чеек дл€ проверки
             Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
             Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
 
-            List<T> indexes = new List<T>();
+            List<T> positionedObjects = new List<T>();
 
             // ѕеребираем все €чейки в этом диапазоне
             for (int x = minCell.x; x <= maxCell.x; x++)
@@ -116,13 +96,13 @@ namespace Assets.Scripts.Map
                     {
                         if (isAnyCornerInRadius(cellCoordinates, center, radius))
                         {
-                            indexes.AddRange(_grid[cellCoordinates].GetIndexes());
+                            positionedObjects.AddRange(_grid[cellCoordinates].GetIndexes());
                         } 
                     }
                 }
             }
 
-            return indexes;
+            return positionedObjects;
         }
         public Dictionary<Vector2Int, Cell<T>> GetAllCellsWithPoints()
         {
@@ -133,5 +113,47 @@ namespace Assets.Scripts.Map
             return _cellSize;
         }
 
+        public Cell<T> QueryCellDirectly(Vector2 worldPosition)
+        {
+            var coordinates = GetCellCoordinates(worldPosition);
+            if(!_grid.ContainsKey(coordinates))
+            {
+                return null;
+            }
+            return _grid[coordinates];
+        }
+
+        public List<Cell<T>> QueryCellsByCircle(float radius, Vector2 center)
+        {
+            Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
+            Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
+
+            List<Cell<T>> cells = new List<Cell<T>>();
+
+            for (int x = minCell.x; x <= maxCell.x; x++)
+            {
+                for (int y = minCell.y; y <= maxCell.y; y++)
+                {
+                    Vector2Int cellCoordinates = new Vector2Int(x, y);
+
+                    // ≈сли €чейка существует
+                    if (_grid.ContainsKey(cellCoordinates))
+                    {
+                        cells.AddRange(_grid[cellCoordinates].GetIndexes());
+                    }
+                }
+            }
+            return ;
+        }
+
+        public List<Cell<T>> QueryCellsByRectangle(Vector2 size, Vector2 center)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public List<Cell<T>> QueryCellsByCapsule(Vector2 start, Vector2 end, float radius)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

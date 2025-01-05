@@ -33,7 +33,7 @@ namespace Assets.Scripts.Roots.Plants
 
         public List<RootNode> GetNodesFromCircle(float circleRadius, Vector2 circleCenter)
         {
-            return _gridPartition.Query(circleRadius, circleCenter);
+            return _gridPartition.QueryByCircle(circleRadius, circleCenter);
         }
 
         public class Factory : IFactory<Plant, PlantRoots>

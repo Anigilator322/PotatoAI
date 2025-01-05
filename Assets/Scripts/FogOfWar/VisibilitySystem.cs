@@ -12,7 +12,7 @@ namespace Assets.Scripts.FogOfWar
         {
             //Search cells in capsule
             //Return List<Cell> with all cells in capsule
-
+            var cells = _gridPartition.GetCellsInCapsule(start, end, radius);
         }
 
         public void UpdateVisibilityForRootNode(RootNode revealer)
