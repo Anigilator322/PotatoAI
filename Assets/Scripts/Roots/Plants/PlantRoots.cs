@@ -12,7 +12,7 @@ namespace Assets.Scripts.Roots.Plants
     public class PlantRoots : IIdentifiable
     {
         const int plantRootsCellSize = 1;
-        public string Id { get; set; }
+        public string Id { get; }
         public Plant plant { get; }
 
         public GridPartition<RootNode> _gridPartition { get; }
