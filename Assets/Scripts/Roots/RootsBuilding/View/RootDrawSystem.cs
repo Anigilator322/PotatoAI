@@ -191,7 +191,7 @@ namespace Assets.Scripts.Roots.View
                 for (int i = 0; i < blueprint.RootPath.Count; i++)
                 {
                     // Get Parent position and width from rootWidths
-                    Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.RootNode.Position;
+                    Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.StartRootNode.Position;
 
                     // Generate straight segment vertices
                     Vector2 direction = (blueprint.RootPath[i] - parentPos).normalized;

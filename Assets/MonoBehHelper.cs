@@ -1,4 +1,5 @@
-using Assets.Scripts.RootS;
+using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Plants;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

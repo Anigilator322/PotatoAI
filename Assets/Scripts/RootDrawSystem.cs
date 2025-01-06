@@ -1,24 +1,14 @@
-using Assets.Scripts;
-using Assets.Scripts.Map;
-using Assets.Scripts.RootS;
-using PlasticPipe.PlasticProtocol.Messages;
-using System.Collections;
+
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using System;
-using System.Runtime.InteropServices;
-using static TreeEditor.TreeGroup;
 using Zenject;
-using Assets.Scripts.RootS.Plants;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using UnityEngine;
 
-
+using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.Roots.RootsBuilding;
 
 public class RootDrawSystem : ITickable, IInitializable
 {
