@@ -11,7 +11,7 @@ namespace Assets.Scripts.Roots.Plants
     /// </summary>
     public class PlantRoots : IIdentifiable
     {
-        const int plantRootsCellSize = 1;
+        const int CELL_SIZE = 1;
         public string Id { get; }
         public Plant plant { get; }
 
@@ -22,7 +22,7 @@ namespace Assets.Scripts.Roots.Plants
         {
             this.plant = plant;
             Nodes = new List<RootNode>();
-            _gridPartition = new GridPartition<RootNode>(plantRootsCellSize);
+            _gridPartition = new GridPartition<RootNode>(CELL_SIZE);
         }
 
         public void AddNode(RootNode rootNode)
