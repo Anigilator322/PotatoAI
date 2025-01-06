@@ -7,5 +7,8 @@ namespace Assets.Scripts.Bootstrap
     {
         [SerializeField]
         public Plant plantPrefab;
+
+        [SerializeField]
+        public SpriteRenderer soilPrefab;
     }
 }

@@ -144,7 +144,8 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;
 
-            RootNode node = _rootSpawnSystem.SpawnRootNode(growingRoot.Plant.Roots, parent, position, type);
+            RootNode node = _rootSpawnSystem.SpawnRootNode(
+                new RootNode(position, parent, type));
 
             growingRoot.Blueprint.RootPath.RemoveAt(0);
             growingRoot.Blueprint.StartRootNode = node;

@@ -16,4 +16,11 @@ public class ResourcePoint : PositionedObject
 {
     public ResourceType ResourceType;
     public int amount;
+
+    public ResourcePoint(ResourceType resourceType, int amount, Vector2 position)
+    {
+        ResourceType = resourceType;
+        this.amount = amount;
+        Position = position;
+    }
 }

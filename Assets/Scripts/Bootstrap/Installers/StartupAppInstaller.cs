@@ -12,10 +12,14 @@ namespace Assets.Scripts.Bootstrap.Installers
 
         public override void InstallBindings()
         {
+            Container.Bind<RootNodeContactsModel>().AsSingle();
+            Container.Bind<SoilResourcesModel>().AsSingle();
+            Container.Bind<PlantsModel>().AsSingle();
+
+            Container.Bind<SpriteRenderer>().WithId("Soil").FromInstance(prefabs.soilPrefab).AsSingle();
+
             GameSystemsInstaller.Install(Container);
             InputInstaller.Install(Container);
-
-            Container.Bind<PlantsModel>().FromNew().AsSingle();
 
             Container.Bind<PlantRoots.Factory>().AsSingle();
             Container.Bind<Plant.Factory>().AsSingle()

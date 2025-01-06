@@ -45,7 +45,7 @@ namespace Assets.Scripts.Roots.Tools
             }
 
             foreach (var rootNode in allNodes)
-                rootSpawnSystem.SpawnRootNode(plantRoots, rootNode);
+                rootSpawnSystem.SpawnRootNode(rootNode);
         }
     }
 }

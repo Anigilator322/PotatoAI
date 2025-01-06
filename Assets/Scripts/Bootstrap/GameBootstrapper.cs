@@ -7,12 +7,21 @@ namespace Assets.Scripts.Bootstrap
 {
     public class GameBootstrapper : IInitializable
     {
-        [Inject] private Plant.Factory _plantFactory;
-        [Inject] private RootSpawnSystem spawnSystem;
+        [Inject(Id = "Soil")] private SpriteRenderer soil;
+        [Inject] private Plant.Factory plantFactory;
+        [Inject] private RootSpawnSystem rootSpawnSystem;
+        [Inject] private ResourceSpawnSystem resourceSpawnSystem;
+        MonoBehHelper monoBehHelper;
+
         public void Initialize()
         {
-            var plant = _plantFactory.Create(PlayerRootBuilderInput.PLAYER_ID);
-            spawnSystem.SpawnRootNode(plant.Roots, new RootNode(new Vector2(0, 0), null, RootType.Harvester));
+            monoBehHelper = GameObject.FindFirstObjectByType<MonoBehHelper>();
+
+            GameObject.Instantiate(soil);
+            var plant = plantFactory.Create(PlayerRootBuilderInput.PLAYER_ID);
+            rootSpawnSystem.SpawnRootNodeToPlant(plant.Roots, new RootNode(new Vector2(0, 0), null, RootType.Harvester));
+
         }
+
     }
 }

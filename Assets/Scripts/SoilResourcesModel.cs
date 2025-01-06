@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoilResources
+public class SoilResourcesModel
 {
     const int CELL_SIZE = 1;
     public List<ResourcePoint> Resources { get; set; } = new List<ResourcePoint>();

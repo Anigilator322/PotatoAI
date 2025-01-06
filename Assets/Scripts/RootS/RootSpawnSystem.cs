@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Roots.Plants;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Roots
@@ -6,27 +7,35 @@ namespace Assets.Scripts.Roots
     //This system probably should just iterate over all root nodes prepared to spawn
     public class RootSpawnSystem
     {
-        //TODO: How do we establish link between newly added RootNode and plant? 
-        //Why do we think it belongs to this instance of PlantRoots?
+        private readonly RootNodeContactsSystem _rootNodeContactsSystem;
+        private readonly PlantsModel _plantModel;
 
-        public RootNode SpawnRootNode(PlantRoots plantRoots, RootNode parent, Vector2 position, RootType type)
+        public RootSpawnSystem(RootNodeContactsSystem rootNodeContactsSystem,
+            PlantsModel plantModel)
         {
-            RootNode newRootNode = new RootNode(position, parent, type);
-
-            Spawn(plantRoots, newRootNode);
-            return newRootNode;
-        }
-
-        public RootNode SpawnRootNode(PlantRoots plantRoots, RootNode newRootNode)
-        {
-            Spawn(plantRoots, newRootNode);
-            return newRootNode;
+            _plantModel = plantModel;
+            _rootNodeContactsSystem = rootNodeContactsSystem;
         }
 
         private void Spawn(PlantRoots plantRoots, RootNode newRootNode)
         {
-            Debug.Log("Trying to spawn root at position: " + newRootNode.Position);
+            Debug.Log("Trying to spawn root node at position: " + newRootNode.Position);
+
             plantRoots.AddNode(newRootNode);
+            _rootNodeContactsSystem.UpdateContactsByNode(newRootNode);
+        }
+
+        public RootNode SpawnRootNodeToPlant(PlantRoots plantRoots, RootNode newRootNode)
+        {
+            Spawn(plantRoots, newRootNode);
+            return newRootNode;
+        }
+
+        public RootNode SpawnRootNode(RootNode newRootNode)
+        {
+            PlantRoots plantRoots = _plantModel.Plants.Single(p => p.Roots.Nodes.Contains(newRootNode.Parent)).Roots;
+            SpawnRootNodeToPlant(plantRoots, newRootNode);
+            return newRootNode;
         }
     }
 }
