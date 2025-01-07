@@ -1,12 +1,15 @@
+
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using Zenject;
+
+using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
-
+using System;
 
 namespace Assets.Scripts.Roots.View
 {
@@ -19,8 +22,8 @@ namespace Assets.Scripts.Roots.View
 
         public List<RootBlueprint> BlueprintsToDraw { get; set; } = new();
 
-        const float _standardIncrement = 0.02f;
-        const float _blueprintWidth = _standardIncrement * 0.75f;
+        const float _standardIncrement = 0.01f;
+        const float _blueprintWidth = _standardIncrement * 1.75f;
 
         Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
 
@@ -31,7 +34,7 @@ namespace Assets.Scripts.Roots.View
             _drawTickCoroutineCTS = new CancellationTokenSource();
             UniTask.RunOnThreadPool(() => TickCoroutine(_drawTickCoroutineCTS.Token));
         }
-
+    
         private void OnApplicationQuit()
         {
             _drawTickCoroutineCTS.Cancel();
@@ -58,7 +61,7 @@ namespace Assets.Scripts.Roots.View
                 tickFlag = false;
                 EvaluateAllWidths();
 
-                foreach (Plant plant in PlantsModel.Plants)
+                foreach(Plant plant in PlantsModel.Plants)
                 {
                     for (int i = 0; i < plant.transform.childCount; i++)
                     {
@@ -94,17 +97,22 @@ namespace Assets.Scripts.Roots.View
             return rootMesh;
         }
 
+        float zOffset = 0f;
+        float zStep = 0.01f;
         Mesh GenerateRootMesh(PlantRoots plantRoots)
         {
             List<Vector3> vertices = new List<Vector3>();
             List<int> triangles = new List<int>();
             List<Vector2> uvs = new List<Vector2>();
+            zOffset = 0f;
 
             foreach (var rootBase in plantRoots.Nodes)
             {
                 if (rootBase.IsRootBase)
                 {
-                    GenerateBranchMesh(rootBase, null, vertices, triangles, uvs);
+                    var rectangle = new RectangleVetrices();
+                    rectangle.downLeft = rectangle.upLeft = rectangle.downLeft = rectangle.downRight = -1;
+                    GenerateBranchMesh(rootBase, null, vertices, triangles, uvs, rectangle);
                 }
             }
 
@@ -119,64 +127,148 @@ namespace Assets.Scripts.Roots.View
             return Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
         }
 
+        struct RectangleVetrices
+        {
+            //indices of vertexes
+            public int upLeft;
+            public int upRight;
+            public int downLeft;
+            public int downRight;
+        }
+
         void GenerateBranchMesh(
             RootNode node,
             RootNode Parent,
             List<Vector3> vertices,
             List<int> triangles,
-            List<Vector2> uvs)
+            List<Vector2> uvs,
+            RectangleVetrices parentSegmentRectangle)
         {
-            // Fetch node width from rootWidths, default to standardIncrement if not found
-            if (!rootWidths.TryGetValue(node, out float nodeWidth))
-                nodeWidth = _standardIncrement;
+            if(Parent is not null)
+            {
+                var nodeWidth = rootWidths[node];
 
-            // Get Parent position and width from rootWidths
-            Vector2 parentPos = Parent != null ? Parent.Position : node.Position;
+                // Get Parent position
+                Vector2 parentPos = Parent.Position;
 
-            // Generate straight segment vertices
-            Vector2 direction = (node.Position - parentPos).normalized;
-            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+                // Generate straight segment vertices
+                Vector2 direction = node.Position - parentPos;
+                Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+            
+                var normalizedDirection = direction.normalized;
+                var normalizedperpendicular = perpendicular.normalized;
 
-            int baseVertexIndex = vertices.Count;
+                float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
 
-            float crossSectionalArea = Mathf.Pow(nodeWidth, 2) * Mathf.PI;
-            float thinerPartWidth = Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
+                float widerPartWidth = Mathf.Sqrt((crossSectionalArea + _standardIncrement) / Mathf.PI);
 
-            Vector3 v1 = parentPos + perpendicular * nodeWidth / 2;
-            Vector3 v2 = parentPos - perpendicular * nodeWidth / 2;
-            Vector3 v3 = node.Position + perpendicular * thinerPartWidth / 2;
-            Vector3 v4 = node.Position - perpendicular * thinerPartWidth / 2;
+                var thinerPartOffest = perpendicular * ((nodeWidth/ 2) / perpendicular.magnitude);
+            
+                Vector3 v3 = node.Position + thinerPartOffest;
+                Vector3 v4 = node.Position - thinerPartOffest;
 
-            // Add the four vertices
-            vertices.Add(v1);
-            vertices.Add(v2);
-            vertices.Add(v3);
-            vertices.Add(v4);
+                //v1.z = v2.z = v3.z = v4.z = zOffset;
+                //zOffset += zStep;
 
-            // Create triangles for the current segment
-            triangles.Add(baseVertexIndex);
-            triangles.Add(baseVertexIndex + 2);
-            triangles.Add(baseVertexIndex + 1);
-            triangles.Add(baseVertexIndex + 1);
-            triangles.Add(baseVertexIndex + 2);
-            triangles.Add(baseVertexIndex + 3);
+                if (Parent.Childs.Count > 1 || Parent.Parent is null)
+                {
+                    var widerPartOffest = perpendicular * ((widerPartWidth / 2) / perpendicular.magnitude);
+                    Vector3 v1 = parentPos + widerPartOffest;
+                    Vector3 v2 = parentPos - widerPartOffest;
 
-            // Add UVs
-            uvs.Add(new Vector2(0, 0));
-            uvs.Add(new Vector2(1, 0));
-            uvs.Add(new Vector2(0, 1));
-            uvs.Add(new Vector2(1, 1));
+                    parentSegmentRectangle.upRight = vertices.Count;
+                    vertices.Add(v1);
+                    parentSegmentRectangle.upLeft = vertices.Count;
+                    vertices.Add(v2);
+                    uvs.Add(new Vector2(0, 0));
+                    uvs.Add(new Vector2(1, 0));
+                }
+                else
+                {
+                    if(parentSegmentRectangle.upRight == -1)
+                        throw new Exception("lastAddedRectangle is not set");
+                
+                    var angle = Vector2.SignedAngle(direction, parentPos - Parent.Parent.Position);
 
-            // Handle merging for nodes with multiple children
+                    if (Mathf.Abs(angle) < 5)
+                    {
+                        parentSegmentRectangle.upRight = parentSegmentRectangle.downRight;
+                        parentSegmentRectangle.upLeft = parentSegmentRectangle.downLeft;
+                    }
+                    else
+                    {
+                        widerPartWidth = (vertices[parentSegmentRectangle.downLeft]
+                            - vertices[parentSegmentRectangle.downRight])
+                            .magnitude;
+
+                        var widerPartOffest = perpendicular * ((widerPartWidth / 2) / perpendicular.magnitude);
+                        Vector3 v1 = parentPos + widerPartOffest;
+                        Vector3 v2 = parentPos - widerPartOffest;
+
+                        if (angle > 0)
+                        {
+                            var projectedPoint = FindIntersection(v2, v4, 
+                                vertices[parentSegmentRectangle.upLeft], vertices[parentSegmentRectangle.downLeft]);
+
+                            vertices[parentSegmentRectangle.downLeft] = projectedPoint;
+
+                            vertices.Add(v1);
+                            uvs.Add(new Vector2(0, 0));
+
+                            triangles.Add(parentSegmentRectangle.downRight);
+                            triangles.Add(vertices.Count - 1);
+                            triangles.Add(parentSegmentRectangle.downLeft);
+
+                            parentSegmentRectangle.upRight = vertices.Count - 1;
+                            parentSegmentRectangle.upLeft = parentSegmentRectangle.downLeft;
+                        }
+                        else
+                        {
+                            var projectedPoint = FindIntersection(v1, v3, 
+                                vertices[parentSegmentRectangle.upRight], vertices[parentSegmentRectangle.downRight]);
+                        
+                            vertices[parentSegmentRectangle.downRight] = projectedPoint;
+
+                            vertices.Add(v2);
+                            uvs.Add(new Vector2(1, 0));
+
+                            triangles.Add(parentSegmentRectangle.downLeft);
+                            triangles.Add(parentSegmentRectangle.downRight);
+                            triangles.Add(vertices.Count - 1);
+
+                            parentSegmentRectangle.upRight = parentSegmentRectangle.downRight;
+                            parentSegmentRectangle.upLeft = vertices.Count - 1;
+                        }
+                    }
+                }
+
+                parentSegmentRectangle.downRight = vertices.Count;
+                vertices.Add(v3);
+                parentSegmentRectangle.downLeft = vertices.Count;
+                vertices.Add(v4);
+                uvs.Add(new Vector2(0, 1));
+                uvs.Add(new Vector2(1, 1));
+
+                // Create triangles for the current segment
+                triangles.Add(parentSegmentRectangle.upRight);
+                triangles.Add(parentSegmentRectangle.downRight);
+                triangles.Add(parentSegmentRectangle.downLeft);
+
+                triangles.Add(parentSegmentRectangle.upLeft);
+                triangles.Add(parentSegmentRectangle.upRight);
+                triangles.Add(parentSegmentRectangle.downLeft);
+            }
+
             if (node.Childs.Count > 1)
             {
-                GenerateMergeCaps(node, vertices, triangles, uvs);
+                //zOffset += zStep;
+                GenerateMergeCaps(node, vertices, triangles, uvs/*, zOffset*/);
             }
 
             // Process all children nodes recursively
             foreach (var child in node.Childs)
             {
-                GenerateBranchMesh(child, node, vertices, triangles, uvs);
+                GenerateBranchMesh(child, node, vertices, triangles, uvs, parentSegmentRectangle);
             }
         }
 
@@ -186,7 +278,7 @@ namespace Assets.Scripts.Roots.View
             List<int> triangles = new List<int>();
             List<Vector2> uvs = new List<Vector2>();
 
-            foreach (var blueprint in BlueprintsToDraw)
+            foreach(var blueprint in BlueprintsToDraw)
             {
                 for (int i = 0; i < blueprint.RootPath.Count; i++)
                 {
@@ -249,7 +341,9 @@ namespace Assets.Scripts.Roots.View
             if (node.Parent is null)
                 return;
 
-            Vector2 direction = (node.Parent.Position - node.Position).normalized;
+            Vector2 direction = 
+                (node.Parent.Position - mergeCenter)
+                .normalized;
 
             int startIndex = vertices.Count;
 
@@ -262,6 +356,7 @@ namespace Assets.Scripts.Roots.View
                 Vector2 offset = new Vector2(
                     Mathf.Cos(angle) * mergeWidth / 2,
                     Mathf.Sin(angle) * mergeWidth / 2);
+
 
                 vertices.Add(mergeCenter + offset);
                 uvs.Add(new Vector2(i / (float)segments, 1)); // Optional UV mapping
@@ -295,19 +390,40 @@ namespace Assets.Scripts.Roots.View
         {
             float nodeArea = 0f;
 
-            if (node.Childs is not null)
+            if(node.Childs is not null)
             {
                 foreach (var child in node.Childs)
                 {
                     nodeArea += EvaluateNodeWidth(child);
+                    nodeArea += _standardIncrement;
                 }
             }
-
-            nodeArea += _standardIncrement;
 
             rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
 
             return nodeArea;
+        }
+
+        public static Vector2 FindIntersection(Vector2 start_1, Vector2 end_1, Vector2 start_2, Vector2 end_2)
+        {
+            double A1 = end_1.y - start_1.y;
+            double B1 = start_1.x - end_1.x;
+            double C1 = start_1.x * end_1.y - end_1.x * start_1.y;
+
+            double A2 = end_2.y - start_2.y;
+            double B2 = start_2.x - end_2.x;
+            double C2 = start_2.x * end_2.y - end_2.x * start_2.y;
+
+            //Gauss solution
+            double coef = -(A2 / A1);
+
+            B2 += B1 * coef;
+            C2 += C1 * coef;
+
+            double y = C2 / B2;
+            double x = (C1 - B1 * y) / A1;
+
+            return new Vector2((float)x, (float)y);
         }
     }
 }
