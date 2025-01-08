@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Prefabs_1
   m_EditorClassIdentifier: 
   plantPrefab: {fileID: 2676730505666247869, guid: 72814e45bf3db3047a2ad2427dd3771d, type: 3}
-  soilPrefab: {fileID: 2523466737781143911, guid: 060cf054a12820141a66e0fe7e068ed8, type: 3}
+  soilPrefab: {fileID: 42500864760729487, guid: 060cf054a12820141a66e0fe7e068ed8, type: 3}

@@ -8,19 +8,21 @@ using UnityEngine;
 
 public class RootNodeContactsSystem
 {
-    public const float RESOURCE_CONTACT_DISTANCE = 0.5f;
+    private readonly float _contactDistance;
 
     private readonly PlantsModel _plantsModel;
-    private readonly SoilResourcesModel _soilResources;
+    private readonly SoilModel _soilResources;
     private readonly RootNodeContactsModel _rootNodeContactsModel;
 
-    public RootNodeContactsSystem(SoilResourcesModel soilResources,
+    public RootNodeContactsSystem(SoilModel soilResources,
         RootNodeContactsModel rootNodeContactsModel,
-        PlantsModel plantsModel)
+        PlantsModel plantsModel,
+        float contactDistance)
     {
         this._soilResources = soilResources;
         this._rootNodeContactsModel = rootNodeContactsModel;
         _plantsModel = plantsModel;
+        _contactDistance = contactDistance;
     }
 
     public void UpdateContactsByResourcePoint(ResourcePoint resourcePoint)
@@ -28,7 +30,7 @@ public class RootNodeContactsSystem
         foreach (PlantRoots plantRoots in _plantsModel.Plants.Select(p => p.Roots))
         {
             List<RootNode> rootNodesFromRadius =
-                plantRoots.GetNodesFromCircle(RESOURCE_CONTACT_DISTANCE, resourcePoint.Position);
+                plantRoots.GetNodesFromCircle(_contactDistance, resourcePoint.Position);
 
             foreach (RootNode rootNode in rootNodesFromRadius) 
             {
@@ -40,7 +42,7 @@ public class RootNodeContactsSystem
     public void UpdateContactsByNode(RootNode node, List<Plant> contactedPlants = null)
     {
         _rootNodeContactsModel.ResourcePointsContacts[node] = 
-            _soilResources.GetResourcesFromCircle(RESOURCE_CONTACT_DISTANCE, node.Position);
+            _soilResources.GetResourcesFromCircle(_contactDistance, node.Position);
     }
 
     public void RemoveAllContacts(RootNode node)

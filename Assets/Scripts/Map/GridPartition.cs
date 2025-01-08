@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 using Zenject;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T> where T : PositionedObject
+    public class Cell<T> where T : IPositionedObject
     {
         private List<T> _positionedObjects;
         public Cell()
@@ -31,7 +31,7 @@ namespace Assets.Scripts.Map
     }
 
     public class GridPartition<T> 
-        where T : PositionedObject
+        where T : IPositionedObject
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;

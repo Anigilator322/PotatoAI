@@ -11,6 +11,12 @@ public class MonoBehHelper : MonoBehaviour
 {
     MeshFilter meshFilter;
     [Inject] PlantsModel PlantsModel;
+
+    private void Awake()
+    {
+        Application.targetFrameRate = 144;
+    }
+
     private void OnDrawGizmos()
     {
         if (PlantsModel == null)

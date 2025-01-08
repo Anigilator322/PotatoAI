@@ -6,10 +6,10 @@ namespace Assets.Scripts.Tools
 {
     public class Geometry
     {
-        public List<PositionedObject> GetObjectsInRadius(Vector2 center, float radius, List<PositionedObject> objects)
+        public List<IPositionedObject> GetObjectsInRadius(Vector2 center, float radius, List<IPositionedObject> objects)
         {
-            List<PositionedObject> objectsInRadius = new List<PositionedObject>();
-            foreach (PositionedObject obj in objects)
+            List<IPositionedObject> objectsInRadius = new List<IPositionedObject>();
+            foreach (IPositionedObject obj in objects)
             {
                 if(IsPointInCircle(center,radius,obj.Position))
                 {

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Assets.Scripts.Roots
 {
-    public class RootNode : PositionedObject
+    public class RootNode : IPositionedObject
     {
         public RootType Type { get; }
 
         public bool IsRootBase => Parent is null;
         public RootNode Parent { get; }
         public List<RootNode> Childs { get; } = new List<RootNode>();
+        public Vector2 Position { get; set; }
 
         public RootNode(Vector2 position, RootNode parent, RootType type)
         {
