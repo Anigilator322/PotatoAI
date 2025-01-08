@@ -48,6 +48,6 @@ public class RootNodeContactsSystem
     public void RemoveAllContacts(RootNode node)
     {
         _rootNodeContactsModel.ResourcePointsContacts.Remove(node);
-        _rootNodeContactsModel.RootNodesContacts.Remove(node);
+        _rootNodeContactsModel.RootNodeContacts.Remove(node);
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -12,6 +13,7 @@ public class ResourceDrawSystem : ITickable
 
     private readonly SoilModel _soil;
     private readonly Material _soilResourcesMaterial;
+    private readonly RootNodeContactsModel _rootNodeContactsModel;
 
     private readonly Vector2 _boundsMinV2, _boundsDelta;
     private Texture2D _circleCoordinatesTexture;
@@ -20,13 +22,14 @@ public class ResourceDrawSystem : ITickable
     public ResourceDrawSystem(SoilModel soil,
         float resoursePointRadius,
         Dictionary<ResourceType, Color> resourceColors,
-        float maxResourcesThreshold)
+        float maxResourcesThreshold,
+        RootNodeContactsModel rootNodeContactsModel)
     {
         _soil = soil;
         _soilResourcesMaterial = _soil.Sprite.material;
 
         PointRadius = resoursePointRadius;
-        
+
         ResourceTypeColors = resourceColors;
         MaxResourcesThreshold = maxResourcesThreshold;
 
@@ -42,13 +45,19 @@ public class ResourceDrawSystem : ITickable
 
         _soilResourcesMaterial.SetTexture("_CoordinatesData", _circleCoordinatesTexture);
         _soilResourcesMaterial.SetTexture("_ColorData", _circleColorTexture);
+        _rootNodeContactsModel = rootNodeContactsModel;
     }
 
     void ITickable.Tick()
     {
         var circleCount = _soil.Resources.Count;
 
-        for(int i = 0; i < circleCount; i++)
+        HashSet<ResourcePoint> connectedResources = _rootNodeContactsModel.ResourcePointsContacts.Values
+            .SelectMany(l => l)
+            .Distinct()
+            .ToHashSet();
+
+        for (int i = 0; i < circleCount; i++)
         {
             var resource = _soil.Resources[i];
             Color pointColor = ResourceTypeColors[resource.ResourceType];
@@ -61,7 +70,7 @@ public class ResourceDrawSystem : ITickable
                 new Color(localVector.x,
                     localVector.y,
                     PointRadius,
-                    pointColor.a));
+                    connectedResources.Contains(resource) ? 1f : 0f));
 
             _circleColorTexture.SetPixel(i, 0, pointColor);
         }

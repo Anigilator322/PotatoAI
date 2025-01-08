@@ -358,9 +358,9 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     },
-    "m_SourceType": 1,
+    "m_SourceType": 0,
     "m_FunctionName": "CircleShaderGraph",
-    "m_FunctionSource": "",
+    "m_FunctionSource": "1e69038cecfaf154d92209709cf2c420",
     "m_FunctionBody": "\tfloat j = 0;\n\t\n\t// Iterate over circles\n    for (int i = 0; i < circleCount; i++)\n    {\n        float t = (i + 0.5) / dataTexturesWidth; // UV X for current circle\n       \n\t// Sample circle coordinates from the texture\n\tfloat4 circle = coordinatesData.Sample(circleDataSampler, float2(t, 0)); \n\n        float2 circlePos = circle.xy;  // Circle center (normalized)\n        float radius = circle.z;      // Circle radius\n\n        // Sample circle color from the texture\n        float4 circleColor = colorData.Sample(circleDataSampler, float2(t, 0)); \n\n        // Calculate distance between pixel and circle center\n        //float dist = distance(uv, circlePos);\n\t\n\tfloat2 diff = uv - circlePos;\n\tdiff.x *= uvScale.x;\t\n\tdiff.y *= uvScale.y;\t\n\t\n\tfloat dist = length(diff);\n\n        // Add circle contribution if within radius\n        if (dist < radius)\n        {\n\tresult += circleColor;\n\tj ++;\n        }\n    }\n\tresult /= j;\t\n\t\n\t\n\n    result.a = saturate(sqrt(j)/12);"
 }
 

@@ -31,6 +31,9 @@ namespace Assets.Scripts.Bootstrap.Installers
                 .AsTransient();
 
             // ======= Systems =======
+            Container.Bind<RootNodeContactsSystem>().AsSingle()
+                .WithArguments(resourcePointsConfig.size);
+
             Container.BindInterfacesAndSelfTo<ResourceDrawSystem>()
                 .FromMethod(x =>
                 {
@@ -46,12 +49,11 @@ namespace Assets.Scripts.Bootstrap.Installers
                         Container.Resolve<SoilModel>(),
                         resourcePointsConfig.size,
                         colorsDict,
-                        resourcePointsConfig.maximumResourcesInPoint);
+                        resourcePointsConfig.maximumResourcesInPoint,
+                        Container.Resolve<RootNodeContactsModel>());
                 })
                 .AsSingle();
 
-            Container.Bind<RootNodeContactsSystem>().AsSingle()
-                .WithArguments(resourcePointsConfig.size);
 
             Container.BindInstance(
                 new ResourcePointSpawnSystem(
