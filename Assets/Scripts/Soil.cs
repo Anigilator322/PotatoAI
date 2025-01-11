@@ -24,6 +24,14 @@ public class Soil : MonoBehaviour
         _gridPartition.Insert(resourcePoint);
     }
 
+    public void RemoveResource(ResourcePoint resourcePoint)
+    {
+        resourcePoint.Dismiss();
+        Destroy(resourcePoint.Transform.gameObject);
+        Resources.Remove(resourcePoint);
+        _gridPartition.Remove(resourcePoint);
+    }
+
     public List<ResourcePoint> GetResourcesFromCircle(float circleRadius, Vector2 circleCenter)
     {
         return _gridPartition.Query(circleRadius, circleCenter);

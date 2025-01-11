@@ -9,6 +9,8 @@ namespace Assets.Scripts.Roots.Plants
 
         public PlantRoots Roots { get; private set; }
 
+        public PlantResources Resources = new PlantResources();
+
         public class Factory : IFactory<Plant>
         {
             private readonly PlantRoots.Factory _rootsFactory;

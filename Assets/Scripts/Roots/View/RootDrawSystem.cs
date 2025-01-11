@@ -56,11 +56,14 @@ namespace Assets.Scripts.Roots.View
             }
         }
     
-        private void OnApplicationQuit()
+        ~RootDrawSystem()
         {
-            _drawTickCoroutineCTS.Cancel();
-            _drawTickCoroutineCTS.Dispose();
-            _drawTickCoroutineCTS = null;
+            if(_drawTickCoroutineCTS is not null)
+            {
+                _drawTickCoroutineCTS.Cancel();
+                _drawTickCoroutineCTS.Dispose();
+                _drawTickCoroutineCTS = null;
+            }
         }
 
         public async UniTaskVoid TickCoroutine(CancellationToken cancellationToken)

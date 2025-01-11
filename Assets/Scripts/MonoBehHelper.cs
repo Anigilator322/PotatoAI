@@ -11,17 +11,6 @@ public class MonoBehHelper : MonoBehaviour
 {
     MeshFilter meshFilter;
     [Inject] PlantsModel PlantsModel;
-    
-    [SerializeField]
-    GameObject selectionPoint;
-
-    public void SelectRootNodes()
-    {
-        var plantRoots = PlantsModel.Plants.First().Roots;
-
-        //foreach(var node in plantRoots.GetNodesFromCircle(selectionPoint.transform.position, 0.5f))
-        //selectionPoint.transform.position = _plant.transform.position;
-    }
 
     private void Awake()
     {

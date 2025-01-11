@@ -29,6 +29,11 @@ namespace Assets.Scripts.Map
             _positionedObjects.Add(point);
         }
 
+        public void RemoveObject(T point)
+        {
+            _positionedObjects.Remove(point);
+        }
+
         public List<T> GetObjects()
         {
             return _positionedObjects;
@@ -66,6 +71,15 @@ namespace Assets.Scripts.Map
             {
                 _grid[cellCoordinates].AddObject(positionedObject);
             }
+        }
+
+        public void Remove(T positionedObject)
+        {
+            Vector2Int cellCoordinates = GetCellCoordinates((Vector2)positionedObject.Transform.position);
+            
+            _grid[cellCoordinates].RemoveObject(positionedObject);
+            if (_grid[cellCoordinates].GetObjects().Count == 0)
+                _grid.Remove(cellCoordinates);
         }
 
         private List<T> GetPointsInCell(Vector2Int cellCoordinates)
