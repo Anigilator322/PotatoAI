@@ -1,3 +1,4 @@
+using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.UX;
 using UnityEngine;
@@ -12,8 +13,8 @@ namespace Assets.Scripts.Bootstrap.Installers
 
         public override void InstallBindings()
         {
-            GameSystemsInstaller.Install(Container);
             InputInstaller.Install(Container);
+            GameSystemsInstaller.Install(Container);
 
             Container.Bind<PlantsModel>().FromNew().AsSingle();
 

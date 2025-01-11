@@ -1,3 +1,4 @@
+using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
 using Cysharp.Threading.Tasks;
 using System;
@@ -5,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.Roots.RootsBuilding.Growing
 {
@@ -23,13 +25,14 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         private RootSpawnSystem _rootSpawnSystem;
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
-
+        private FieldOfView _fieldOfView;
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
-        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel)
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel, FieldOfView fov)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
+            _fieldOfView = fov;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -148,6 +151,9 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
             growingRoot.Blueprint.RootPath.RemoveAt(0);
             growingRoot.Blueprint.RootNode = node;
+
+            //Calc FOV
+            _fieldOfView.ComputeFov(position);
 
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {

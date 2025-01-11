@@ -1,15 +1,18 @@
 ﻿using Assets.Scripts.Map;
 using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Plants;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject.ReflectionBaking.Mono.Cecil;
 
 namespace Assets.Scripts.FogOfWar
 {
     public class VisibilitySystem
     {
-        private GridPartition<RootNode> _gridPartition;
+        private PlantsModel _plantsModel;
         private int _cellSize;
 
+        private Dictionary<Plant, List<PositionedObject>> _visibleByPlantsPoints = new Dictionary<Plant, List<PositionedObject>>();
         public VisibilitySystem(int cellSize)
         {
             _cellSize = cellSize;
@@ -40,11 +43,11 @@ namespace Assets.Scripts.FogOfWar
             return distanceToCapsule <= radius;
         }
 
-
+        //Search cells in capsule
+        //Return List<Vector2Int> with all cells in capsule
+        //TODO: return List<PositionedObject> points that are in capsule
         private List<Vector2Int> CapsuleCast(Vector2 start, Vector2 end, float radius)
         {
-            //Search cells in capsule
-            //Return List<Vector2Int> with all cells in capsule
 
             List<Vector2Int> cells = new List<Vector2Int>();
 
@@ -75,22 +78,44 @@ namespace Assets.Scripts.FogOfWar
             return cells;
         }
 
-        public void UpdateVisibilityForRootNode(RootNode revealer)
+        public void UpdateVisibilityForRootNode(Plant plantOwner, RootNode revealer)
         {
+            if (revealer.Parent is null)
+                return;
             var edge = revealer.Position - revealer.Parent.Position;
             int revealRadius = ((int)revealer.Type);//Make configuration for revealRadius of different rootTypes
             float length = edge.magnitude;
             float width = revealRadius * 2;
-            //var area = CapsuleCast()
-            // Make BFS from revealer to all cells in capsule by quadrants. From 0 to 2PI
-            // Make BFS from revealer.Parent to all cells in capsule by quadrants. From 0 to 2PI
-            // Mark all gained cells as visible
-            // Notify Cells about visibility change
+            List<Vector2Int> area = CapsuleCast(revealer.Parent.Position, revealer.Position, width);
+            CheckRoots(plantOwner, area);
+            CheckResources(plantOwner, area);
         }
 
-        public void UpdateVisibilityForResourcePoint()
+        private void CheckResources(Plant plantOwner, List<Vector2Int> area)
         {
+            //Implement checking resources in capsule
+        }
 
+        private void CheckRoots(Plant plantOwner, List<Vector2Int> area)
+        {
+            foreach (var cell in area)
+            {
+                foreach (var plant in _plantsModel.Plants) // foreach exist plants we check which roots are in capsule now
+                {
+                    if (!_visibleByPlantsPoints.ContainsKey(plant))
+                        _visibleByPlantsPoints.Add(plant, new List<PositionedObject>());
+                    if (plant == plantOwner) // Skip nodes of the plant that is revealing
+                        continue;
+                    foreach (var node in plant.Roots.GetNodesFromCellDirectly(cell))
+                    {
+                        if (!_visibleByPlantsPoints[plant].Contains(node)) // If node is already visible, do not make recursive call again
+                        {
+                            _visibleByPlantsPoints[plant].Add(node);
+                            UpdateVisibilityForRootNode(plant, node); // Reactive Update visibility for node that is visible now, to recalculate their own visibilities
+                        }
+                    }
+                }
+            }
         }
     }
 }

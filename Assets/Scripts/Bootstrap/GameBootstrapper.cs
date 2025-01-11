@@ -9,6 +9,7 @@ namespace Assets.Scripts.Bootstrap
     {
         [Inject] private Plant.Factory _plantFactory;
         [Inject] private RootSpawnSystem spawnSystem;
+
         public void Initialize()
         {
             var plant = _plantFactory.Create(PlayerRootBuilderInput.PLAYER_ID);

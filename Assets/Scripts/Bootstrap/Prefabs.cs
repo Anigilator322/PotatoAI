@@ -1,3 +1,4 @@
+using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
 using UnityEngine;
 namespace Assets.Scripts.Bootstrap
@@ -5,7 +6,8 @@ namespace Assets.Scripts.Bootstrap
     [CreateAssetMenu(fileName = "Prefabs", menuName = "PrefabsReferenceMap", order = 0)]
     public class Prefabs : ScriptableObject
     {
-        [SerializeField]
-        public Plant plantPrefab;
+
+        [SerializeField] public Plant plantPrefab;
+        [SerializeField] public GizmosView gizmosViewPrefab;
     }
 }

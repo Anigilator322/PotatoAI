@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Prefabs_1
   m_EditorClassIdentifier: 
   plantPrefab: {fileID: 2676730505666247869, guid: 72814e45bf3db3047a2ad2427dd3771d, type: 3}
+  gizmosViewPrefab: {fileID: 3945057390958451286, guid: f31013a1a6704e34dbadf04fbc924ec0, type: 3}
