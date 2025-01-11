@@ -10,6 +10,11 @@ namespace Assets.Scripts.FogOfWar
         private GridPartition<RootNode> _gridPartition;
         private int _cellSize;
 
+        public VisibilitySystem(int cellSize)
+        {
+            _cellSize = cellSize;
+        }
+
         private Vector2Int GetCellCoordinates(Vector2 worldPosition)
         {
             int x = Mathf.FloorToInt(worldPosition.x / _cellSize);
@@ -17,7 +22,7 @@ namespace Assets.Scripts.FogOfWar
             return new Vector2Int(x, y);
         }
 
-        private static bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
+        private bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
         {
             // Найти ближайшую точку от центра клетки на отрезке
             Vector2 segmentDir = end - start;

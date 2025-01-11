@@ -44,7 +44,7 @@ namespace Assets.Scripts.Map
                 _grid[cellCoordinates].AddIndex(positionedObject);
             }
         }
-        private List<T> GetPointsInCell(Vector2Int cellCoordinates)
+        public List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
             {

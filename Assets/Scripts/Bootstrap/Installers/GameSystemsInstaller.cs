@@ -1,3 +1,4 @@
+using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Metabolics;
 using Assets.Scripts.Roots.RootsBuilding;
@@ -17,6 +18,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootGrowthSystem>().FromNew().AsSingle();
             Container.Bind<MetabolicSystem>().FromNew().AsSingle();
             Container.BindInterfacesAndSelfTo<RootDrawSystem>().FromNew().AsSingle();
+            Container.Bind<FieldOfView>().FromNew().AsSingle().NonLazy();
         }
     }
 }
