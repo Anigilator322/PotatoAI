@@ -1,6 +1,5 @@
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
-using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +15,6 @@ public class MonoBehHelper : MonoBehaviour
     [SerializeField]
     GameObject selectionPoint;
 
-    [Button]
     public void SelectRootNodes()
     {
         var plantRoots = PlantsModel.Plants.First().Roots;
