@@ -40,7 +40,7 @@ namespace Assets.Scripts.Roots.Plants
 
         public List<RootNode> GetNodesFromCellDirectly(Vector2Int cellPos)
         {
-            return _gridPartition.GetPointsInCell(cellPos);
+            return _gridPartition.QueryDirectlyCell(cellPos);
         }
 
         public class Factory : IFactory<Plant, PlantRoots>

@@ -11,7 +11,7 @@ namespace Assets.Scripts.Map
 {
 
     public class GridPartition<T> : IObjectsQuery<T>
-        where T : PositionedObject
+        where T : IPositionedObject
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
@@ -43,7 +43,7 @@ namespace Assets.Scripts.Map
             }
         }
         
-        public List<T> GetPointsInCell(Vector2Int cellCoordinates)
+        private List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
             {
@@ -68,28 +68,24 @@ namespace Assets.Scripts.Map
             return false;
         }
 
-        public List<T> QueryDirectly(Vector2 worldPosition)
+        public List<T> QueryDirectlyCell(Vector2Int cellCoordinates)
         {
-            Vector2Int cellCoordinates = GetCellCoordinates(worldPosition);
             return GetPointsInCell(cellCoordinates);
         }
 
-        public List<T> QueryByCircle(float radius, Vector2 center, bool strictSelection = true)
+        public List<T> QueryByCircle(float radius, Vector2 worldPosCenter, bool strictSelection = true)
         {
-            // ��������� �������� ����� ��� ��������
             Vector2Int minCell = GetCellCoordinates(new Vector2(worldPosCenter.x - radius, worldPosCenter.y - radius));
             Vector2Int maxCell = GetCellCoordinates(new Vector2(worldPosCenter.x + radius, worldPosCenter.y + radius));
 
             List<T> positionedObjects = new List<T>();
 
-            // ���������� ��� ������ � ���� ���������
             for (int x = minCell.x; x <= maxCell.x; x++)
             {
                 for (int y = minCell.y; y <= maxCell.y; y++)
                 {
                     Vector2Int cellCoordinates = new Vector2Int(x, y);
 
-                    // ���� ������ ����������
                     if (_grid.ContainsKey(cellCoordinates))
                     {
                         if (IsAnyCornerInRadius(cellCoordinates, worldPosCenter, radius))
@@ -116,5 +112,6 @@ namespace Assets.Scripts.Map
         {
             return _cellSize;
         }
+
     }
 }

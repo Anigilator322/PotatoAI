@@ -5,15 +5,14 @@ using Assets.Scripts.Roots.Plants;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
 
 namespace Assets.Scripts.FogOfWar
 {
     public class FieldOfView
     {
         private int _cellSize;
-        public List<PositionedObject> _visiblePoints { private set; get; }
-        public List<PositionedObject> BlockingPoints { private set; get; }
+        public List<IPositionedObject> _visiblePoints { private set; get; }
+        public List<IPositionedObject> BlockingPoints { private set; get; }
         private PlantRoots _plantRoots;
         private GridPartition<ObstaclePoint> _gridPartitionForObstaclePoint;
         private PlantsModel _model;
@@ -22,32 +21,7 @@ namespace Assets.Scripts.FogOfWar
         {
             _model = model;
             _cellSize = 1;
-            _visiblePoints = new List<PositionedObject>();
-            InitTestObstacles();
-            
-        }
-        //Only for testing purposes
-        private void InitTestObstacles()
-        {
-            _gridPartitionForObstaclePoint = new GridPartition<ObstaclePoint>(_cellSize);
-            BlockingPoints = new List<PositionedObject>();
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(0, 4)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(1, 4)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(2, 4)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(3, 4)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(2.34f, 4.5f)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(7.23f, 4.5f)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(3.7f, 4.13f)));
-            BlockingPoints.Add(new ObstaclePoint(new Vector2(0.91f, 4.1f)));
-
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(0, 4)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(1, 4)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(2, 4)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(3, 4)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(2.34f, 4.5f)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(7.23f, 4.5f)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(3.7f, 4.13f)));
-            _gridPartitionForObstaclePoint.Insert(new ObstaclePoint(new Vector2(0.91f, 4.1f)));
+            _visiblePoints = new List<IPositionedObject>();            
         }
 
         public void ComputeFov(Vector2 originPosition)
@@ -72,7 +46,7 @@ namespace Assets.Scripts.FogOfWar
 
         private bool IsBlocking(Vector2Int position)
         {
-            var points = _gridPartitionForObstaclePoint.GetPointsInCell(position);
+            var points = _gridPartitionForObstaclePoint.QueryDirectlyCell(position);
             if(points.Count > 0)
             {
                 return true;
@@ -84,7 +58,7 @@ namespace Assets.Scripts.FogOfWar
         private void MarkVisible(Vector2Int position)
         {
             List<RootNode> rootPoints = _plantRoots.GetNodesFromCellDirectly(position);
-            List<ObstaclePoint> obstaclePoints = _gridPartitionForObstaclePoint.GetPointsInCell(position);
+            List<ObstaclePoint> obstaclePoints = _gridPartitionForObstaclePoint.QueryDirectlyCell(position);
             _visiblePoints.AddRange(rootPoints);
             _visiblePoints.AddRange(obstaclePoints);
         }

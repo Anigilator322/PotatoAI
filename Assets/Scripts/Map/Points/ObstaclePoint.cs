@@ -2,11 +2,8 @@
 
 namespace Assets.Scripts.Map.Points
 {
-    public class ObstaclePoint : PositionedObject
+    public class ObstaclePoint : IPositionedObject
     {
-        public ObstaclePoint(Vector2 position)
-        {
-            Position = position;
-        }
+        public Transform Transform { get; set; }
     }
 }

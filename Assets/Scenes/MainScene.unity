@@ -271,7 +271,6 @@ GameObject:
   - component: {fileID: 1574179252}
   - component: {fileID: 1574179251}
   - component: {fileID: 1574179254}
-  - component: {fileID: 1574179255}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -292,7 +291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generalPrefabs: {fileID: 11400000, guid: 4fe693ba07e4b134d99bc95ac920624c, type: 2}
-  resourcePointsConfig: {fileID: 11400000, guid: 8167f8dbffc51704a87c4193390eb89b, type: 2}
+  resourcePointsConfig: {fileID: 11400000, guid: 1c2c8dd639abb8044956e197fb42b244, type: 2}
 --- !u!114 &1574179252
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,21 +351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef29dd3fa62e1842a32107baa9371c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1574179255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574179250}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ee49297d45b00446b0a2a3661101fc7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  circleMaterial: {fileID: 2100000, guid: 715d2e21c584acb49976cab7bfd0e9f2, type: 2}
-  circleCount: 50
-  intensity: 0.25
+  selectionPoint: {fileID: 0}
 --- !u!1 &1867925664
 GameObject:
   m_ObjectHideFlags: 0

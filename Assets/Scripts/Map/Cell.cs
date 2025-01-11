@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T> where T : PositionedObject
+    public class Cell<T> where T : IPositionedObject
     {
         private List<T> _positionedObjects;
         public Cell()
@@ -13,11 +13,11 @@ namespace Assets.Scripts.Map
             _positionedObjects = new List<T>();
             _positionedObjects.Add(point);
         }
-        public void AddIndex(T point)
+        public void AddObject(T point)
         {
             _positionedObjects.Add(point);
         }
-        public List<T> GetIndexes()
+        public List<T> GetObjects()
         {
             return _positionedObjects;
         }

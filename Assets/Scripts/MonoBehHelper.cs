@@ -1,3 +1,4 @@
+using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using System.Collections;
@@ -11,9 +12,7 @@ public class MonoBehHelper : MonoBehaviour
 {
     MeshFilter meshFilter;
     [Inject] PlantsModel PlantsModel;
-    
-    [SerializeField]
-    GameObject selectionPoint;
+    [Inject] VisibilitySystem VisibilitySystem;
 
     public void SelectRootNodes()
     {
@@ -43,7 +42,16 @@ public class MonoBehHelper : MonoBehaviour
             }
         }
 
-        if(meshFilter == null)
+        foreach(var plantAndPoints in VisibilitySystem._visibleByPlantsPoints)
+        {
+            Gizmos.color = Color.blue;
+            foreach (var point in plantAndPoints.Value)
+            {
+                Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
+            }
+        }
+
+        if (meshFilter == null)
         {
             meshFilter = PlantsModel.Plants.First().GetComponentInChildren<MeshFilter>();
         }

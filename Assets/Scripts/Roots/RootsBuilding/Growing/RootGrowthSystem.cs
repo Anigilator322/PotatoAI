@@ -1,3 +1,4 @@
+using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
 using Cysharp.Threading.Tasks;
 using System;
@@ -22,17 +23,19 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
         private SynchronizationContext _mainThreadContext;
+        private VisibilitySystem _visibilitySystem;
 
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
-        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel)
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel, VisibilitySystem visibilitySystem)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
             _mainThreadContext = System.Threading.SynchronizationContext.Current;
+            _visibilitySystem = visibilitySystem;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -152,6 +155,9 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
             growingRoot.Blueprint.RootPath.RemoveAt(0);
             growingRoot.Blueprint.StartRootNode = node;
+
+            //For visibility system
+            _visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);
 
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {

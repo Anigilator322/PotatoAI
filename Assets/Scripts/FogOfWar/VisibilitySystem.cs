@@ -10,12 +10,16 @@ namespace Assets.Scripts.FogOfWar
     public class VisibilitySystem
     {
         private PlantsModel _plantsModel;
+        private Soil _soilResources;
+
         private int _cellSize;
 
-        private Dictionary<Plant, List<PositionedObject>> _visibleByPlantsPoints = new Dictionary<Plant, List<PositionedObject>>();
-        public VisibilitySystem(int cellSize)
+        public Dictionary<Plant, List<IPositionedObject>> _visibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
+        public VisibilitySystem(Soil soil, PlantsModel model)
         {
-            _cellSize = cellSize;
+            _soilResources = soil;
+            _plantsModel = model;
+            _cellSize = 1;
         }
 
         private Vector2Int GetCellCoordinates(Vector2 worldPosition)
@@ -82,18 +86,32 @@ namespace Assets.Scripts.FogOfWar
         {
             if (revealer.Parent is null)
                 return;
-            var edge = revealer.Position - revealer.Parent.Position;
-            int revealRadius = ((int)revealer.Type);//Make configuration for revealRadius of different rootTypes
+            var edge = revealer.Transform.position - revealer.Parent.Transform.position;
+            int revealRadius = ((int)revealer.Type + 2);//Make configuration for revealRadius of different rootTypes
             float length = edge.magnitude;
             float width = revealRadius * 2;
-            List<Vector2Int> area = CapsuleCast(revealer.Parent.Position, revealer.Position, width);
+            List<Vector2Int> area = CapsuleCast(revealer.Parent.Transform.position, revealer.Transform.position, width);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
         }
 
         private void CheckResources(Plant plantOwner, List<Vector2Int> area)
         {
-            //Implement checking resources in capsule
+            foreach (var cell in area)
+            {
+                
+                if (!_visibleByPlantsPoints.ContainsKey(plantOwner))
+                    _visibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
+
+                foreach (var resource in _soilResources.GetResourcesFromCellDirectly(cell))
+                {
+                    if (!_visibleByPlantsPoints[plantOwner].Contains(resource))
+                    {
+                        _visibleByPlantsPoints[plantOwner].Add(resource);
+                    }
+                }
+                
+            }
         }
 
         private void CheckRoots(Plant plantOwner, List<Vector2Int> area)
@@ -103,7 +121,7 @@ namespace Assets.Scripts.FogOfWar
                 foreach (var plant in _plantsModel.Plants) // foreach exist plants we check which roots are in capsule now
                 {
                     if (!_visibleByPlantsPoints.ContainsKey(plant))
-                        _visibleByPlantsPoints.Add(plant, new List<PositionedObject>());
+                        _visibleByPlantsPoints.Add(plant, new List<IPositionedObject>());
                     if (plant == plantOwner) // Skip nodes of the plant that is revealing
                         continue;
                     foreach (var node in plant.Roots.GetNodesFromCellDirectly(cell))

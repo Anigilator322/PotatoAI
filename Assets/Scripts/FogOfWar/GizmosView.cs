@@ -14,13 +14,13 @@ namespace Assets.Scripts.FogOfWar
             Gizmos.color = Color.green;
             foreach(var obj in fov._visiblePoints)
             {
-                Gizmos.DrawSphere(obj.Position, 0.2f);
+                Gizmos.DrawSphere(obj.Transform.position, 0.2f);
             }
 
             foreach(var obs in fov.BlockingPoints)
             {
                 Gizmos.color = Color.black;
-                Gizmos.DrawSphere(obs.Position, 0.1f);
+                Gizmos.DrawSphere(obs.Transform.position, 0.1f);
             }
         }
     }
