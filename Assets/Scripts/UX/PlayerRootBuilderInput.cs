@@ -14,6 +14,7 @@ namespace Assets.Scripts.UX
 {
     public class PlayerRootBuilderInput : IInitializable, ITickable
     {
+        // This class is a total mess of player UX logic. It should be completely refactored.
         public const string PLAYER_ID = "player_1";
 
         [SerializeField] private float _clickedNodeSearchRadius = 2f;
@@ -43,16 +44,16 @@ namespace Assets.Scripts.UX
         }
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
-        private RootBlueprint _currentBlueprint;
+        private ScaffoldedRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 
-        private RootBlueprint currentBlueprint
+        private ScaffoldedRootBlueprint blueprintScaffold
         {
             get => _currentBlueprint;
             set 
             {
                 _currentBlueprint = value;
-                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint };
+                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint.blueprint };
             }
         }
 
@@ -82,8 +83,8 @@ namespace Assets.Scripts.UX
         {
             if (!_isDragging)
                 return;
-            Debug.Log("Drawing trajectory");
-            Debug.Log("Mouse position: " + GetMousePosition());
+            //Debug.Log("Drawing trajectory");
+            //Debug.Log("Mouse position: " + GetMousePosition());
             Vector2 mousePos = GetMousePosition();
             DrawTrajectory(mousePos);
         }
@@ -93,20 +94,20 @@ namespace Assets.Scripts.UX
             List<RootNode> queiriedNodes = PlayersPlantRoots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
-            currentBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            blueprintScaffold = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            currentBlueprint = _rootBlueprintingSystem.Update(currentBlueprint, mousePos);
+            blueprintScaffold = _rootBlueprintingSystem.Update(blueprintScaffold, mousePos);
         }
 
         private void CancelBlueprinting()
         {
-            if (currentBlueprint == null)
+            if (blueprintScaffold == null || blueprintScaffold.blueprint.RootPath.Count == 0)
                 return;
-            if (_metabolicSystem.IsAbleToBuild(currentBlueprint))
-                _rootGrowthSystem.StartGrowth(currentBlueprint);
+            if (_metabolicSystem.IsAbleToBuild(blueprintScaffold.blueprint))
+                _rootGrowthSystem.StartGrowth(blueprintScaffold.blueprint);
         }
 
         private bool IsClickedOnRoot(Vector2 mousePosition)
@@ -125,13 +126,13 @@ namespace Assets.Scripts.UX
         private RootNode FindClosestNodeToMouse(List<RootNode> rootNodes, Vector2 mousePosition)
         {
             RootNode closestNode = rootNodes[0];
-            float minDistance = Vector2.Distance(mousePosition, closestNode.Position);
+            float minDistance = Vector2.Distance(mousePosition, (Vector2)closestNode.Transform.position);
             foreach (RootNode node in rootNodes)
             {
-                if (Vector2.Distance(node.Position, mousePosition) < minDistance)
+                if (Vector2.Distance((Vector2)node.Transform.position, mousePosition) < minDistance)
                 {
                     closestNode = node;
-                    minDistance = Vector2.Distance(node.Position, mousePosition);
+                    minDistance = Vector2.Distance((Vector2)node.Transform.position, mousePosition);
                 }
             }
             return closestNode;

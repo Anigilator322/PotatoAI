@@ -1,4 +1,5 @@
 using Assets.Scripts.Roots;
+using Assets.Scripts.Tools;
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +15,6 @@ namespace Assets.Scripts.Map
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
-        //private List<T> _positionedObjects = new List<T>();
 
         public GridPartition(int cellSize)
         { 
@@ -29,11 +29,9 @@ namespace Assets.Scripts.Map
             return new Vector2Int(x, y);    
         }
 
-
         public void Insert(T positionedObject)
         {
-
-            Vector2Int cellCoordinates = GetCellCoordinates(positionedObject.Position);
+            Vector2Int cellCoordinates = GetCellCoordinates((Vector2)positionedObject.Transform.position);
 
             if (!_grid.ContainsKey(cellCoordinates))
             {
@@ -41,30 +39,31 @@ namespace Assets.Scripts.Map
             }
             else
             {
-                _grid[cellCoordinates].AddIndex(positionedObject);
+                _grid[cellCoordinates].AddObject(positionedObject);
             }
         }
+        
         public List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
             {
-                return _grid[cellCoordinates].GetIndexes();
+                return _grid[cellCoordinates].GetObjects();
             }
 
             return new List<T>();
         }
 
-        private bool isAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 center, float radius)
+        private bool IsAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 worldPosCenter, float radius)
         {
             Vector2 downLeft = new Vector2(cellCoordinates.x * _cellSize, cellCoordinates.y * _cellSize);
             Vector2 upRight = new Vector2(downLeft.x + _cellSize, downLeft.y + _cellSize);
             Vector2 upLeft = new Vector2(downLeft.x,downLeft.y + _cellSize);
             Vector2 downRight = new Vector2(downLeft.x + _cellSize, downLeft.y);
 
-            if (Vector2.Distance(downLeft, center) < radius) return true;
-            if (Vector2.Distance(upRight, center) < radius) return true;
-            if (Vector2.Distance(downRight, center) < radius) return true;
-            if (Vector2.Distance(upLeft,center)<radius) return true;
+            if (Vector2.Distance(downLeft, worldPosCenter) < radius) return true;
+            if (Vector2.Distance(upRight, worldPosCenter) < radius) return true;
+            if (Vector2.Distance(downRight, worldPosCenter) < radius) return true;
+            if (Vector2.Distance(upLeft,worldPosCenter)<radius) return true;
 
             return false;
         }
@@ -75,39 +74,44 @@ namespace Assets.Scripts.Map
             return GetPointsInCell(cellCoordinates);
         }
 
-        public List<T> QueryByCircle(float radius, Vector2 center)
+        public List<T> QueryByCircle(float radius, Vector2 center, bool strictSelection = true)
         {
-
-            // Вычисляем диапазон ячеек для проверки
-            Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
-            Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            Vector2Int minCell = GetCellCoordinates(new Vector2(worldPosCenter.x - radius, worldPosCenter.y - radius));
+            Vector2Int maxCell = GetCellCoordinates(new Vector2(worldPosCenter.x + radius, worldPosCenter.y + radius));
 
             List<T> positionedObjects = new List<T>();
 
-            // Перебираем все ячейки в этом диапазоне
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             for (int x = minCell.x; x <= maxCell.x; x++)
             {
                 for (int y = minCell.y; y <= maxCell.y; y++)
                 {
                     Vector2Int cellCoordinates = new Vector2Int(x, y);
 
-                    // Если ячейка существует
+                    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                     if (_grid.ContainsKey(cellCoordinates))
                     {
-                        if (isAnyCornerInRadius(cellCoordinates, center, radius))
+                        if (IsAnyCornerInRadius(cellCoordinates, worldPosCenter, radius))
                         {
-                            positionedObjects.AddRange(_grid[cellCoordinates].GetIndexes());
+                            positionedObjects.AddRange(_grid[cellCoordinates].GetObjects());
                         } 
                     }
                 }
             }
 
-            return positionedObjects;
+
+            if(strictSelection)
+                return Geometry.GetObjectsInRadius<T>(worldPosCenter, radius, positionedObjects);
+            else
+                return positionedObjects;
         }
+
         public Dictionary<Vector2Int, Cell<T>> GetAllCellsWithPoints()
         {
             return _grid;
         }
+
         public int GetCellSize()
         {
             return _cellSize;

@@ -1,4 +1,3 @@
-using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
 using Cysharp.Threading.Tasks;
 using System;
@@ -6,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
-using Zenject;
 
 namespace Assets.Scripts.Roots.RootsBuilding.Growing
 {
@@ -23,22 +21,24 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
     {
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
+        private SynchronizationContext _mainThreadContext;
+
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
-        private FieldOfView _fieldOfView;
+
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
-        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel, FieldOfView fov)
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
-            _fieldOfView = fov;
+            _mainThreadContext = System.Threading.SynchronizationContext.Current;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
         {
             Plant plant = PlantsModel.Plants
-                .SingleOrDefault(r => r.Roots.Nodes.Contains(blueprint.RootNode))
+                .SingleOrDefault(r => r.Roots.Nodes.Contains(blueprint.StartRootNode))
                 ?? throw new Exception($"No {nameof(Plant)} for {nameof(RootBlueprint)} trying to grow found");
 
             _growingRoots.Blueprints.Add(blueprint.Id, new GrowingRoot(blueprint, plant)
@@ -121,7 +121,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                     switch (growingRoot.State)
                     {
                         case GrowthState.Growing:
-                            SpawnNode(growingRoot);
+                            _mainThreadContext.Post(_ => SpawnNode(growingRoot), null);
                             break;
                         
                         case GrowthState.Paused:
@@ -143,17 +143,15 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
-            RootNode parent = growingRoot.Blueprint.RootNode;
+            RootNode parent = growingRoot.Blueprint.StartRootNode;
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;
 
-            RootNode node = _rootSpawnSystem.SpawnRootNode(growingRoot.Plant.Roots, parent, position, type);
+            RootNode node = _rootSpawnSystem.SpawnRootNode(
+                new RootNode(position, parent, type));
 
             growingRoot.Blueprint.RootPath.RemoveAt(0);
-            growingRoot.Blueprint.RootNode = node;
-
-            //Calc FOV
-            _fieldOfView.ComputeFov(position);
+            growingRoot.Blueprint.StartRootNode = node;
 
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {

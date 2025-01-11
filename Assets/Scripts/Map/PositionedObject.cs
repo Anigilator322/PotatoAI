@@ -2,8 +2,8 @@
 
 namespace Assets.Scripts.Map
 {
-    public abstract class PositionedObject
+    public interface IPositionedObject
     {
-        public Vector2 Position { get; set; }
+        public Transform Transform { get; }
     }
 }
