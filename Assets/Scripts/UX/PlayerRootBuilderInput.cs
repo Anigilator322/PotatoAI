@@ -83,8 +83,8 @@ namespace Assets.Scripts.UX
         {
             if (!_isDragging)
                 return;
-            Debug.Log("Drawing trajectory");
-            Debug.Log("Mouse position: " + GetMousePosition());
+            //Debug.Log("Drawing trajectory");
+            //Debug.Log("Mouse position: " + GetMousePosition());
             Vector2 mousePos = GetMousePosition();
             DrawTrajectory(mousePos);
         }
@@ -126,13 +126,13 @@ namespace Assets.Scripts.UX
         private RootNode FindClosestNodeToMouse(List<RootNode> rootNodes, Vector2 mousePosition)
         {
             RootNode closestNode = rootNodes[0];
-            float minDistance = Vector2.Distance(mousePosition, closestNode.Position);
+            float minDistance = Vector2.Distance(mousePosition, (Vector2)closestNode.Transform.position);
             foreach (RootNode node in rootNodes)
             {
-                if (Vector2.Distance(node.Position, mousePosition) < minDistance)
+                if (Vector2.Distance((Vector2)node.Transform.position, mousePosition) < minDistance)
                 {
                     closestNode = node;
-                    minDistance = Vector2.Distance(node.Position, mousePosition);
+                    minDistance = Vector2.Distance((Vector2)node.Transform.position, mousePosition);
                 }
             }
             return closestNode;

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class SoilModel : MonoBehaviour
+public class Soil : MonoBehaviour
 {
     public List<ResourcePoint> Resources { get; private set; } = new List<ResourcePoint>();
 
@@ -19,6 +19,7 @@ public class SoilModel : MonoBehaviour
 
     public void AddResource(ResourcePoint resourcePoint)
     {
+        resourcePoint.Transform.parent = transform;
         Resources.Add(resourcePoint);
         _gridPartition.Insert(resourcePoint);
     }
@@ -28,16 +29,16 @@ public class SoilModel : MonoBehaviour
         return _gridPartition.Query(circleRadius, circleCenter);
     }
 
-    public class Factory : IFactory<SoilModel>
+    public class Factory : IFactory<Soil>
     {
-        SoilModel _soilPrefab;
+        Soil _soilPrefab;
 
-        public Factory(SoilModel soilPrefab)
+        public Factory(Soil soilPrefab)
         {
             _soilPrefab = soilPrefab;
         }
 
-        public SoilModel Create()
+        public Soil Create()
         {
             return Instantiate(_soilPrefab);
         }

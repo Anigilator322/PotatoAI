@@ -4,14 +4,15 @@ using UnityEngine;
 
 namespace Assets.Scripts.Tools
 {
-    public class Geometry
+    public static class Geometry
     {
-        public List<IPositionedObject> GetObjectsInRadius(Vector2 center, float radius, List<IPositionedObject> objects)
+        public static List<T> GetObjectsInRadius<T>(Vector2 center, float radius, List<T> objects)
+            where T : IPositionedObject
         {
-            List<IPositionedObject> objectsInRadius = new List<IPositionedObject>();
-            foreach (IPositionedObject obj in objects)
+            List<T> objectsInRadius = new List<T>();
+            foreach (T obj in objects)
             {
-                if(IsPointInCircle(center,radius,obj.Position))
+                if(IsPointInCircle(center,radius,(Vector2)obj.Transform.position))
                 {
                     objectsInRadius.Add(obj);
                 }
@@ -19,7 +20,7 @@ namespace Assets.Scripts.Tools
             return objectsInRadius;
         }
 
-        private bool IsPointInCircle(Vector2 center, float radius, Vector2 point)
+        private static bool IsPointInCircle(Vector2 center, float radius, Vector2 point)
         {
             float distance = Vector2.Distance(center, point);
             return distance < radius;

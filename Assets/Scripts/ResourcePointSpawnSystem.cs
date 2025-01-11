@@ -11,10 +11,10 @@ namespace Assets.Scripts.Roots
         private readonly float amountInPoint = 10;
 
         private readonly RootNodeContactsSystem _rootNodeContactsSystem;
-        private readonly SoilModel _soil;
+        private readonly Soil _soil;
 
         public ResourcePointSpawnSystem(RootNodeContactsSystem rootNodeContactsSystem,
-            SoilModel soilResourcesModel,
+            Soil soilResourcesModel,
             int numberOfResourcePoints,
             float amountInPoint)
         {
@@ -48,7 +48,9 @@ namespace Assets.Scripts.Roots
                 float x = UnityEngine.Random.Range(soilBounds.min.x, soilBounds.max.x);
                 float y = UnityEngine.Random.Range(soilBounds.min.y, soilBounds.max.y);
 
-                SpawnResourcePoint(resourceType, amountInPoint, new Vector2(x, y));
+                Vector2 worldPosition = new Vector2(x, y);
+
+                SpawnResourcePoint(resourceType, amountInPoint, worldPosition);
             }
         }
     }

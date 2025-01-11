@@ -20,6 +20,9 @@ namespace Assets.Scripts.Roots.View
         [Inject]
         private PlantsModel PlantsModel { get; }
 
+        [Inject]
+        private Soil soil { get; }
+
         public List<RootBlueprint> BlueprintsToDraw { get; set; } = new();
 
         const float _standardIncrement = 0.01f;
@@ -29,10 +32,28 @@ namespace Assets.Scripts.Roots.View
 
         CancellationTokenSource _drawTickCoroutineCTS = new CancellationTokenSource();
 
-        public void Initialize()
+        public async void Initialize()
         {
             _drawTickCoroutineCTS = new CancellationTokenSource();
             UniTask.RunOnThreadPool(() => TickCoroutine(_drawTickCoroutineCTS.Token));
+
+            await UniTask.Delay(1000);
+
+            var soilScale = soil.transform.localScale;
+
+            foreach (Plant plant in PlantsModel.Plants)
+            {
+                for (int i = 0; i < plant.transform.childCount; i++)
+                {
+                    var child = plant.transform.GetChild(i);
+
+                    if ((child.name == "Roots") ||
+                        (child.name == "RootBlueprints"))
+                    {
+                        child.transform.localScale = new Vector3(1 / soilScale.x, 1 / soilScale.y, 1 / soilScale.z);
+                    }
+                }
+            }
         }
     
         private void OnApplicationQuit()
@@ -149,11 +170,11 @@ namespace Assets.Scripts.Roots.View
                 var nodeWidth = rootWidths[node];
 
                 // Get Parent position
-                Vector2 parentPos = Parent.Position;
+                Vector3 parentPos = Parent.Transform.position;
 
                 // Generate straight segment vertices
-                Vector2 direction = node.Position - parentPos;
-                Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+                Vector3 direction = (node.Transform.position - parentPos);
+                Vector3 perpendicular = new Vector3(-direction.y, direction.x, 0);
             
                 var normalizedDirection = direction.normalized;
                 var normalizedperpendicular = perpendicular.normalized;
@@ -164,8 +185,8 @@ namespace Assets.Scripts.Roots.View
 
                 var thinerPartOffest = perpendicular * ((nodeWidth/ 2) / perpendicular.magnitude);
             
-                Vector3 v3 = node.Position + thinerPartOffest;
-                Vector3 v4 = node.Position - thinerPartOffest;
+                Vector3 v3 = node.Transform.position + thinerPartOffest;
+                Vector3 v4 = node.Transform.position - thinerPartOffest;
 
                 //v1.z = v2.z = v3.z = v4.z = zOffset;
                 //zOffset += zStep;
@@ -188,7 +209,7 @@ namespace Assets.Scripts.Roots.View
                     if(parentSegmentRectangle.upRight == -1)
                         throw new Exception("lastAddedRectangle is not set");
                 
-                    var angle = Vector2.SignedAngle(direction, parentPos - Parent.Parent.Position);
+                    var angle = Vector2.SignedAngle(direction, parentPos - Parent.Parent.Transform.position);
 
                     if (Mathf.Abs(angle) < 5)
                     {
@@ -283,7 +304,7 @@ namespace Assets.Scripts.Roots.View
                 for (int i = 0; i < blueprint.RootPath.Count; i++)
                 {
                     // Get Parent position and width from rootWidths
-                    Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.StartRootNode.Position;
+                    Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.StartRootNode.Transform.position;
 
                     // Generate straight segment vertices
                     Vector2 direction = (blueprint.RootPath[i] - parentPos).normalized;
@@ -333,7 +354,7 @@ namespace Assets.Scripts.Roots.View
 
             mergeWidth = GetThinerPartWidth(mergeWidth);
 
-            Vector2 mergeCenter = node.Position;
+            Vector2 mergeCenter = node.Transform.position;
 
             int segments = 20; // Number of segments for the semi-circle (higher = smoother)
             float angleStep = Mathf.PI / segments;
@@ -342,7 +363,7 @@ namespace Assets.Scripts.Roots.View
                 return;
 
             Vector2 direction = 
-                (node.Parent.Position - mergeCenter)
+                ((Vector2)node.Parent.Transform.position - mergeCenter)
                 .normalized;
 
             int startIndex = vertices.Count;

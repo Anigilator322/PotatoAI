@@ -27,6 +27,7 @@ namespace Assets.Scripts.Roots.Plants
 
         public void AddNode(RootNode rootNode)
         {
+            rootNode.Transform.parent = plant.transform;
             Nodes.Add(rootNode);
             _gridPartition.Insert(rootNode);
         }

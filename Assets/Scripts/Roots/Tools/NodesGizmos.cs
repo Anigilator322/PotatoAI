@@ -14,7 +14,7 @@ namespace Assets.Scripts.Roots.Tools
                 foreach (var node in plant.Roots.Nodes)
                 {
                     Gizmos.color = Color.red;
-                    Gizmos.DrawSphere(node.Position, 0.1f);
+                    Gizmos.DrawSphere(node.Transform.position, 0.1f);
                 }
             }
         }

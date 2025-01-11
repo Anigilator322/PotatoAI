@@ -18,8 +18,7 @@ namespace Assets.Scripts.Bootstrap
         {
             monoBehHelper = GameObject.FindFirstObjectByType<MonoBehHelper>();
 
-            var plant = plantFactory.Create(PlayerRootBuilderInput.PLAYER_ID);
-            rootSpawnSystem.SpawnRootNodeToPlant(plant.Roots, new RootNode(new Vector2(0, 0), null, RootType.Harvester));
+            var plant = plantFactory.Create(PlayerRootBuilderInput.PLAYER_ID, Vector2.zero);
             resourceSpawnSystem.FillSoilUniformly();
         }
     }

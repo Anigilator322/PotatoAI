@@ -16,6 +16,6 @@ MonoBehaviour:
   phosphorus: {r: 0.7075472, g: 0.29703632, b: 0.29703632, a: 0.24705882}
   potassium: {r: 0.6981132, g: 0.28648987, b: 0.6702591, a: 0.24705882}
   nitrogen: {r: 0.20478818, g: 0.735849, b: 0.44193715, a: 0.24705882}
-  size: 0.1
+  size: 1
   maximumResourcesInPoint: 10
   numberOfResourcePoints: 30

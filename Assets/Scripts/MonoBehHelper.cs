@@ -1,5 +1,6 @@
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,18 @@ public class MonoBehHelper : MonoBehaviour
 {
     MeshFilter meshFilter;
     [Inject] PlantsModel PlantsModel;
+    
+    [SerializeField]
+    GameObject selectionPoint;
+
+    [Button]
+    public void SelectRootNodes()
+    {
+        var plantRoots = PlantsModel.Plants.First().Roots;
+
+        //foreach(var node in plantRoots.GetNodesFromCircle(selectionPoint.transform.position, 0.5f))
+        //selectionPoint.transform.position = _plant.transform.position;
+    }
 
     private void Awake()
     {
@@ -28,7 +41,7 @@ public class MonoBehHelper : MonoBehaviour
 
             foreach (var node in plant.Roots.Nodes)
             {
-                Gizmos.DrawSphere(node.Position, 0.1f);
+                Gizmos.DrawSphere((Vector2)node.Transform.position, 0.1f);
             }
         }
 

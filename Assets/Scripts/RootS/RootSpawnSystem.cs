@@ -19,7 +19,7 @@ namespace Assets.Scripts.Roots
 
         private void Spawn(PlantRoots plantRoots, RootNode newRootNode)
         {
-            Debug.Log("Trying to spawn root node at position: " + newRootNode.Position);
+            //Debug.Log("Trying to spawn root node at position: " + newRootNode.Transform);
 
             plantRoots.AddNode(newRootNode);
             _rootNodeContactsSystem.UpdateContactsByNode(newRootNode);

@@ -5,22 +5,26 @@ namespace Assets.Scripts.Roots
 {
     public class RootNode : IPositionedObject
     {
+        public Transform Transform { get; }
         public RootType Type { get; }
 
         public bool IsRootBase => Parent is null;
         public RootNode Parent { get; }
         public List<RootNode> Childs { get; } = new List<RootNode>();
-        public Vector2 Position { get; set; }
 
         public RootNode(Vector2 position, RootNode parent, RootType type)
         {
-            this.Position = position;
-            this.Type = type;
+            Transform = new GameObject().transform;
+            Transform.position = position;
+            Type = type;
+            Transform.name = nameof(this.Type);
 
             if(parent is not null)
             {
-                this.Parent = parent;
                 parent.Childs.Add(this);
+                
+                Parent = parent;
+                Transform.parent = Parent.Transform;
             }
         }
 

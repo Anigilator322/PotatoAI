@@ -18,9 +18,9 @@ namespace Assets.Scripts.Bootstrap.Installers
         public override void InstallBindings()
         {
             // ======= Models =======
-            Container.Bind<RootNodeContactsModel>().AsSingle();
+            Container.Bind<Soil>().FromComponentInNewPrefab(generalPrefabs.soilPrefab).AsSingle();
             Container.Bind<PlantsModel>().AsSingle();
-            Container.Bind<SoilModel>().FromComponentInNewPrefab(generalPrefabs.soilPrefab).AsSingle();
+            Container.Bind<RootNodeContactsModel>().AsSingle();
 
             Container.Bind<PlantRoots.Factory>().AsSingle();
             Container.Bind<Plant.Factory>().AsSingle()
@@ -46,7 +46,7 @@ namespace Assets.Scripts.Bootstrap.Installers
                     };
 
                     return new ResourceDrawSystem(
-                        Container.Resolve<SoilModel>(),
+                        Container.Resolve<Soil>(),
                         resourcePointsConfig.size,
                         colorsDict,
                         resourcePointsConfig.maximumResourcesInPoint,
@@ -54,28 +54,19 @@ namespace Assets.Scripts.Bootstrap.Installers
                 })
                 .AsSingle();
 
-
             Container.BindInstance(
                 new ResourcePointSpawnSystem(
                     Container.Resolve<RootNodeContactsSystem>(),
-                    Container.Resolve<SoilModel>(),
+                    Container.Resolve<Soil>(),
                     resourcePointsConfig.numberOfResourcePoints,
                     resourcePointsConfig.maximumResourcesInPoint))
                 .AsSingle();
-
-            //Container.Bind<ResourcePointSpawnSystem>()
-            //    .FromInstance(new ResourcePointSpawnSystem(
-            //        Container.Resolve<RootNodeContactsSystem>(),
-            //        Container.Resolve<SoilModel>(),
-            //        resourcePointsConfig.numberOfResourcePoints,
-            //        resourcePointsConfig.maximumResourcesInPoint))
-            //    .AsSingle();
 
             GameSystemsInstaller.Install(Container);
             InputInstaller.Install(Container);
 
             Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().FromNew().AsSingle();
-            Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle().NonLazy();
         }
     }
 }

@@ -11,7 +11,7 @@ public class ResourceDrawSystem : ITickable
     public int MaxDrawnResources { get; set; } = 400;
     public Dictionary<ResourceType, Color> ResourceTypeColors { get; set; }
 
-    private readonly SoilModel _soil;
+    private readonly Soil _soil;
     private readonly Material _soilResourcesMaterial;
     private readonly RootNodeContactsModel _rootNodeContactsModel;
 
@@ -19,7 +19,7 @@ public class ResourceDrawSystem : ITickable
     private Texture2D _circleCoordinatesTexture;
     private Texture2D _circleColorTexture;
 
-    public ResourceDrawSystem(SoilModel soil,
+    public ResourceDrawSystem(Soil soil,
         float resoursePointRadius,
         Dictionary<ResourceType, Color> resourceColors,
         float maxResourcesThreshold,
@@ -37,7 +37,7 @@ public class ResourceDrawSystem : ITickable
         var boundsMaxV2 = new Vector2(_soil.Sprite.bounds.max.x, _soil.Sprite.bounds.max.y);
         _boundsDelta = boundsMaxV2 - _boundsMinV2;
 
-        _soilResourcesMaterial.SetVector("_SoilScale", new Vector2(_soil.transform.localScale.x / _soil.transform.localScale.y, 1f));
+        _soilResourcesMaterial.SetVector("_SoilScale", _soil.transform.localScale);
         _soilResourcesMaterial.SetFloat("_DataTexturesWidth", MaxDrawnResources);
 
         _circleCoordinatesTexture = new Texture2D(MaxDrawnResources, 1, TextureFormat.RGBAFloat, false);
@@ -63,7 +63,7 @@ public class ResourceDrawSystem : ITickable
             Color pointColor = ResourceTypeColors[resource.ResourceType];
             pointColor.a *= Mathf.Clamp01(resource.Amount / MaxResourcesThreshold);
 
-            var localVector = resource.Position - _boundsMinV2;
+            var localVector = (Vector2)resource.Transform.position - _boundsMinV2;
             localVector /= _boundsDelta;
 
             _circleCoordinatesTexture.SetPixel(i, 0,

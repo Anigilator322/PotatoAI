@@ -21,6 +21,8 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
     {
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
+        private SynchronizationContext _mainThreadContext;
+
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
 
@@ -30,6 +32,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
+            _mainThreadContext = System.Threading.SynchronizationContext.Current;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -118,7 +121,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                     switch (growingRoot.State)
                     {
                         case GrowthState.Growing:
-                            SpawnNode(growingRoot);
+                            _mainThreadContext.Post(_ => SpawnNode(growingRoot), null);
                             break;
                         
                         case GrowthState.Paused:

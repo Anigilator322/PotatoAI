@@ -4,6 +4,6 @@ namespace Assets.Scripts.Map
 {
     public interface IPositionedObject
     {
-        public Vector2 Position { get; set; }
+        public Transform Transform { get; }
     }
 }

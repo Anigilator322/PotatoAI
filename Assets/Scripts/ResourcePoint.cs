@@ -14,28 +14,21 @@ public enum ResourceType
     Potassium
 }
 
-public struct ResourcePoint : IPositionedObject
+public class ResourcePoint : IPositionedObject
 {
+    public Transform Transform { get; }
     public ResourceType ResourceType { get; set; }
     public float Amount { get; set; }
-    public Vector2 Position { get; set; }
 
     public ResourcePoint(ResourceType resourceType, float amount, Vector2 position)
     {
+        Transform = new GameObject().transform;
+        Transform.position = position;
+        Transform.parent = null;
+
+        Transform.name = "Resource point";
+
         ResourceType = resourceType;
         Amount = amount;
-        Position = position;
     }
-
-    
-
-    //public class Factory : IFactory<ResourceType, Vector2, ResourcePoint>
-    //{
-    //    const float AMOUNT = 10;
-
-    //    public ResourcePoint Create(ResourceType resourceType, float amount, Vector2 position)
-    //    {
-    //        return new ResourcePoint(resourceType, (int)AMOUNT, position);
-    //    }
-    //}
 }

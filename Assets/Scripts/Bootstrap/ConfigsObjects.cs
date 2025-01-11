@@ -10,7 +10,7 @@ namespace Assets.Scripts.Bootstrap
         public Plant plantPrefab;
 
         [SerializeField]
-        public SoilModel soilPrefab;
+        public Soil soilPrefab;
     }
 
     [CreateAssetMenu(fileName = "ResourcePoints", menuName = "PrefabsReferenceMaps/ResourcePoints", order = 1)]

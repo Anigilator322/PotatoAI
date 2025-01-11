@@ -3,6 +3,7 @@ void CircleShaderGraph_float(UnityTexture2D coordinatesData, UnityTexture2D colo
 {
     float j = 0;
 	float EPSILON = 0.0001;
+    float outlineWidth = EPSILON * 7 * length(uvScale);
     
 	// Iterate over circles
     [loop]
@@ -24,9 +25,9 @@ void CircleShaderGraph_float(UnityTexture2D coordinatesData, UnityTexture2D colo
 	
         float dist = length(diff);
         
-        if (abs(dist - radius) < (EPSILON * 20))
+        if (drawOutline && (abs(dist - radius) < outlineWidth))
         {
-            result = float4(0.02, 0.2, 0.02, 1);
+            result = float4(0.875, 0.7, 0.00, 0.3);
             return;
         }
         
