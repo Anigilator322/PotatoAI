@@ -65,6 +65,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             GameSystemsInstaller.Install(Container);
             InputInstaller.Install(Container);
 
+            Container.BindInterfacesAndSelfTo<CameraMoveInput>().FromNew().AsSingle();
             Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().FromNew().AsSingle();
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle().NonLazy();
         }
