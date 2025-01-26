@@ -9,6 +9,7 @@ namespace Assets.Scripts.Roots.Tools
 
         private void OnDrawGizmos()
         {
+            if(plant is not null)
             if (plant.Roots.Nodes.Count > 0)
             {
                 foreach (var node in plant.Roots.Nodes)

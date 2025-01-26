@@ -2,6 +2,7 @@ using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.UX;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -14,6 +15,9 @@ namespace Assets.Scripts.Bootstrap.Installers
 
         [SerializeField]
         ResourcePointsConfig resourcePointsConfig;
+
+        [SerializeField]
+        TextMeshProUGUI text;
 
         public override void InstallBindings()
         {
@@ -67,6 +71,7 @@ namespace Assets.Scripts.Bootstrap.Installers
 
             Container.BindInterfacesAndSelfTo<CameraMoveInput>().FromNew().AsSingle();
             Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<UIDataViewModel>().AsSingle().WithArguments(text);
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle().NonLazy();
         }
     }
