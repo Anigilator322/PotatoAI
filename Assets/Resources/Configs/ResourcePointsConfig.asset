@@ -18,4 +18,4 @@ MonoBehaviour:
   nitrogen: {r: 0.39799973, g: 0.4433962, b: 0.14431292, a: 0}
   size: 0.5
   maximumResourcesInPoint: 3
-  numberOfResourcePoints: 2
+  numberOfResourcePoints: 10
