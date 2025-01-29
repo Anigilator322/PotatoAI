@@ -1,8 +1,10 @@
 ﻿using Assets.Scripts.Map;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.Tools;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 using Zenject.ReflectionBaking.Mono.Cecil;
 
 namespace Assets.Scripts.FogOfWar
@@ -10,9 +12,15 @@ namespace Assets.Scripts.FogOfWar
     public class VisibilitySystem
     {
         private PlantsModel _plantsModel;
+        [Inject]
+        ResourceDrawSystem _resourceDrawSystem;
         private Soil _soilResources;
-
         private int _cellSize;
+
+        public int CellSize { get => _cellSize;}
+        public float Radius { get; set; }
+        public List<Vector2> Starts { get; set; } = new List<Vector2>();
+        public List<Vector2> Ends { get; set; } = new List<Vector2>();
 
         public Dictionary<Plant, List<IPositionedObject>> _visibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
         public VisibilitySystem(Soil soil, PlantsModel model)
@@ -52,7 +60,10 @@ namespace Assets.Scripts.FogOfWar
         //TODO: return List<PositionedObject> points that are in capsule
         private List<Vector2Int> CapsuleCast(Vector2 start, Vector2 end, float radius)
         {
-
+            //DEBUG INFO
+            Starts.Add(start);
+            Ends.Add(end);
+            //END DEBUG INFO
             List<Vector2Int> cells = new List<Vector2Int>();
 
             // Определить AABB капсулы
@@ -78,7 +89,6 @@ namespace Assets.Scripts.FogOfWar
                     }
                 }
             }
-
             return cells;
         }
 
@@ -87,10 +97,10 @@ namespace Assets.Scripts.FogOfWar
             if (revealer.Parent is null)
                 return;
             var edge = revealer.Transform.position - revealer.Parent.Transform.position;
-            int revealRadius = ((int)revealer.Type + 2);//Make configuration for revealRadius of different rootTypes
+            float revealRadius = ((int)revealer.Type + 0.2f);//Make configuration for revealRadius of different rootTypes
             float length = edge.magnitude;
             float width = revealRadius * 2;
-            List<Vector2Int> area = CapsuleCast(revealer.Parent.Transform.position, revealer.Transform.position, width);
+            List<Vector2Int> area = CapsuleCast(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
         }
@@ -102,15 +112,14 @@ namespace Assets.Scripts.FogOfWar
                 
                 if (!_visibleByPlantsPoints.ContainsKey(plantOwner))
                     _visibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
-
-                foreach (var resource in _soilResources.GetResourcesFromCellDirectly(cell))
+                var resources = _soilResources.GetResourcesFromCellDirectly(cell);
+                foreach (var resource in resources)
                 {
                     if (!_visibleByPlantsPoints[plantOwner].Contains(resource))
                     {
                         _visibleByPlantsPoints[plantOwner].Add(resource);
                     }
                 }
-                
             }
         }
 

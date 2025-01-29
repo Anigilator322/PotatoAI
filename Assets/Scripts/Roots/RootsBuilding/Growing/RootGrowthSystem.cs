@@ -152,12 +152,10 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
             RootNode node = _rootSpawnSystem.SpawnRootNode(
                 new RootNode(position, parent, type));
-
-            growingRoot.Blueprint.RootPath.RemoveAt(0);
-            growingRoot.Blueprint.StartRootNode = node;
-
             //For visibility system
             _visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);
+            growingRoot.Blueprint.RootPath.RemoveAt(0);
+            growingRoot.Blueprint.StartRootNode = node;
 
             if (growingRoot.Blueprint.RootPath.Count == 0)
             {

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Zenject;
 
 public class MonoBehHelper : MonoBehaviour
@@ -13,14 +14,6 @@ public class MonoBehHelper : MonoBehaviour
     MeshFilter meshFilter;
     [Inject] PlantsModel PlantsModel;
     [Inject] VisibilitySystem VisibilitySystem;
-
-    public void SelectRootNodes()
-    {
-        var plantRoots = PlantsModel.Plants.First().Roots;
-
-        //foreach(var node in plantRoots.GetNodesFromCircle(selectionPoint.transform.position, 0.5f))
-        //selectionPoint.transform.position = _plant.transform.position;
-    }
 
     private void Awake()
     {
@@ -48,6 +41,19 @@ public class MonoBehHelper : MonoBehaviour
             foreach (var point in plantAndPoints.Value)
             {
                 Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
+            }
+        }
+
+        foreach(var start in VisibilitySystem.Starts)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(start, 0.1f);
+            foreach (var end in VisibilitySystem.Ends)
+            {
+                var length = (end - start).magnitude;
+                float radius = 0.2f;
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(end,radius);
             }
         }
 
