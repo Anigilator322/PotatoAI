@@ -89,15 +89,19 @@ namespace Assets.Scripts.Roots.Metabolics
             }
         }
 
-
-        public bool IsAbleToBuild(RootBlueprint blueprint)
+        public bool IsAbleToBuild(RootBlueprint blueprint, Plant plant)
         {
-            return true;
+            if(plant.Resources.Calories >= CalculateBlueprintPrice(blueprint))
+            {
+                return true;
+            }
+            else
+                return false;
         }
 
-        private int CalculateBlueprintPrice(RootBlueprint blueprint)
+        public int CalculateBlueprintPrice(RootBlueprint blueprint)
         {
-            return 0;
+            return (int)Mathf.Pow(blueprint.RootPath.Count, 1.5f);
         }
 
 

@@ -38,6 +38,8 @@ namespace Assets.Scripts.Roots.Plants
                 Plant plant = Instantiate(_plantPrefab, (Vector3)rootBasePosition, Quaternion.identity, _soil.transform);
                 plant.Id = id;
 
+                plant.Resources.Calories = 10;
+
                 plant.Roots = _rootsFactory.Create(plant);
 
                 _rootSpawnSystem.SpawnRootNodeToPlant(plant.Roots, new RootNode(new Vector2(0, 0), null, RootType.Harvester));
