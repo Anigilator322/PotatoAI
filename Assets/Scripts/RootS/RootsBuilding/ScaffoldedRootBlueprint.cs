@@ -14,7 +14,9 @@ namespace Assets.Scripts.Roots.RootsBuilding
             blueprint = new RootBlueprint(rootType, startRootNode);
             if (blueprint.StartRootNode.Childs.Count == 0
                 && startRootNode.Parent is not null)
+            {
                 scaffoldedPath.Add(startRootNode.Parent.Transform.position);
+            }
 
             scaffoldedPath.Add(startRootNode.Transform.position);
         }

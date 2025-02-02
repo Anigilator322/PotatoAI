@@ -50,9 +50,11 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             StartGrowingCoroutine();
         }
 
+        bool coroutineIsRunning = false;
+
         private bool IsCoroutineRunning()
         {
-            return _growRootsCancellationTokenSource != null;
+            return _growRootsCancellationTokenSource is not null;
         }
 
         private void StartGrowingCoroutine()
@@ -121,6 +123,8 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                     switch (growingRoot.State)
                     {
                         case GrowthState.Growing:
+
+                            //Debug.Log("Spawn for root " + id);
                             _mainThreadContext.Post(_ => SpawnNode(growingRoot), null);
                             break;
                         
@@ -130,6 +134,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                         case GrowthState.Canceled:
                         case GrowthState.Failed:
                         case GrowthState.Completed:
+                            //Debug.Log("Remove root " + id);
                             _growingRoots.RemoveBlueprint(id);
 
                             break;
@@ -143,6 +148,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
+
             RootNode parent = growingRoot.Blueprint.StartRootNode;
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;

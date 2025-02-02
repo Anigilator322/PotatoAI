@@ -103,7 +103,5 @@ namespace Assets.Scripts.Roots.Metabolics
         {
             return (int)Mathf.Pow(blueprint.RootPath.Count, 1.5f);
         }
-
-
     }
 }

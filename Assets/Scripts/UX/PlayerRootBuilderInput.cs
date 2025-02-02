@@ -109,14 +109,6 @@ namespace Assets.Scripts.UX
             blueprintScaffold = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
-        private void UpdateCostIndication(Vector2 mousePosition)
-        {
-            var cost = _metabolicSystem.CalculateBlueprintPrice(blueprintScaffold.blueprint);
-            _costIndicator.text = cost.ToString();
-
-            FollowMouse(_costIndicator.rectTransform, _costIndicator.canvas, new Vector2(100, 10));
-        }
-
         private void DrawTrajectory(Vector2 mousePos)
         {
             blueprintScaffold = _rootBlueprintingSystem.Update(blueprintScaffold, mousePos);
@@ -167,8 +159,18 @@ namespace Assets.Scripts.UX
             return closestNode;
         }
 
+        #region -cost indicator-
+
+        private void UpdateCostIndication(Vector2 mousePosition)
+        {
+            var cost = _metabolicSystem.CalculateBlueprintPrice(blueprintScaffold.blueprint);
+            _costIndicator.text = cost.ToString();
+
+            FollowMouse(_costIndicator.rectTransform, _costIndicator.canvas, new Vector2(100, 10));
+        }
+
         //TODO: DECOMPOSE
-        public void FollowMouse(RectTransform panelRectTransform, Canvas canvas, Vector2 offset)
+        private void FollowMouse(RectTransform panelRectTransform, Canvas canvas, Vector2 offset)
         {
             if (panelRectTransform == null || canvas == null)
             {
@@ -227,6 +229,8 @@ namespace Assets.Scripts.UX
             // Apply the clamped position
             panelRectTransform.anchoredPosition = panelPosition;
         }
+
+        #endregion -cost indicator-
     }
 }
 

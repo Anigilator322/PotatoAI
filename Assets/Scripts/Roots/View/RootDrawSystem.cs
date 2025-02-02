@@ -26,7 +26,7 @@ namespace Assets.Scripts.Roots.View
         public List<RootBlueprint> BlueprintsToDraw { get; set; } = new();
 
         const float _standardIncrement = 0.01f;
-        const float _blueprintWidth = _standardIncrement * 1.75f;
+        const float _blueprintWidth = _standardIncrement * 6f;
 
         Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
 

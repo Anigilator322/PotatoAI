@@ -6,8 +6,6 @@ namespace Assets.Scripts.Roots.RootsBuilding
     {
         public float _rootSegmentLength { get; private set; } = 0.8f;
         public float _maxBuildAngle { get; private set; } = 15f;
-        private int _maxIters = 100;
-        private int _curIters = 0;
 
         private void CreateNewPathNode(ScaffoldedRootBlueprint rootBlueprint, Vector2 direction)
         {
@@ -16,20 +14,17 @@ namespace Assets.Scripts.Roots.RootsBuilding
             rootBlueprint.AppendPoint(lastNodePosition + direction * _rootSegmentLength);
         }
 
-        private bool TryBlueprint(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
+        enum BlueprintingResult { Incr = 1, Decr = -1, Unchanged = 0};
+
+        private BlueprintingResult TryBlueprint(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
         {
-            if(_curIters >= _maxIters)
-                return false;
-
-            _curIters++;
-
             if (Vector2.Distance(targetPos, rootBlueprint.ScaffoldedPath[^1]) <= _rootSegmentLength)
-                return false;
+                return BlueprintingResult.Unchanged;
 
             if(rootBlueprint.ScaffoldedPath.Count < 2)
             {
-                CreateNewPathNode(rootBlueprint, targetPos);
-                return true;
+                CreateNewPathNode(rootBlueprint, targetPos - rootBlueprint.ScaffoldedPath[^1]);
+                return BlueprintingResult.Incr;
             }
 
             Vector2 lastPoint = rootBlueprint.ScaffoldedPath[^1];
@@ -49,12 +44,13 @@ namespace Assets.Scripts.Roots.RootsBuilding
                     Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
                     rootBlueprint.AppendPoint(rootBlueprint.ScaffoldedPath[^1] + correctedPathNode);
                 }
+                return BlueprintingResult.Incr;
             }
             else
             {
                 DecreasePath(rootBlueprint);
+                return BlueprintingResult.Decr;
             }
-            return true;
         }
 
         public ScaffoldedRootBlueprint Create(RootType type, RootNode parentNode)
@@ -62,10 +58,21 @@ namespace Assets.Scripts.Roots.RootsBuilding
             return new ScaffoldedRootBlueprint(type, parentNode);
         }
 
-        public ScaffoldedRootBlueprint Update(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
+        public ScaffoldedRootBlueprint Update(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos, int maxIters = 3)
         {
-            _curIters = 0;
-            TryBlueprint(rootBlueprint, targetPos);
+            BlueprintingResult firstResult = TryBlueprint(rootBlueprint, targetPos);
+
+            if (firstResult == BlueprintingResult.Unchanged) 
+                return rootBlueprint;
+
+            BlueprintingResult result;
+            while (firstResult == (result = TryBlueprint(rootBlueprint, targetPos)));
+
+            if (result == BlueprintingResult.Unchanged
+                || result == BlueprintingResult.Incr)
+                return rootBlueprint;
+
+            result = TryBlueprint(rootBlueprint, targetPos);
 
             return rootBlueprint;
         }
