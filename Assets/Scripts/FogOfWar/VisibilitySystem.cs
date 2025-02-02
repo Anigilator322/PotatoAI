@@ -18,7 +18,7 @@ namespace Assets.Scripts.FogOfWar
         private int _cellSize;
 
         public int CellSize { get => _cellSize;}
-        public float Radius { get; set; }
+        public float Radius { get; set; } = 0.5f;
         public List<Vector2> Starts { get; set; } = new List<Vector2>();
         public List<Vector2> Ends { get; set; } = new List<Vector2>();
 
@@ -97,7 +97,7 @@ namespace Assets.Scripts.FogOfWar
             if (revealer.Parent is null)
                 return;
             var edge = revealer.Transform.position - revealer.Parent.Transform.position;
-            float revealRadius = ((int)revealer.Type + 0.2f);//Make configuration for revealRadius of different rootTypes
+            float revealRadius = ((int)revealer.Type + Radius);//Make configuration for revealRadius of different rootTypes
             float length = edge.magnitude;
             float width = revealRadius * 2;
             List<Vector2Int> area = CapsuleCast(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);

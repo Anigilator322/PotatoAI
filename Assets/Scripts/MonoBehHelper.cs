@@ -2,30 +2,64 @@ using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Zenject;
+using Assets.Scripts.FogOfWar.View;
+using Assets.Scripts.UX;
 
 public class MonoBehHelper : MonoBehaviour
 {
+    [SerializeField] 
+    private CapsuleCutSystem _capsuleCutSystem;
+    #region DrawGizmosFields
     MeshFilter meshFilter;
-    [Inject] PlantsModel PlantsModel;
-    [Inject] VisibilitySystem VisibilitySystem;
-
+    [Inject] 
+    private PlantsModel _plantsModel;
+    [Inject] 
+    private VisibilitySystem _visibilitySystem;
+    #endregion
     private void Awake()
     {
         Application.targetFrameRate = 144;
     }
 
+    private void Update()
+    {
+        _capsuleCutSystem.Capsules.Clear();
+        for (int i=0;i<_visibilitySystem.Starts.Count();i++)
+        {
+            _capsuleCutSystem.SetCapsule(_visibilitySystem.Starts[i], _visibilitySystem.Ends[i], _visibilitySystem.Radius);
+        }
+    }
+
     private void OnDrawGizmos()
     {
-        if (PlantsModel == null)
+        if (_plantsModel == null)
             return;
+        DrawGizmosForFOV();
+        DrawGizmosForRootNodes();
+        DrawGizmosForMesh();
+    }
 
-        foreach(var plant in PlantsModel.Plants)
+    #region DrawGizmosFuncs
+    private void DrawGizmosForMesh()
+    {
+        if (meshFilter == null)
+        {
+            meshFilter = _plantsModel.Plants.First().GetComponentInChildren<MeshFilter>();
+        }
+
+        foreach (var vertice in meshFilter.mesh.vertices)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(vertice, 0.05f);
+        }
+    }
+
+    private void DrawGizmosForRootNodes()
+    {
+        foreach (var plant in _plantsModel.Plants)
         {
             Gizmos.color = Color.red;
 
@@ -34,8 +68,11 @@ public class MonoBehHelper : MonoBehaviour
                 Gizmos.DrawSphere((Vector2)node.Transform.position, 0.1f);
             }
         }
+    }
 
-        foreach(var plantAndPoints in VisibilitySystem._visibleByPlantsPoints)
+    private void DrawGizmosForFOV()
+    {
+        foreach (var plantAndPoints in _visibilitySystem._visibleByPlantsPoints)
         {
             Gizmos.color = Color.blue;
             foreach (var point in plantAndPoints.Value)
@@ -43,30 +80,19 @@ public class MonoBehHelper : MonoBehaviour
                 Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
             }
         }
+        float radius = 3f;
 
-        foreach(var start in VisibilitySystem.Starts)
+        foreach (var start in _visibilitySystem.Starts)
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(start, 0.1f);
-            foreach (var end in VisibilitySystem.Ends)
+            Gizmos.DrawWireSphere(start, radius);
+            foreach (var end in _visibilitySystem.Ends)
             {
                 var length = (end - start).magnitude;
-                float radius = 0.2f;
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(end,radius);
+                Gizmos.DrawWireSphere(end, radius);
             }
         }
-
-        if (meshFilter == null)
-        {
-            meshFilter = PlantsModel.Plants.First().GetComponentInChildren<MeshFilter>();
-        }
-
-        foreach(var vertice in meshFilter.mesh.vertices)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawSphere(vertice, 0.05f);
-        }
-
     }
+    #endregion
 }
