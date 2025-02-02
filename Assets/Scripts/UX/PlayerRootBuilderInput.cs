@@ -124,8 +124,10 @@ namespace Assets.Scripts.UX
 
         private void CancelBlueprinting()
         {
+            _costIndicator.text = "";
             if (blueprintScaffold == null || blueprintScaffold.blueprint.RootPath.Count == 0)
                 return;
+
             if (_metabolicSystem.IsAbleToBuild(blueprintScaffold.blueprint, playersPlant))
             {
                 _rootGrowthSystem.StartGrowth(blueprintScaffold.blueprint);
@@ -134,7 +136,6 @@ namespace Assets.Scripts.UX
             else
             {
                 blueprintScaffold = null;
-                _costIndicator.text = string.Empty;
             }
         }
 

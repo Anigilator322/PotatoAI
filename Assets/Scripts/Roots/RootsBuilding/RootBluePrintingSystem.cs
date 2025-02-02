@@ -5,7 +5,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
     public class RootBlueprintingSystem
     {
         public float _rootSegmentLength { get; private set; } = 0.8f;
-        public float _maxBuildAngle { get; private set; } = 40f;
+        public float _maxBuildAngle { get; private set; } = 15f;
         private int _maxIters = 100;
         private int _curIters = 0;
 
@@ -20,15 +20,18 @@ namespace Assets.Scripts.Roots.RootsBuilding
         {
             if(_curIters >= _maxIters)
                 return false;
+
             _curIters++;
-            //Debug.Log("Trying to blueprint");
+
             if (Vector2.Distance(targetPos, rootBlueprint.ScaffoldedPath[^1]) <= _rootSegmentLength)
                 return false;
+
             if(rootBlueprint.ScaffoldedPath.Count < 2)
             {
                 CreateNewPathNode(rootBlueprint, targetPos);
                 return true;
             }
+
             Vector2 lastPoint = rootBlueprint.ScaffoldedPath[^1];
             Vector2 secondLastPoint = rootBlueprint.ScaffoldedPath[^2];
             Vector2 directionToTarget = (targetPos - lastPoint).normalized;
@@ -44,7 +47,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
                 else
                 {
                     Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
-                    CreateNewPathNode(rootBlueprint, directionToTarget);
+                    rootBlueprint.AppendPoint(rootBlueprint.ScaffoldedPath[^1] + correctedPathNode);
                 }
             }
             else
@@ -62,7 +65,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
         public ScaffoldedRootBlueprint Update(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
         {
             _curIters = 0;
-            while (TryBlueprint(rootBlueprint, targetPos)) ;
+            TryBlueprint(rootBlueprint, targetPos);
 
             return rootBlueprint;
         }

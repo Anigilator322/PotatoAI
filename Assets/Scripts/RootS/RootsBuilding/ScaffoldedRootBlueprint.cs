@@ -21,16 +21,6 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         public IReadOnlyList<Vector2> ScaffoldedPath => scaffoldedPath;
 
-        //public int PointsCount()
-        //{
-        //    return rootBlueprint.RootPath.Count;
-        //}
-
-        //public Vector2 GetPointByIndex(int index)
-        //{
-        //    return rootBlueprint.RootPath[index];
-        //}
-
         public void AppendPoint(Vector2 pathPoint)
         {
             blueprint.AppendPoint(pathPoint);
