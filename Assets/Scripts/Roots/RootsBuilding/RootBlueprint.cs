@@ -3,15 +3,18 @@ using UnityEngine;
 
 namespace Assets.Scripts.Roots.RootsBuilding
 {
-    public class RootBlueprint : IIdentifiable
-    {    
+    public class RootBlueprint : IRootBlueprint, IIdentifiable
+    {
+        private List<Vector2> _rootPath { get; } = new List<Vector2>();
+
+
         public string Id { get; }
-        
-        public RootType RootType { get; }
+
+        public RootType RootType { get; set; }
 
         public RootNode StartRootNode { get; set; }
 
-        public List<Vector2> RootPath { get; } = new List<Vector2>();
+        public IReadOnlyList<Vector2> RootPath => _rootPath.AsReadOnly();
 
         public RootBlueprint(RootType rootType, RootNode startRootNode)
         {
@@ -22,12 +25,21 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         public void AppendPoint(Vector2 pathPoint)
         {
-            RootPath.Add(pathPoint);
+            _rootPath.Add(pathPoint);
         }
 
-        public void RemoveLastPoint()
+        public bool TryRemoveLastPoint()
         {
-            RootPath.RemoveAt(RootPath.Count - 1);
+            if(_rootPath.Count == 0) 
+                return false;
+
+            _rootPath.RemoveAt(_rootPath.Count - 1);
+            return true;
+        }
+
+        public void RemoveFirstPoint()
+        {
+            _rootPath.RemoveAt(0);
         }
     }
 }

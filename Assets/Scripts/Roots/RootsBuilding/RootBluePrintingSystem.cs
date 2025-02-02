@@ -9,7 +9,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         private void CreateNewPathNode(ScaffoldedRootBlueprint rootBlueprint, Vector2 direction)
         {
-            Vector2 lastNodePosition = rootBlueprint.ScaffoldedPath[^1];
+            Vector2 lastNodePosition = rootBlueprint.RootPath[^1];
             direction.Normalize();
             rootBlueprint.AppendPoint(lastNodePosition + direction * _rootSegmentLength);
         }
@@ -18,17 +18,17 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         private BlueprintingResult TryBlueprint(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
         {
-            if (Vector2.Distance(targetPos, rootBlueprint.ScaffoldedPath[^1]) <= _rootSegmentLength)
+            if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _rootSegmentLength)
                 return BlueprintingResult.Unchanged;
 
-            if(rootBlueprint.ScaffoldedPath.Count < 2)
+            if(rootBlueprint.RootPath.Count < 2)
             {
-                CreateNewPathNode(rootBlueprint, targetPos - rootBlueprint.ScaffoldedPath[^1]);
+                CreateNewPathNode(rootBlueprint, targetPos - rootBlueprint.RootPath[^1]);
                 return BlueprintingResult.Incr;
             }
 
-            Vector2 lastPoint = rootBlueprint.ScaffoldedPath[^1];
-            Vector2 secondLastPoint = rootBlueprint.ScaffoldedPath[^2];
+            Vector2 lastPoint = rootBlueprint.RootPath[^1];
+            Vector2 secondLastPoint = rootBlueprint.RootPath[^2];
             Vector2 directionToTarget = (targetPos - lastPoint).normalized;
             Vector2 directionOfPath = (lastPoint - secondLastPoint).normalized;
             
@@ -41,15 +41,19 @@ namespace Assets.Scripts.Roots.RootsBuilding
                 }
                 else
                 {
-                    Vector2 correctedPathNode = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
-                    rootBlueprint.AppendPoint(rootBlueprint.ScaffoldedPath[^1] + correctedPathNode);
+                    Vector2 correctedDirection = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
+                    rootBlueprint.AppendPoint(rootBlueprint.RootPath[^1] + correctedDirection);
                 }
                 return BlueprintingResult.Incr;
             }
             else
             {
-                DecreasePath(rootBlueprint);
-                return BlueprintingResult.Decr;
+                var result = TryDecreasePath(rootBlueprint);
+
+                if(result)
+                    return BlueprintingResult.Decr;
+                else
+                    return BlueprintingResult.Unchanged;
             }
         }
 
@@ -83,7 +87,6 @@ namespace Assets.Scripts.Roots.RootsBuilding
             float cos = Mathf.Cos(rad);
             float sin = Mathf.Sin(rad);
             return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
-
         }
 
         private Vector2 FindMaxAllowedPathNode(Vector2 directionOfPath, Vector2 directionToTarget)
@@ -100,9 +103,9 @@ namespace Assets.Scripts.Roots.RootsBuilding
             return angle;
         }
 
-        private void DecreasePath(ScaffoldedRootBlueprint rootBlueprint)
+        private bool TryDecreasePath(IRootBlueprint rootBlueprint)
         {
-            rootBlueprint.RemoveLastPoint();
+            return rootBlueprint.TryRemoveLastPoint();
         }
 
         private bool IsCoDirected(Vector2 path, Vector2 targetPos)
