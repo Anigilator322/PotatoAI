@@ -118,7 +118,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                 {
                     var id = ids[i];
                     var growingRoot = _growingRoots.Blueprints[ids[i]];
-                    Debug.Log("Growing root " + id);
+                    //Debug.Log("Growing root " + id);
 
                     switch (growingRoot.State)
                     {
@@ -156,7 +156,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             RootNode node = _rootSpawnSystem.SpawnRootNode(
                 new RootNode(position, parent, type));
 
-            growingRoot.Blueprint.RootPath.RemoveAt(0);
+            growingRoot.Blueprint.RemoveFirstPoint();
             growingRoot.Blueprint.StartRootNode = node;
 
             if (growingRoot.Blueprint.RootPath.Count == 0)

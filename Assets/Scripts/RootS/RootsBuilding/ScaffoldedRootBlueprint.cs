@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Assets.Scripts.Roots.RootsBuilding
 {
-    public class ScaffoldedRootBlueprint
+    public class ScaffoldedRootBlueprint : IRootBlueprint
     {
         public RootBlueprint blueprint { get; }
 
-        List<Vector2> scaffoldedPath = new List<Vector2>();
+        List<Vector2> _scaffoldedPath = new List<Vector2>();
 
         public ScaffoldedRootBlueprint(RootType rootType, RootNode startRootNode)
         {
@@ -15,26 +15,39 @@ namespace Assets.Scripts.Roots.RootsBuilding
             if (blueprint.StartRootNode.Childs.Count == 0
                 && startRootNode.Parent is not null)
             {
-                scaffoldedPath.Add(startRootNode.Parent.Transform.position);
+                _scaffoldedPath.Add(startRootNode.Parent.Transform.position);
+            }
+            else
+            {
+                Debug.Log("NEW ROOT");
             }
 
-            scaffoldedPath.Add(startRootNode.Transform.position);
+            _scaffoldedPath.Add(startRootNode.Transform.position);
         }
 
-        public IReadOnlyList<Vector2> ScaffoldedPath => scaffoldedPath;
+        public IReadOnlyList<Vector2> RootPath => _scaffoldedPath;
+
+        public RootType RootType { get => blueprint.RootType; set => blueprint.RootType = value; }
+
+        public RootNode StartRootNode { get => blueprint.StartRootNode; set => blueprint.StartRootNode = value; }
+
+        public string Id => blueprint.Id;
 
         public void AppendPoint(Vector2 pathPoint)
         {
             blueprint.AppendPoint(pathPoint);
-            scaffoldedPath.Add(pathPoint);
+            _scaffoldedPath.Add(pathPoint);
         }
 
-        public void RemoveLastPoint()
+        public bool TryRemoveLastPoint()
         {
-            if (blueprint.RootPath.Count > 0)
-                blueprint.RemoveLastPoint();
-            
-            scaffoldedPath.RemoveAt(scaffoldedPath.Count - 1);
+            if (blueprint.TryRemoveLastPoint())
+            {
+                _scaffoldedPath.RemoveAt(_scaffoldedPath.Count - 1);
+                return true;
+            }
+
+            return false;
         }
     }
 }
