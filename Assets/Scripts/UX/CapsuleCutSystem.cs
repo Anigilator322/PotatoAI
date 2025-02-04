@@ -79,8 +79,8 @@ namespace Assets.Scripts.UX
             mpb.SetInt("_CapsuleCount", Capsules.Count());
             mpb.SetVectorArray("_Capsules", capsuleSegments);
             mpb.SetFloatArray("_CapsuleRadius", capsuleRadii);
-            fogMaterial.SetVector("_MapMin", minMap);
-            fogMaterial.SetVector("_MapMax", maxMap);
+            mpb.SetVector("_MapMin", minMap);
+            mpb.SetVector("_MapMax", maxMap);
 
             rend.SetPropertyBlock(mpb);
             Debug.Log("Capsules updated");
