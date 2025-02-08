@@ -27,11 +27,12 @@ namespace Assets.Scripts.UX
         [Inject] private RootDrawSystem _rootDrawSystem;
         [Inject] private PlantsModel _plantsModel;
 
-        TextMeshProUGUI _costIndicator;
+        TextMeshProUGUI _costIndicator, _justText;
 
-        public PlayerRootBuilderInput(TextMeshProUGUI text)
+        public PlayerRootBuilderInput(TextMeshProUGUI text, TextMeshProUGUI justText)
         {
             _costIndicator = text;
+            _justText = justText;
         }
 
         private bool _isBuilding = false;
@@ -51,10 +52,10 @@ namespace Assets.Scripts.UX
         }
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
-        private ScaffoldedRootBlueprint _currentBlueprint;
+        private DrawingRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 
-        private ScaffoldedRootBlueprint blueprintScaffold
+        private DrawingRootBlueprint drawingBlueprint
         {
             get => _currentBlueprint;
             set 
@@ -91,12 +92,18 @@ namespace Assets.Scripts.UX
 
         void ITickable.Tick()
         {
+            Vector2 mousePos = GetMousePosition();
+
+            _justText.text = mousePos.ToString() + "\n"
+                + _mousePositionAction.ReadValue<Vector2>().ToString();
+
             if (!_isBuilding)
                 return;
             else
                 _costIndicator.text = string.Empty;
+            
 
-            Vector2 mousePos = GetMousePosition();
+
             DrawTrajectory(mousePos);
             UpdateCostIndication(mousePos);
         }
@@ -106,28 +113,28 @@ namespace Assets.Scripts.UX
             List<RootNode> queiriedNodes = playersPlant.Roots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
-            blueprintScaffold = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            drawingBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            blueprintScaffold = _rootBlueprintingSystem.Update(blueprintScaffold, mousePos);
+            drawingBlueprint = _rootBlueprintingSystem.Update(drawingBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
         {
             _costIndicator.text = "";
-            if (blueprintScaffold == null || blueprintScaffold.blueprint.RootPath.Count == 0)
+            if (drawingBlueprint == null || drawingBlueprint.blueprint.RootPath.Count == 0)
                 return;
 
-            if (_metabolicSystem.IsAbleToBuild(blueprintScaffold.blueprint, playersPlant))
+            if (_metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant))
             {
-                _rootGrowthSystem.StartGrowth(blueprintScaffold.blueprint);
-                _playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(blueprintScaffold.blueprint);
+                _rootGrowthSystem.StartGrowth(drawingBlueprint.blueprint);
+                _playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
             }
             else
             {
-                blueprintScaffold = null;
+                drawingBlueprint = null;
             }
         }
 
@@ -161,12 +168,13 @@ namespace Assets.Scripts.UX
 
         #region -cost indicator-
 
+
         private void UpdateCostIndication(Vector2 mousePosition)
         {
-            var cost = _metabolicSystem.CalculateBlueprintPrice(blueprintScaffold.blueprint);
-            _costIndicator.text = cost.ToString();
+            var cost = _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
+            _costIndicator.text = "- " + cost.ToString();
 
-            FollowMouse(_costIndicator.rectTransform, _costIndicator.canvas, new Vector2(100, 10));
+            FollowMouse(_costIndicator.rectTransform, _costIndicator.canvas, new Vector2(50, 35));
         }
 
         //TODO: DECOMPOSE
@@ -180,7 +188,7 @@ namespace Assets.Scripts.UX
 
             //TODO: FIX
             // Get the mouse position in screen space
-            Vector2 mousePosition = Input.mousePosition;
+            Vector2 mousePosition = _mousePositionAction.ReadValue<Vector2>();
 
             // Calculate the desired position with offset
             Vector2 desiredPosition = mousePosition + offset;

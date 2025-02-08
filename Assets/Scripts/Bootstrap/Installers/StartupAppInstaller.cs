@@ -21,7 +21,7 @@ namespace Assets.Scripts.Bootstrap.Installers
         VerticalLayoutGroup resourcesIndicator;
 
         [SerializeField]
-        TextMeshProUGUI caloriesIndicator, buildCostIndicator;
+        TextMeshProUGUI caloriesIndicator, buildCostIndicator, justText;
 
         public override void InstallBindings()
         {
@@ -74,7 +74,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             InputInstaller.Install(Container);
 
             Container.BindInterfacesAndSelfTo<CameraMoveInput>().FromNew().AsSingle();
-            Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().AsSingle().WithArguments(buildCostIndicator);
+            Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().AsSingle().WithArguments(buildCostIndicator, justText);
             Container.BindInterfacesAndSelfTo<UIDataViewModel>().AsSingle().WithArguments(resourcesIndicator, caloriesIndicator, colorsDict);
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle().NonLazy();
         }

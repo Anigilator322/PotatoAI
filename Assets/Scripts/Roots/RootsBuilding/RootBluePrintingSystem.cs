@@ -7,7 +7,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
         public float _rootSegmentLength { get; private set; } = 0.8f;
         public float _maxBuildAngle { get; private set; } = 15f;
 
-        private void CreateNewPathNode(ScaffoldedRootBlueprint rootBlueprint, Vector2 direction)
+        private void CreateNewPathNode(DrawingRootBlueprint rootBlueprint, Vector2 direction)
         {
             Vector2 lastNodePosition = rootBlueprint.RootPath[^1];
             direction.Normalize();
@@ -16,7 +16,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         enum BlueprintingResult { Incr = 1, Decr = -1, Unchanged = 0};
 
-        private BlueprintingResult TryBlueprint(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos)
+        private BlueprintingResult TryBlueprint(DrawingRootBlueprint rootBlueprint, Vector2 targetPos)
         {
             if (Vector2.Distance(targetPos, rootBlueprint.RootPath[^1]) <= _rootSegmentLength)
                 return BlueprintingResult.Unchanged;
@@ -57,12 +57,12 @@ namespace Assets.Scripts.Roots.RootsBuilding
             }
         }
 
-        public ScaffoldedRootBlueprint Create(RootType type, RootNode parentNode)
+        public DrawingRootBlueprint Create(RootType type, RootNode parentNode)
         {
-            return new ScaffoldedRootBlueprint(type, parentNode);
+            return new DrawingRootBlueprint(type, parentNode);
         }
 
-        public ScaffoldedRootBlueprint Update(ScaffoldedRootBlueprint rootBlueprint, Vector2 targetPos, int maxIters = 3)
+        public DrawingRootBlueprint Update(DrawingRootBlueprint rootBlueprint, Vector2 targetPos, int maxIters = 3)
         {
             BlueprintingResult firstResult = TryBlueprint(rootBlueprint, targetPos);
 

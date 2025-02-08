@@ -89,7 +89,7 @@ namespace Assets.Scripts.Roots.Metabolics
             }
         }
 
-        public bool IsAbleToBuild(RootBlueprint blueprint, Plant plant)
+        public bool IsAbleToBuild(DrawingRootBlueprint blueprint, Plant plant)
         {
             if(plant.Resources.Calories >= CalculateBlueprintPrice(blueprint))
             {
@@ -99,9 +99,33 @@ namespace Assets.Scripts.Roots.Metabolics
                 return false;
         }
 
-        public int CalculateBlueprintPrice(RootBlueprint blueprint)
+        public int CalculateBlueprintPrice(DrawingRootBlueprint scaffoldedBlueprint)
         {
-            return (int)Mathf.Pow(blueprint.RootPath.Count, 1.5f);
+            int cost = 0;
+            int startRootNodeDepth = GetDepthOrRootNode(scaffoldedBlueprint.blueprint.StartRootNode);
+            int endRootNodeDepth = startRootNodeDepth + scaffoldedBlueprint.blueprint.RootPath.Count;
+
+            if (scaffoldedBlueprint.IsNewRoot)
+            {
+                //==== Additional cost for founding new root branch ==== 
+                cost += startRootNodeDepth;
+            }
+
+            //==== Basic cost of new root nodes ====
+            
+            cost += (int)Mathf.Pow(endRootNodeDepth, 1.25f) - (int)Mathf.Pow(startRootNodeDepth, 1.25f);
+            return cost;
+        }
+
+        public static int GetDepthOrRootNode(RootNode rootNode)
+        {
+            int depth = 0;
+            while (rootNode.Parent is not null)
+            {
+                depth++;
+                rootNode = rootNode.Parent;
+            }
+            return depth;
         }
     }
 }

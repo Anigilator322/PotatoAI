@@ -3,29 +3,31 @@ using UnityEngine;
 
 namespace Assets.Scripts.Roots.RootsBuilding
 {
-    public class ScaffoldedRootBlueprint : IRootBlueprint
+    public class DrawingRootBlueprint : IRootBlueprint
     {
         public RootBlueprint blueprint { get; }
 
-        List<Vector2> _scaffoldedPath = new List<Vector2>();
+        List<Vector2> _pseudoRootPath = new List<Vector2>();
 
-        public ScaffoldedRootBlueprint(RootType rootType, RootNode startRootNode)
+        public DrawingRootBlueprint(RootType rootType, RootNode startRootNode)
         {
             blueprint = new RootBlueprint(rootType, startRootNode);
             if (blueprint.StartRootNode.Childs.Count == 0
                 && startRootNode.Parent is not null)
             {
-                _scaffoldedPath.Add(startRootNode.Parent.Transform.position);
+                _pseudoRootPath.Add(startRootNode.Parent.Transform.position);
+                IsNewRoot = false;
             }
             else
             {
+                IsNewRoot = true;
                 Debug.Log("NEW ROOT");
             }
 
-            _scaffoldedPath.Add(startRootNode.Transform.position);
+            _pseudoRootPath.Add(startRootNode.Transform.position);
         }
 
-        public IReadOnlyList<Vector2> RootPath => _scaffoldedPath;
+        public IReadOnlyList<Vector2> RootPath => _pseudoRootPath;
 
         public RootType RootType { get => blueprint.RootType; set => blueprint.RootType = value; }
 
@@ -33,17 +35,19 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         public string Id => blueprint.Id;
 
+        public bool IsNewRoot { get; set; }
+
         public void AppendPoint(Vector2 pathPoint)
         {
             blueprint.AppendPoint(pathPoint);
-            _scaffoldedPath.Add(pathPoint);
+            _pseudoRootPath.Add(pathPoint);
         }
 
         public bool TryRemoveLastPoint()
         {
             if (blueprint.TryRemoveLastPoint())
             {
-                _scaffoldedPath.RemoveAt(_scaffoldedPath.Count - 1);
+                _pseudoRootPath.RemoveAt(_pseudoRootPath.Count - 1);
                 return true;
             }
 

@@ -77,6 +77,8 @@ public class UIDataViewModel : ITickable
         {
             playerPlant = _plantsModel.Plants
                 .SingleOrDefault(plant => plant.Id == PlayerRootBuilderInput.PLAYER_ID);
+
+            resourcesData.transform.parent.position = playerPlant.transform.position + new Vector3(0, 2f, 0);
         }
     }
 }
