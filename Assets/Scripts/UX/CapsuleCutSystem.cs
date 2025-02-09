@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.UX
@@ -75,6 +71,8 @@ namespace Assets.Scripts.UX
             capsuleBuffer.SetData(_capsuleDatas);
             mpb.SetBuffer("capsuleBuffer", capsuleBuffer);
             mpb.SetInt("_CapsuleCount", _capsuleDatas.Count());
+            mpb.SetVector("_MapMin", minMap);
+            mpb.SetVector("_MapMax", maxMap);
             rend.SetPropertyBlock(mpb);
         }
     }

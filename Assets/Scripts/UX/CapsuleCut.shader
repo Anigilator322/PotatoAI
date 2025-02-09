@@ -4,7 +4,6 @@ Shader "Custom/CapsuleCut"
     {
         _FogColor ("Fog Color", Color) = (0,0,0,1)
         _MainTex ("Sprite Texture", 2D) = "white" {}
-        // _CapsuleCount задаётся из кода
     }
     SubShader
     {
@@ -23,11 +22,12 @@ Shader "Custom/CapsuleCut"
             sampler2D _MainTex;
             fixed4 _FogColor;
             int _CapsuleCount;
+            float2 _MapMin;
+            float2 _MapMax;
 
-            // Структура данных, должна соответствовать структуре из C#
             struct CapsuleData {
-                float4 points; // xy: start, zw: end (в нормализованных координатах)
-                float4 extra;  // x: нормализованный радиус
+                float4 points; 
+                float4 extra;  
             };
 
             StructuredBuffer<CapsuleData> capsuleBuffer;
@@ -42,17 +42,15 @@ Shader "Custom/CapsuleCut"
                 float4 vertex : SV_POSITION;
             };
 
-            v2f vert (appdata v)
+            v2f vert(appdata v)
             {
                 v2f o;
-                // Если ваш объект тумана покрывает всю карту и имеет корректные uv,
-                // их можно использовать напрямую
+                float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
+                o.uv = (worldPos.xy - _MapMin) / (_MapMax - _MapMin);
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
                 return o;
             }
 
-            // Функция для вычисления расстояния от точки до отрезка
             float segmentDistance(float2 p, float2 a, float2 b)
             {
                 float2 pa = p - a;
@@ -65,7 +63,6 @@ Shader "Custom/CapsuleCut"
             {
                 float2 pos = i.uv;
                 float alpha = 1.0;
-                // Перебираем все капсулы из StructuredBuffer
                 for (int j = 0; j < _CapsuleCount; j++)
                 {
                     CapsuleData cd = capsuleBuffer[j];
