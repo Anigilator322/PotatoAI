@@ -17,7 +17,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.Bind<RootSpawnSystem>().AsSingle();
             Container.Bind<RootGrowthSystem>().AsSingle();
-            Container.Bind<MetabolicSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<RootDrawSystem>().AsSingle();
             Container.Bind<VisibilitySystem>().FromNew().AsSingle();
         }
