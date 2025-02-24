@@ -19,6 +19,7 @@ public class MonoBehHelper : MonoBehaviour
     [Inject] 
     private VisibilitySystem _visibilitySystem;
     #endregion
+
     private void Awake()
     {
         Application.targetFrameRate = 144;

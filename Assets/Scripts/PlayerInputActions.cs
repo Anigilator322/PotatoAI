@@ -44,6 +44,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Arrows"",
+                    ""type"": ""Value"",
+                    ""id"": ""00ac5399-13eb-4975-9683-32f7ebb01398"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -68,6 +77,116 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""LBMPressed"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""daf0b7dc-2d37-405c-bbe0-c1235832ab8b"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""a558dfaa-cfe6-4888-807e-d8f295d2bb19"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""31e4d2c9-3524-45e1-a357-09ecc3ac9caf"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""f477f3b2-05ca-4af1-959c-7edf3b5e7aad"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""72c53eba-d7af-459d-bec3-3fc86f0f391e"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""8e188e0a-7bf5-4c98-a175-d044f8a7e3d0"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""74b43968-703a-449a-90c2-3142b297f9a7"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""7569e3b2-aeed-40e9-a4bc-4dd225647d43"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""a3fb891d-9c64-4a3c-8161-c18fd397f956"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""08dc9af7-8565-4ca4-9084-9e0e3237a08d"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Arrows"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -78,6 +197,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_PlayerMap = asset.FindActionMap("PlayerMap", throwIfNotFound: true);
         m_PlayerMap_MousePosition = m_PlayerMap.FindAction("MousePosition", throwIfNotFound: true);
         m_PlayerMap_LBMPressed = m_PlayerMap.FindAction("LBMPressed", throwIfNotFound: true);
+        m_PlayerMap_Arrows = m_PlayerMap.FindAction("Arrows", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -141,12 +261,14 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private List<IPlayerMapActions> m_PlayerMapActionsCallbackInterfaces = new List<IPlayerMapActions>();
     private readonly InputAction m_PlayerMap_MousePosition;
     private readonly InputAction m_PlayerMap_LBMPressed;
+    private readonly InputAction m_PlayerMap_Arrows;
     public struct PlayerMapActions
     {
         private @PlayerInputActions m_Wrapper;
         public PlayerMapActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @MousePosition => m_Wrapper.m_PlayerMap_MousePosition;
         public InputAction @LBMPressed => m_Wrapper.m_PlayerMap_LBMPressed;
+        public InputAction @Arrows => m_Wrapper.m_PlayerMap_Arrows;
         public InputActionMap Get() { return m_Wrapper.m_PlayerMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -162,6 +284,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @LBMPressed.started += instance.OnLBMPressed;
             @LBMPressed.performed += instance.OnLBMPressed;
             @LBMPressed.canceled += instance.OnLBMPressed;
+            @Arrows.started += instance.OnArrows;
+            @Arrows.performed += instance.OnArrows;
+            @Arrows.canceled += instance.OnArrows;
         }
 
         private void UnregisterCallbacks(IPlayerMapActions instance)
@@ -172,6 +297,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @LBMPressed.started -= instance.OnLBMPressed;
             @LBMPressed.performed -= instance.OnLBMPressed;
             @LBMPressed.canceled -= instance.OnLBMPressed;
+            @Arrows.started -= instance.OnArrows;
+            @Arrows.performed -= instance.OnArrows;
+            @Arrows.canceled -= instance.OnArrows;
         }
 
         public void RemoveCallbacks(IPlayerMapActions instance)
@@ -193,5 +321,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     {
         void OnMousePosition(InputAction.CallbackContext context);
         void OnLBMPressed(InputAction.CallbackContext context);
+        void OnArrows(InputAction.CallbackContext context);
     }
 }

@@ -9,8 +9,38 @@ using UnityEngine.UIElements;
 using Zenject;
 namespace Assets.Scripts.Map
 {
+    public class Cell<T> where T : IPositionedObject
+    {
+        private List<T> _positionedObjects;
 
-    public class GridPartition<T> : IObjectsQuery<T>
+        public Cell()
+        {
+            _positionedObjects = new List<T>();
+        }
+
+        public Cell(T point)
+        {
+            _positionedObjects = new List<T>();
+            _positionedObjects.Add(point);
+        }
+
+        public void AddObject(T point)
+        {
+            _positionedObjects.Add(point);
+        }
+
+        public void RemoveObject(T point)
+        {
+            _positionedObjects.Remove(point);
+        }
+
+        public List<T> GetObjects()
+        {
+            return _positionedObjects;
+        }
+    }
+
+    public class GridPartition<T> 
         where T : IPositionedObject
     {
         private int _cellSize;
@@ -42,7 +72,16 @@ namespace Assets.Scripts.Map
                 _grid[cellCoordinates].AddObject(positionedObject);
             }
         }
-        
+
+        public void Remove(T positionedObject)
+        {
+            Vector2Int cellCoordinates = GetCellCoordinates((Vector2)positionedObject.Transform.position);
+            
+            _grid[cellCoordinates].RemoveObject(positionedObject);
+            if (_grid[cellCoordinates].GetObjects().Count == 0)
+                _grid.Remove(cellCoordinates);
+        }
+
         private List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
@@ -80,6 +119,7 @@ namespace Assets.Scripts.Map
 
             List<T> positionedObjects = new List<T>();
 
+
             for (int x = minCell.x; x <= maxCell.x; x++)
             {
                 for (int y = minCell.y; y <= maxCell.y; y++)
@@ -95,8 +135,6 @@ namespace Assets.Scripts.Map
                     }
                 }
             }
-
-
             if(strictSelection)
                 return Geometry.GetObjectsInRadius<T>(worldPosCenter, radius, positionedObjects);
             else
@@ -112,6 +150,5 @@ namespace Assets.Scripts.Map
         {
             return _cellSize;
         }
-
     }
 }

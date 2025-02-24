@@ -24,14 +24,17 @@ public class Soil : MonoBehaviour
         _gridPartition.Insert(resourcePoint);
     }
 
-    public List<ResourcePoint> GetResourcesFromCircle(float circleRadius, Vector2 circleCenter)
+    public void RemoveResource(ResourcePoint resourcePoint)
     {
-        return _gridPartition.QueryByCircle(circleRadius, circleCenter);
+        resourcePoint.Dismiss();
+        Destroy(resourcePoint.Transform.gameObject);
+        Resources.Remove(resourcePoint);
+        _gridPartition.Remove(resourcePoint);
     }
 
-    public List<ResourcePoint> GetResourcesFromCellDirectly(Vector2Int cellPos)
+    public List<ResourcePoint> GetResourcesFromCircle(float circleRadius, Vector2 circleCenter)
     {
-        return _gridPartition.QueryDirectlyCell(cellPos);
+        return _gridPartition.Query(circleRadius, circleCenter);
     }
 
     public class Factory : IFactory<Soil>

@@ -1,3 +1,5 @@
+
+using Assets.Scripts;
 using Assets.Scripts.Bootstrap;
 using Assets.Scripts.Map;
 using System.Collections;
@@ -14,11 +16,15 @@ public enum ResourceType
     Potassium
 }
 
-public class ResourcePoint : IPositionedObject
+public class ResourcePoint : IPositionedObject, IDismissable
 {
     public Transform Transform { get; }
     public ResourceType ResourceType { get; set; }
     public float Amount { get; set; }
+
+    public bool IsDismissed { get; protected set; }
+
+    public void Dismiss() => IsDismissed = true;
 
     public ResourcePoint(ResourceType resourceType, float amount, Vector2 position)
     {

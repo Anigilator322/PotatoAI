@@ -34,6 +34,12 @@ namespace Assets.Scripts.Roots
             return newResourcePoint;
         }
 
+        public void DestroyResourcePoint(ResourcePoint resourcePoint)
+        {
+            _soil.RemoveResource(resourcePoint);
+            _rootNodeContactsSystem.UpdateContactsByResourcePoint(resourcePoint);
+        }
+
         public void FillSoilUniformly()
         {
             Bounds soilBounds = _soil.Sprite.bounds;

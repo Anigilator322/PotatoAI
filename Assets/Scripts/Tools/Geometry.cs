@@ -34,6 +34,7 @@ namespace Assets.Scripts.Tools
             return objectsInRectangle;
         }
 
+
         private static bool IsPointInCircle(Vector2 center, float radius, Vector2 point)
         {
             float distance = Vector2.Distance(center, point);

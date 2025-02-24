@@ -6,6 +6,7 @@ using Assets.Scripts.Roots.RootsBuilding.Growing;
 using Assets.Scripts.Roots.View;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
@@ -26,34 +27,44 @@ namespace Assets.Scripts.UX
         [Inject] private RootDrawSystem _rootDrawSystem;
         [Inject] private PlantsModel _plantsModel;
 
-        private bool _isDragging = false;
-        private PlantRoots _playersPlantRoots;
-        private PlantRoots PlayersPlantRoots 
+        TextMeshProUGUI _costIndicator, _justText;
+
+        public PlayerRootBuilderInput(TextMeshProUGUI text, TextMeshProUGUI justText)
+        {
+            _costIndicator = text;
+            _justText = justText;
+        }
+
+        private bool _isBuilding = false;
+        private Plant _playersPlant;
+        private Plant playersPlant
         { 
             get
             {
-                if (_playersPlantRoots is null)
+                if (_playersPlant is null)
                 {
-                    _playersPlantRoots = _plantsModel.Plants
-                        .Single(p => p.Id == PLAYER_ID)
-                            .Roots;
+                    _playersPlant = _plantsModel.Plants
+                        .Single(p => p.Id == PLAYER_ID);
                 }
 
-                return _playersPlantRoots;
+                return _playersPlant;
             } 
         }
         private RootNode _clickedNode;
         private RootType _selectedType = RootType.Harvester;
-        private ScaffoldedRootBlueprint _currentBlueprint;
+        private DrawingRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 
-        private ScaffoldedRootBlueprint blueprintScaffold
+        private DrawingRootBlueprint drawingBlueprint
         {
             get => _currentBlueprint;
             set 
             {
                 _currentBlueprint = value;
-                _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint.blueprint };
+                if (_currentBlueprint is null)
+                    _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { };
+                else
+                    _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint.blueprint };
             }
         }
 
@@ -71,49 +82,66 @@ namespace Assets.Scripts.UX
                 Vector2 mousePosition = GetMousePosition();
                 if (IsClickedOnRoot(mousePosition))
                 {
-                    _isDragging = true;
+                    _isBuilding = true;
                     PrepareBlueprint(mousePosition);
                 }
             };
 
-            LBMPressedAction.canceled += _ => { _isDragging = false; CancelBlueprinting(); };
+            LBMPressedAction.canceled += _ => { _isBuilding = false; CancelBlueprinting(); };
         }
 
         void ITickable.Tick()
         {
-            if (!_isDragging)
-                return;
-            //Debug.Log("Drawing trajectory");
-            //Debug.Log("Mouse position: " + GetMousePosition());
             Vector2 mousePos = GetMousePosition();
+
+            _justText.text = mousePos.ToString() + "\n"
+                + _mousePositionAction.ReadValue<Vector2>().ToString();
+
+            if (!_isBuilding)
+                return;
+            else
+                _costIndicator.text = string.Empty;
+            
+
+
             DrawTrajectory(mousePos);
+            UpdateCostIndication(mousePos);
         }
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
-            List<RootNode> queiriedNodes = PlayersPlantRoots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
+            List<RootNode> queiriedNodes = playersPlant.Roots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
             _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
 
-            blueprintScaffold = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            drawingBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            blueprintScaffold = _rootBlueprintingSystem.Update(blueprintScaffold, mousePos);
+            drawingBlueprint = _rootBlueprintingSystem.Update(drawingBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
         {
-            if (blueprintScaffold == null || blueprintScaffold.blueprint.RootPath.Count == 0)
+            _costIndicator.text = "";
+            if (drawingBlueprint == null || drawingBlueprint.blueprint.RootPath.Count == 0)
                 return;
-            if (_metabolicSystem.IsAbleToBuild(blueprintScaffold.blueprint))
-                _rootGrowthSystem.StartGrowth(blueprintScaffold.blueprint);
+
+            if (_metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant))
+            {
+                _rootGrowthSystem.StartGrowth(drawingBlueprint.blueprint);
+                _playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
+            }
+            else
+            {
+                drawingBlueprint = null;
+            }
         }
 
         private bool IsClickedOnRoot(Vector2 mousePosition)
         {
 
-            if (PlayersPlantRoots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition).Count != 0)
+            if (playersPlant.Roots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition).Count != 0)
             {
                 return true;
             }
@@ -137,5 +165,80 @@ namespace Assets.Scripts.UX
             }
             return closestNode;
         }
+
+        #region -cost indicator-
+
+
+        private void UpdateCostIndication(Vector2 mousePosition)
+        {
+            var cost = _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
+            _costIndicator.text = "- " + cost.ToString();
+
+            FollowMouse(_costIndicator.rectTransform, _costIndicator.canvas, new Vector2(50, 35));
+        }
+
+        //TODO: DECOMPOSE
+        private void FollowMouse(RectTransform panelRectTransform, Canvas canvas, Vector2 offset)
+        {
+            if (panelRectTransform == null || canvas == null)
+            {
+                Debug.LogWarning("Panel RectTransform or Canvas is not assigned.");
+                return;
+            }
+
+            //TODO: FIX
+            // Get the mouse position in screen space
+            Vector2 mousePosition = _mousePositionAction.ReadValue<Vector2>();
+
+            // Calculate the desired position with offset
+            Vector2 desiredPosition = mousePosition + offset;
+
+            // Convert the desired position to canvas space
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform,
+                desiredPosition,
+                canvas.worldCamera,
+                out Vector2 localPoint
+            );
+
+            // Adjust the panel's position
+            panelRectTransform.localPosition = localPoint;
+
+            // Ensure the panel stays within the camera's viewport
+            ClampToViewport(panelRectTransform, canvas);
+        }
+
+        /// <summary>
+        /// Clamps the UI element's position to stay within the camera's viewport.
+        /// </summary>
+        /// <param name="panelRectTransform">The RectTransform of the UI element.</param>
+        /// <param name="canvas">The Canvas containing the UI element.</param>
+        private static void ClampToViewport(RectTransform panelRectTransform, Canvas canvas)
+        {
+            // Get the canvas size
+            Vector2 canvasSize = canvas.GetComponent<RectTransform>().sizeDelta;
+
+            // Get the panel size
+            Vector2 panelSize = panelRectTransform.sizeDelta;
+
+            // Get the current position of the panel
+            Vector2 panelPosition = panelRectTransform.anchoredPosition;
+
+            // Calculate the minimum and maximum positions
+            float minX = -canvasSize.x / 2 + panelSize.x / 2;
+            float maxX = canvasSize.x / 2 - panelSize.x / 2;
+            float minY = -canvasSize.y / 2 + panelSize.y / 2;
+            float maxY = canvasSize.y / 2 - panelSize.y / 2;
+
+            // Clamp the position
+            panelPosition.x = Mathf.Clamp(panelPosition.x, minX, maxX);
+            panelPosition.y = Mathf.Clamp(panelPosition.y, minY, maxY);
+
+            // Apply the clamped position
+            panelRectTransform.anchoredPosition = panelPosition;
+        }
+
+        #endregion -cost indicator-
     }
 }
+

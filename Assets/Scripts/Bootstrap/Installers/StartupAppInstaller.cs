@@ -2,7 +2,9 @@ using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.UX;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Assets.Scripts.Bootstrap.Installers
@@ -14,6 +16,12 @@ namespace Assets.Scripts.Bootstrap.Installers
 
         [SerializeField]
         ResourcePointsConfig resourcePointsConfig;
+
+        [SerializeField]
+        VerticalLayoutGroup resourcesIndicator;
+
+        [SerializeField]
+        TextMeshProUGUI caloriesIndicator, buildCostIndicator, justText;
 
         public override void InstallBindings()
         {
@@ -34,17 +42,17 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootNodeContactsSystem>().AsSingle()
                 .WithArguments(resourcePointsConfig.size);
 
+            var colorsDict = new Dictionary<ResourceType, Color>()
+            {
+                [ResourceType.Water] = resourcePointsConfig.water,
+                [ResourceType.Nitrogen] = resourcePointsConfig.nitrogen,
+                [ResourceType.Phosphorus] = resourcePointsConfig.phosphorus,
+                [ResourceType.Potassium] = resourcePointsConfig.potassium
+            };
+
             Container.BindInterfacesAndSelfTo<ResourceDrawSystem>()
                 .FromMethod(x =>
                 {
-                    var colorsDict = new Dictionary<ResourceType, Color>()
-                    {
-                        [ResourceType.Water] = resourcePointsConfig.water,
-                        [ResourceType.Nitrogen] = resourcePointsConfig.nitrogen,
-                        [ResourceType.Phosphorus] = resourcePointsConfig.phosphorus,
-                        [ResourceType.Potassium] = resourcePointsConfig.potassium
-                    };
-
                     return new ResourceDrawSystem(
                         Container.Resolve<Soil>(),
                         resourcePointsConfig.size,
@@ -65,7 +73,9 @@ namespace Assets.Scripts.Bootstrap.Installers
             GameSystemsInstaller.Install(Container);
             InputInstaller.Install(Container);
 
-            Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<CameraMoveInput>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlayerRootBuilderInput>().AsSingle().WithArguments(buildCostIndicator, justText);
+            Container.BindInterfacesAndSelfTo<UIDataViewModel>().AsSingle().WithArguments(resourcesIndicator, caloriesIndicator, colorsDict);
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNew().AsSingle().NonLazy();
         }
     }

@@ -27,7 +27,7 @@ void CircleShaderGraph_float(UnityTexture2D coordinatesData, UnityTexture2D colo
         
         if (drawOutline && (abs(dist - radius) < outlineWidth))
         {
-            result = float4(0.875, 0.7, 0.00, 0.3);
+            result = float4(0.43, 0.34, 0.3, 0.9);
             return;
         }
         
@@ -39,5 +39,10 @@ void CircleShaderGraph_float(UnityTexture2D coordinatesData, UnityTexture2D colo
     }
     
     result /= j;
-    result.a = saturate(sqrt(j) / 12);
+
+    if(j == 1)
+        return;
+    
+    j--;
+    result.a = saturate(result.a * (1 + (j / (j + 2))));
 }
