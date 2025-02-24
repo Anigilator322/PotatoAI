@@ -34,8 +34,14 @@ public class Soil : MonoBehaviour
 
     public List<ResourcePoint> GetResourcesFromCircle(float circleRadius, Vector2 circleCenter)
     {
-        return _gridPartition.Query(circleRadius, circleCenter);
+        return _gridPartition.QueryByCircle(circleRadius, circleCenter);
     }
+
+    public List<ResourcePoint> GetResourcesFromCellDirectly(Vector2Int cellPos)
+    {
+        return _gridPartition.QueryDirectlyCell(cellPos);
+    }
+
 
     public class Factory : IFactory<Soil>
     {
