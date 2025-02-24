@@ -21,7 +21,8 @@ namespace Assets.Scripts.Roots.RootsBuilding
             if(_curIters >= _maxIters)
                 return false;
             _curIters++;
-            //Debug.Log("Trying to blueprint");
+            Debug.Log("Trying to blueprint");
+            
             if (Vector2.Distance(targetPos, rootBlueprint.ScaffoldedPath[^1]) <= _rootSegmentLength)
                 return false;
             if(rootBlueprint.ScaffoldedPath.Count < 2)
