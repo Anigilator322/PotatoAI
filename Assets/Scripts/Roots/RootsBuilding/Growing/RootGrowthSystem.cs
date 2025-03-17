@@ -21,6 +21,8 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
     {
         private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
+        private SynchronizationContext _mainThreadContext;
+
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
 
@@ -30,6 +32,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
+            _mainThreadContext = System.Threading.SynchronizationContext.Current;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -47,9 +50,11 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             StartGrowingCoroutine();
         }
 
+        bool coroutineIsRunning = false;
+
         private bool IsCoroutineRunning()
         {
-            return _growRootsCancellationTokenSource != null;
+            return _growRootsCancellationTokenSource is not null;
         }
 
         private void StartGrowingCoroutine()
@@ -113,12 +118,14 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                 {
                     var id = ids[i];
                     var growingRoot = _growingRoots.Blueprints[ids[i]];
-                    Debug.Log("Growing root " + id);
+                    //Debug.Log("Growing root " + id);
 
                     switch (growingRoot.State)
                     {
                         case GrowthState.Growing:
-                            SpawnNode(growingRoot);
+
+                            //Debug.Log("Spawn for root " + id);
+                            _mainThreadContext.Post(_ => SpawnNode(growingRoot), null);
                             break;
                         
                         case GrowthState.Paused:
@@ -127,6 +134,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                         case GrowthState.Canceled:
                         case GrowthState.Failed:
                         case GrowthState.Completed:
+                            //Debug.Log("Remove root " + id);
                             _growingRoots.RemoveBlueprint(id);
 
                             break;
@@ -140,13 +148,15 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
+
             RootNode parent = growingRoot.Blueprint.StartRootNode;
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;
 
-            RootNode node = _rootSpawnSystem.SpawnRootNode(growingRoot.Plant.Roots, parent, position, type);
+            RootNode node = _rootSpawnSystem.SpawnRootNode(
+                new RootNode(position, parent, type));
 
-            growingRoot.Blueprint.RootPath.RemoveAt(0);
+            growingRoot.Blueprint.RemoveFirstPoint();
             growingRoot.Blueprint.StartRootNode = node;
 
             if (growingRoot.Blueprint.RootPath.Count == 0)

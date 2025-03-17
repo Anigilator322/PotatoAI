@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Assets.Scripts.Roots
 {
-    public class RootNode : PositionedObject
+    public class RootNode : IPositionedObject
     {
+        public Transform Transform { get; }
         public RootType Type { get; }
 
         public bool IsRootBase => Parent is null;
@@ -13,13 +14,17 @@ namespace Assets.Scripts.Roots
 
         public RootNode(Vector2 position, RootNode parent, RootType type)
         {
-            this.Position = position;
-            this.Type = type;
+            Transform = new GameObject().transform;
+            Transform.position = position;
+            Type = type;
+            Transform.name = nameof(this.Type);
 
             if(parent is not null)
             {
-                this.Parent = parent;
                 parent.Childs.Add(this);
+                
+                Parent = parent;
+                Transform.parent = Parent.Transform;
             }
         }
 

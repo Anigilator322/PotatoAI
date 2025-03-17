@@ -9,12 +9,13 @@ namespace Assets.Scripts.Roots.Tools
 
         private void OnDrawGizmos()
         {
+            if(plant is not null)
             if (plant.Roots.Nodes.Count > 0)
             {
                 foreach (var node in plant.Roots.Nodes)
                 {
                     Gizmos.color = Color.red;
-                    Gizmos.DrawSphere(node.Position, 0.1f);
+                    Gizmos.DrawSphere(node.Transform.position, 0.1f);
                 }
             }
         }

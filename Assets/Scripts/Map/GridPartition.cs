@@ -1,4 +1,5 @@
 using Assets.Scripts.Roots;
+using Assets.Scripts.Tools;
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,34 +9,42 @@ using UnityEngine.UIElements;
 using Zenject;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T> where T : PositionedObject
+    public class Cell<T> where T : IPositionedObject
     {
         private List<T> _positionedObjects;
+
         public Cell()
         {
             _positionedObjects = new List<T>();
         }
+
         public Cell(T point)
         {
             _positionedObjects = new List<T>();
             _positionedObjects.Add(point);
         }
-        public void AddIndex(T point)
+
+        public void AddObject(T point)
         {
             _positionedObjects.Add(point);
         }
-        public List<T> GetIndexes()
+
+        public void RemoveObject(T point)
+        {
+            _positionedObjects.Remove(point);
+        }
+
+        public List<T> GetObjects()
         {
             return _positionedObjects;
         }
     }
 
     public class GridPartition<T> 
-        where T : PositionedObject
+        where T : IPositionedObject
     {
         private int _cellSize;
         private Dictionary<Vector2Int, Cell<T>> _grid;
-        //private List<T> _positionedObjects = new List<T>();
 
         public GridPartition(int cellSize)
         { 
@@ -50,11 +59,9 @@ namespace Assets.Scripts.Map
             return new Vector2Int(x, y);    
         }
 
-
         public void Insert(T positionedObject)
         {
-
-            Vector2Int cellCoordinates = GetCellCoordinates(positionedObject.Position);
+            Vector2Int cellCoordinates = GetCellCoordinates((Vector2)positionedObject.Transform.position);
 
             if (!_grid.ContainsKey(cellCoordinates))
             {
@@ -62,30 +69,40 @@ namespace Assets.Scripts.Map
             }
             else
             {
-                _grid[cellCoordinates].AddIndex(positionedObject);
+                _grid[cellCoordinates].AddObject(positionedObject);
             }
         }
+
+        public void Remove(T positionedObject)
+        {
+            Vector2Int cellCoordinates = GetCellCoordinates((Vector2)positionedObject.Transform.position);
+            
+            _grid[cellCoordinates].RemoveObject(positionedObject);
+            if (_grid[cellCoordinates].GetObjects().Count == 0)
+                _grid.Remove(cellCoordinates);
+        }
+
         private List<T> GetPointsInCell(Vector2Int cellCoordinates)
         {
             if (_grid.ContainsKey(cellCoordinates))
             {
-                return _grid[cellCoordinates].GetIndexes();
+                return _grid[cellCoordinates].GetObjects();
             }
 
             return new List<T>();
         }
 
-        private bool isAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 center, float radius)
+        private bool IsAnyCornerInRadius(Vector2Int cellCoordinates, Vector2 worldPosCenter, float radius)
         {
             Vector2 downLeft = new Vector2(cellCoordinates.x * _cellSize, cellCoordinates.y * _cellSize);
             Vector2 upRight = new Vector2(downLeft.x + _cellSize, downLeft.y + _cellSize);
             Vector2 upLeft = new Vector2(downLeft.x,downLeft.y + _cellSize);
             Vector2 downRight = new Vector2(downLeft.x + _cellSize, downLeft.y);
 
-            if (Vector2.Distance(downLeft, center) < radius) return true;
-            if (Vector2.Distance(upRight, center) < radius) return true;
-            if (Vector2.Distance(downRight, center) < radius) return true;
-            if (Vector2.Distance(upLeft,center)<radius) return true;
+            if (Vector2.Distance(downLeft, worldPosCenter) < radius) return true;
+            if (Vector2.Distance(upRight, worldPosCenter) < radius) return true;
+            if (Vector2.Distance(downRight, worldPosCenter) < radius) return true;
+            if (Vector2.Distance(upLeft,worldPosCenter)<radius) return true;
 
             return false;
         }
@@ -95,14 +112,14 @@ namespace Assets.Scripts.Map
             Vector2Int cellCoordinates = GetCellCoordinates(worldPosition);
             return GetPointsInCell(cellCoordinates);
         }
-        public List<T> Query(float radius, Vector2 center)
+
+        public List<T> Query(float radius, Vector2 worldPosCenter, bool strictSelection = true)
         {
-
             // ¬ычисл€ем диапазон €чеек дл€ проверки
-            Vector2Int minCell = GetCellCoordinates(new Vector2(center.x - radius, center.y - radius));
-            Vector2Int maxCell = GetCellCoordinates(new Vector2(center.x + radius, center.y + radius));
+            Vector2Int minCell = GetCellCoordinates(new Vector2(worldPosCenter.x - radius, worldPosCenter.y - radius));
+            Vector2Int maxCell = GetCellCoordinates(new Vector2(worldPosCenter.x + radius, worldPosCenter.y + radius));
 
-            List<T> indexes = new List<T>();
+            List<T> positionedObjects = new List<T>();
 
             // ѕеребираем все €чейки в этом диапазоне
             for (int x = minCell.x; x <= maxCell.x; x++)
@@ -114,24 +131,28 @@ namespace Assets.Scripts.Map
                     // ≈сли €чейка существует
                     if (_grid.ContainsKey(cellCoordinates))
                     {
-                        if (isAnyCornerInRadius(cellCoordinates, center, radius))
+                        if (IsAnyCornerInRadius(cellCoordinates, worldPosCenter, radius))
                         {
-                            indexes.AddRange(_grid[cellCoordinates].GetIndexes());
+                            positionedObjects.AddRange(_grid[cellCoordinates].GetObjects());
                         } 
                     }
                 }
             }
 
-            return indexes;
+            if(strictSelection)
+                return Geometry.GetObjectsInRadius<T>(worldPosCenter, radius, positionedObjects);
+            else
+                return positionedObjects;
         }
+
         public Dictionary<Vector2Int, Cell<T>> GetAllCellsWithPoints()
         {
             return _grid;
         }
+
         public int GetCellSize()
         {
             return _cellSize;
         }
-
     }
 }

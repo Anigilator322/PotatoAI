@@ -2,6 +2,8 @@
 {
     public interface IDismissable
     {
-        bool IsDismissed { get; set; }
+        bool IsDismissed { get; }
+
+        public void Dismiss();
     }
 }

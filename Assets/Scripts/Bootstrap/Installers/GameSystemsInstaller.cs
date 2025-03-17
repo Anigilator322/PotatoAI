@@ -3,6 +3,7 @@ using Assets.Scripts.Roots.Metabolics;
 using Assets.Scripts.Roots.RootsBuilding;
 using Assets.Scripts.Roots.RootsBuilding.Growing;
 using Assets.Scripts.Roots.View;
+using System.Diagnostics.Contracts;
 using Zenject;
 
 namespace Assets.Scripts.Bootstrap.Installers
@@ -12,11 +13,11 @@ namespace Assets.Scripts.Bootstrap.Installers
         public override void InstallBindings()
         {
             //Systems
-            Container.Bind<RootBlueprintingSystem>().FromNew().AsSingle();
-            Container.Bind<RootSpawnSystem>().FromNew().AsSingle();
-            Container.Bind<RootGrowthSystem>().FromNew().AsSingle();
-            Container.Bind<MetabolicSystem>().FromNew().AsSingle();
-            Container.BindInterfacesAndSelfTo<RootDrawSystem>().FromNew().AsSingle();
+            Container.Bind<RootBlueprintingSystem>().AsSingle();
+            Container.Bind<RootSpawnSystem>().AsSingle();
+            Container.Bind<RootGrowthSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<RootDrawSystem>().AsSingle();
         }
     }
 }
