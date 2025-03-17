@@ -40,7 +40,6 @@ namespace Assets.Scripts.Roots
             _rootNodeContactsSystem.UpdateContactsByResourcePoint(resourcePoint);
         }
 
-
         public void FillSoilUniformly()
         {
             Bounds soilBounds = _soil.Sprite.bounds;

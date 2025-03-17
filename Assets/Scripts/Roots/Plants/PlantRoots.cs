@@ -30,11 +30,17 @@ namespace Assets.Scripts.Roots.Plants
             rootNode.Transform.parent = plant.transform;
             Nodes.Add(rootNode);
             _gridPartition.Insert(rootNode);
+
         }
 
         public List<RootNode> GetNodesFromCircle(float circleRadius, Vector2 circleCenter)
         {
-            return _gridPartition.Query(circleRadius, circleCenter);
+            return _gridPartition.QueryByCircle(circleRadius, circleCenter);
+        }
+
+        public List<RootNode> GetNodesFromCellDirectly(Vector2Int cellPos)
+        {
+            return _gridPartition.QueryDirectlyCell(cellPos);
         }
 
         public class Factory : IFactory<Plant, PlantRoots>

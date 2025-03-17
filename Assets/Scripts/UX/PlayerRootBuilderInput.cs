@@ -124,18 +124,16 @@ namespace Assets.Scripts.UX
         private void CancelBlueprinting()
         {
             _costIndicator.text = "";
-            if (drawingBlueprint == null || drawingBlueprint.blueprint.RootPath.Count == 0)
-                return;
-
-            if (_metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant))
+            
+            if (drawingBlueprint is not null
+                && (drawingBlueprint.blueprint.RootPath.Count != 0)
+                && _metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant))
             {
                 _rootGrowthSystem.StartGrowth(drawingBlueprint.blueprint);
                 _playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
             }
-            else
-            {
-                drawingBlueprint = null;
-            }
+                
+            drawingBlueprint = null;
         }
 
         private bool IsClickedOnRoot(Vector2 mousePosition)

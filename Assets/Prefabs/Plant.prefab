@@ -154,7 +154,7 @@ GameObject:
   - component: {fileID: 4503325277823972192}
   - component: {fileID: 5252515602949453776}
   - component: {fileID: 7274774829565688295}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: RootBlueprints
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -170,7 +170,7 @@ Transform:
   m_GameObject: {fileID: 6058204494275309728}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -201,7 +201,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: b4430bc10196be940b4f2b9e00010039, type: 2}

@@ -1,3 +1,4 @@
+
 using Assets.Scripts;
 using Assets.Scripts.Bootstrap;
 using Assets.Scripts.Map;
@@ -17,7 +18,6 @@ public enum ResourceType
 
 public class ResourcePoint : IPositionedObject, IDismissable
 {
-
     public Transform Transform { get; }
     public ResourceType ResourceType { get; set; }
     public float Amount { get; set; }

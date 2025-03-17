@@ -9,37 +9,6 @@ using UnityEngine.UIElements;
 using Zenject;
 namespace Assets.Scripts.Map
 {
-    public class Cell<T> where T : IPositionedObject
-    {
-        private List<T> _positionedObjects;
-
-        public Cell()
-        {
-            _positionedObjects = new List<T>();
-        }
-
-        public Cell(T point)
-        {
-            _positionedObjects = new List<T>();
-            _positionedObjects.Add(point);
-        }
-
-        public void AddObject(T point)
-        {
-            _positionedObjects.Add(point);
-        }
-
-        public void RemoveObject(T point)
-        {
-            _positionedObjects.Remove(point);
-        }
-
-        public List<T> GetObjects()
-        {
-            return _positionedObjects;
-        }
-    }
-
     public class GridPartition<T> 
         where T : IPositionedObject
     {
@@ -107,28 +76,25 @@ namespace Assets.Scripts.Map
             return false;
         }
 
-        public List<T> Query(Vector2 worldPosition)
+        public List<T> QueryDirectlyCell(Vector2Int cellCoordinates)
         {
-            Vector2Int cellCoordinates = GetCellCoordinates(worldPosition);
             return GetPointsInCell(cellCoordinates);
         }
 
-        public List<T> Query(float radius, Vector2 worldPosCenter, bool strictSelection = true)
+        public List<T> QueryByCircle(float radius, Vector2 worldPosCenter, bool strictSelection = true)
         {
-            // ¬ычисл€ем диапазон €чеек дл€ проверки
             Vector2Int minCell = GetCellCoordinates(new Vector2(worldPosCenter.x - radius, worldPosCenter.y - radius));
             Vector2Int maxCell = GetCellCoordinates(new Vector2(worldPosCenter.x + radius, worldPosCenter.y + radius));
 
             List<T> positionedObjects = new List<T>();
 
-            // ѕеребираем все €чейки в этом диапазоне
+
             for (int x = minCell.x; x <= maxCell.x; x++)
             {
                 for (int y = minCell.y; y <= maxCell.y; y++)
                 {
                     Vector2Int cellCoordinates = new Vector2Int(x, y);
 
-                    // ≈сли €чейка существует
                     if (_grid.ContainsKey(cellCoordinates))
                     {
                         if (IsAnyCornerInRadius(cellCoordinates, worldPosCenter, radius))
@@ -138,7 +104,6 @@ namespace Assets.Scripts.Map
                     }
                 }
             }
-
             if(strictSelection)
                 return Geometry.GetObjectsInRadius<T>(worldPosCenter, radius, positionedObjects);
             else

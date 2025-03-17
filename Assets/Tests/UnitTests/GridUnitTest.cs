@@ -39,7 +39,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
             rootSystem.Nodes.Add(node);
             grid.Insert(node);
         }
-        List<RootNode> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
+        List<RootNode> pointsIndexes = grid.QueryByCircle(0.5f, new Vector2(0, 0));
         Assert.That(pointsIndexes.Count == 6);
     }
 
@@ -64,7 +64,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
             grid.Insert(node);
         }
         
-        List<RootNode> pointsIndexes = grid.Query(0.5f, new Vector2(0, 0));
+        List<RootNode> pointsIndexes = grid.QueryByCircle(0.5f, new Vector2(0, 0));
         Assert.That(pointsIndexes.Count == 7);
     }
     [Test]
@@ -82,7 +82,7 @@ public class GridUnitTest : ZenjectUnitTestFixture
             grid.Insert(node);
         }
 
-        List<RootNode> pointsIndexes = grid.Query(100, new Vector2(0, 0));
+        List<RootNode> pointsIndexes = grid.QueryByCircle(100, new Vector2(0, 0));
         Assert.That(pointsIndexes.Count == 1);
     }
 }
