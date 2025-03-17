@@ -1,4 +1,6 @@
 # PotatoAI
+The struggle for soil of the aggressive plants 
+
 Unity Version: 2022.3.46f LTS
 
 game at 03.2025:  <br />
