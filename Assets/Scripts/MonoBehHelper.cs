@@ -70,9 +70,14 @@ public class MonoBehHelper : MonoBehaviour
             }
         }
     }
+    [SerializeField]
+    bool drawGizmosForFOV = true;
 
     private void DrawGizmosForFOV()
     {
+        if (!drawGizmosForFOV)
+            return;
+
         foreach (var plantAndPoints in _visibilitySystem._visibleByPlantsPoints)
         {
             Gizmos.color = Color.blue;

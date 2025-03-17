@@ -18,7 +18,7 @@ namespace Assets.Scripts.FogOfWar
         private int _cellSize;
 
         public int CellSize { get => _cellSize;}
-        public float Radius { get; set; } = 0.5f;
+        public float Radius { get; set; } = 1f;
         public List<Vector2> Starts { get; set; } = new List<Vector2>();
         public List<Vector2> Ends { get; set; } = new List<Vector2>();
 
