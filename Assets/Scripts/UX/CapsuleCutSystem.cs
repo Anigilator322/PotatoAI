@@ -75,5 +75,15 @@ namespace Assets.Scripts.UX
             mpb.SetVector("_MapMax", maxMap);
             rend.SetPropertyBlock(mpb);
         }
+
+        private void OnDestroy()
+        {
+            if (capsuleBuffer != null)
+            {
+                Debug.Log("CapsuleCutSystem OnDestroy");
+                capsuleBuffer.Release();
+                capsuleBuffer.Dispose();
+            }
+        }
     }
 }
