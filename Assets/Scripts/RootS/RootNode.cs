@@ -1,9 +1,11 @@
 ﻿using Assets.Scripts.Map;
+using Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace Assets.Scripts.Roots
 {
-    public class RootNode : IPositionedObject
+    public class RootNode : IPositionedObject, IBlockerNode
     {
         public Transform Transform { get; }
         public RootType Type { get; }
@@ -11,6 +13,10 @@ namespace Assets.Scripts.Roots
         public bool IsRootBase => Parent is null;
         public RootNode Parent { get; }
         public List<RootNode> Childs { get; } = new List<RootNode>();
+
+        IBlockerNode IBlockerNode.Parent => Parent as IBlockerNode;
+
+        List<IBlockerNode> IBlockerNode.Childs => Childs.Select((child) => child.Transform).ToList<IBlockerNode>();
 
         public RootNode(Vector2 position, RootNode parent, RootType type)
         {
