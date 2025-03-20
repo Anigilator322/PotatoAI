@@ -35,6 +35,23 @@ namespace Assets.Scripts.Tools
         }
 
 
+        public static T FindClosestObject<T>(List<T> positionedObjects, Vector2 position)
+            where T : IPositionedObject
+        {
+            T closestObject = positionedObjects[0];
+            float minDistance = Vector2.Distance(position, (Vector2)closestObject.Transform.position);
+            foreach (T positionedObject in positionedObjects)
+            {
+                if (Vector2.Distance((Vector2)positionedObject.Transform.position, position) < minDistance)
+                {
+                    closestObject = positionedObject;
+                    minDistance = Vector2.Distance((Vector2)positionedObject.Transform.position, position);
+                }
+            }
+            return closestObject;
+        }
+
+
         private static bool IsPointInCircle(Vector2 center, float radius, Vector2 point)
         {
             float distance = Vector2.Distance(center, point);

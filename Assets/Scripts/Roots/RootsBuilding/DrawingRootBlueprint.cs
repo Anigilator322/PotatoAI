@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Assets.Scripts.Roots.RootsBuilding
 {
+    /// <summary>
+    /// Обёртка вокруг RootBlueprint - Прокси, обеспечивающий удобство построения чертежа
+    /// </summary>
     public class DrawingRootBlueprint : IRootBlueprint
     {
         public RootBlueprint blueprint { get; }
