@@ -7,6 +7,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
     {
         Transform Transform { get; }
         IBlockerNode Parent { get; }
-        List<IBlockerNode> Childs { get; }
+        IReadOnlyList<IBlockerNode> Childs { get; }
     }
 }

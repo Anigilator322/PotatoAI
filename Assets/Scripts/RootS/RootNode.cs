@@ -14,9 +14,9 @@ namespace Assets.Scripts.Roots
         public RootNode Parent { get; }
         public List<RootNode> Childs { get; } = new List<RootNode>();
 
-        IBlockerNode IBlockerNode.Parent => Parent as IBlockerNode;
+        IBlockerNode IBlockerNode.Parent => Parent;
 
-        List<IBlockerNode> IBlockerNode.Childs => Childs.Select((child) => child.Transform).ToList<IBlockerNode>();
+        IReadOnlyList<IBlockerNode> IBlockerNode.Childs => Childs.Select(x => x).ToList<IBlockerNode>();
 
         public RootNode(Vector2 position, RootNode parent, RootType type)
         {

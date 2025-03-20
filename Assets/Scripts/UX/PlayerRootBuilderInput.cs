@@ -51,7 +51,7 @@ namespace Assets.Scripts.UX
             } 
         }
         private RootNode _clickedNode;
-        private RootType _selectedType = RootType.Harvester;
+        private RootType _selectedType = RootType.Wall;
         private DrawingRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 
@@ -127,7 +127,8 @@ namespace Assets.Scripts.UX
             
             if (drawingBlueprint is not null
                 && (drawingBlueprint.blueprint.RootPath.Count != 0)
-                && _metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant))
+                && _metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant)
+                && !drawingBlueprint.IsBlocked)
             {
                 _rootGrowthSystem.StartGrowth(drawingBlueprint.blueprint);
                 _playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
