@@ -1,4 +1,5 @@
 using Assets.Scripts.Map;
+using Assets.Scripts.Roots.Plants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,12 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
     {
         private float _blockObjectsSeekRadius = 2f;
 
-        [Inject]
-        private GridPartition<RootNode> _plantsRootsGridPartition;
+        private PlantsModel _plantsModel;
+
+        public RootsBlockSystem(PlantsModel plantsModel)
+        {
+            _plantsModel = plantsModel;
+        }
 
         public bool IsAnyBlock(DrawingRootBlueprint rootBlueprint)
         {
@@ -41,7 +46,11 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
 
         private IReadOnlyList<IBlockerNode> GetBlockingObjects(Vector2 center)
         {
-            var rootNodesList = _plantsRootsGridPartition.QueryByCircle(_blockObjectsSeekRadius, center);
+            var rootNodesList = new List<RootNode>();
+            foreach (var plant in _plantsModel.Plants)
+            {
+                rootNodesList.AddRange(plant.Roots.GetNodesFromCircle(_blockObjectsSeekRadius, center));
+            }
 
             var result = new List<IBlockerNode>();
             result.AddRange(rootNodesList.Where(node => node.Type == RootType.Wall ).
@@ -115,8 +124,8 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
 
         private bool OnSegment(Vector2 pi, Vector2 pj, Vector2 pk)
         {
-            return Mathf.Min(pi.x, pj.x) <= pk.x && pk.x <= Mathf.Max(pi.x, pj.x) &&
-                   Mathf.Min(pi.y, pj.y) <= pk.y && pk.y <= Mathf.Max(pi.y, pj.y);
+            return Mathf.Min(pi.x, pj.x) < pk.x && pk.x < Mathf.Max(pi.x, pj.x) &&
+                   Mathf.Min(pi.y, pj.y) < pk.y && pk.y < Mathf.Max(pi.y, pj.y);
         }
     }
 }
