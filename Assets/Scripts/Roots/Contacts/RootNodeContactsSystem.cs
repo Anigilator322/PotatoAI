@@ -41,6 +41,9 @@ public class RootNodeContactsSystem
 
     public void UpdateContactsByNode(RootNode node, List<Plant> contactedPlants = null)
     {
+        if (node.Type != RootType.Harvester)
+            return;
+
         _rootNodeContactsModel.ResourcePointsContacts[node] =
             _soilResources.GetResourcesFromCircle(_contactDistance, node.Transform.position);
     }

@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.UX;
 using System.Collections;
@@ -8,21 +9,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class UIDataViewModel : ITickable
+
+/// <summary>
+/// System that draws the resources of the player in the UIs
+/// </summary>
+public class ResourcesViewSystem : ITickable
 {
-    private readonly PlantsModel _plantsModel;
+    private PlayerDataModel _playerData { get; }
 
     private readonly TextMeshProUGUI _water, _phosphorus, _nitrogen, _potassium, _calories;
-    private Plant playerPlant { get; set; }
-    private VerticalLayoutGroup resourcesData { get; set; }
+    private VerticalLayoutGroup _resourcesIndicators { get; set; }
 
-    public UIDataViewModel(VerticalLayoutGroup resourcesData,
+    public ResourcesViewSystem(VerticalLayoutGroup resourcesData,
         TextMeshProUGUI calories,
-        PlantsModel plantsModel,
+        PlayerDataModel playerData,
         Dictionary<ResourceType, Color> resourcesColors)
     {
-        this.resourcesData = resourcesData;
-        _plantsModel = plantsModel;
+        _playerData = playerData;
+        _resourcesIndicators = resourcesData;
         _calories = calories;
 
         var resourceTexts =  resourcesData.GetComponentsInChildren<TextMeshProUGUI>(true);
@@ -35,6 +39,20 @@ public class UIDataViewModel : ITickable
         _potassium.color = new Color (resourcesColors[ResourceType.Potassium].r, resourcesColors[ResourceType.Potassium].g, resourcesColors[ResourceType.Potassium].b, 0.8f);
         _phosphorus.color = new Color (resourcesColors[ResourceType.Phosphorus].r, resourcesColors[ResourceType.Phosphorus].g, resourcesColors[ResourceType.Phosphorus].b, 0.8f);
         _nitrogen.color = new Color (resourcesColors[ResourceType.Nitrogen].r, resourcesColors[ResourceType.Nitrogen].g, resourcesColors[ResourceType.Nitrogen].b, 0.8f);
+
+        _resourcesIndicators.transform.parent.position = _playerData.playersPlant.transform.position + new Vector3(0, 2f, 0);
+        
+    }
+
+    public void Tick()
+    {
+        var resources = _playerData.playersPlant.Resources;
+        float overallAmount = resources.Water + resources.Nitrogen + resources.Phosphorus + resources.Potassium;
+        _water.text = "<mspace=7>" + DotsForResources(resources.Water, overallAmount) + resources.Water.ToString() + "</mspace>";
+        _nitrogen.text = "<mspace=7>" + DotsForResources(resources.Nitrogen, overallAmount) + resources.Nitrogen.ToString() + "</mspace>";
+        _phosphorus.text = "<mspace=7>" + DotsForResources(resources.Phosphorus, overallAmount) + resources.Phosphorus.ToString() + "</mspace>";
+        _potassium.text = "<mspace=7>" + DotsForResources(resources.Potassium, overallAmount) + resources.Potassium.ToString() + "</mspace>";
+        _calories.text =  resources.Calories >= 1 ? "\u25CF " + resources.Calories.ToString() : " " + resources.Calories.ToString();
     }
 
     private string DotsForResources(float amount, float overallAmount)
@@ -60,25 +78,4 @@ public class UIDataViewModel : ITickable
         return (new string('\u25CF', numberOfDots)) + (new string(' ', 5 - numberOfDots));
     }
 
-    //\u25CF
-    public void Tick()
-    {
-        if (playerPlant is not null)
-        {
-            var resources = playerPlant.Resources;
-            float overallAmount = resources.Water + resources.Nitrogen + resources.Phosphorus + resources.Potassium;
-            _water.text = "<mspace=7>" + DotsForResources(resources.Water, overallAmount) + resources.Water.ToString() + "</mspace>";
-            _nitrogen.text = "<mspace=7>" + DotsForResources(resources.Nitrogen, overallAmount) + resources.Nitrogen.ToString() + "</mspace>";
-            _phosphorus.text = "<mspace=7>" + DotsForResources(resources.Phosphorus, overallAmount) + resources.Phosphorus.ToString() + "</mspace>";
-            _potassium.text = "<mspace=7>" + DotsForResources(resources.Potassium, overallAmount) + resources.Potassium.ToString() + "</mspace>";
-            _calories.text =  resources.Calories >= 1 ? "\u25CF " + resources.Calories.ToString() : " " + resources.Calories.ToString();
-        }
-        else
-        {
-            playerPlant = _plantsModel.Plants
-                .SingleOrDefault(plant => plant.Id == PlayerRootBuilderInput.PLAYER_ID);
-
-            resourcesData.transform.parent.position = playerPlant.transform.position + new Vector3(0, 2f, 0);
-        }
-    }
 }

@@ -61,11 +61,6 @@ namespace Assets.Scripts.Roots.RootsBuilding
             }
         }
 
-        public DrawingRootBlueprint Create(RootType type, RootNode parentNode)
-        {
-            return new DrawingRootBlueprint(type, parentNode);
-        }
-
         public DrawingRootBlueprint Update(DrawingRootBlueprint rootBlueprint, Vector2 targetPos, int maxIters = 3)
         {
             BlueprintingResult firstResult = TryBlueprint(rootBlueprint, targetPos);

@@ -1,9 +1,11 @@
+using Assets.Scripts.Map;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Metabolics;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
 using Assets.Scripts.Roots.RootsBuilding.Growing;
 using Assets.Scripts.Roots.View;
+using Assets.Scripts.Tools;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -13,59 +15,43 @@ using Zenject;
 
 namespace Assets.Scripts.UX
 {
-    public class PlayerRootBuilderInput : IInitializable, ITickable
+    public class PlayerRootBuildingInput : IInitializable, ITickable
     {
         // This class is a total mess of player UX logic. It should be completely refactored.
-        public const string PLAYER_ID = "player_1";
+        // But of course there is no more perpetual soution than a temporary solution)))
+        // I just know it looks clumsy, but i want to spend time on more important tasks, you know
 
-        [SerializeField] private float _clickedNodeSearchRadius = 2f;
+        private InputAction _mousePositionAction;
 
         [Inject] private PlayerInputActions _playerInputActions;
+
+        [Inject] private PlantsModel _plantsModel;
+        [Inject] private PlayerDataModel _playerData;
+
         [Inject] private RootBlueprintingSystem _rootBlueprintingSystem;
         [Inject] private RootGrowthSystem _rootGrowthSystem;
         [Inject] private MetabolicSystem _metabolicSystem;
         [Inject] private RootDrawSystem _rootDrawSystem;
-        [Inject] private PlantsModel _plantsModel;
 
         TextMeshProUGUI _costIndicator, _justText;
 
-        public PlayerRootBuilderInput(TextMeshProUGUI text, TextMeshProUGUI justText)
+        private DrawingRootBlueprint drawingBlueprint
+        {
+            get => _playerData.DrawingRootBlueprint;
+            set 
+            {
+                _playerData.DrawingRootBlueprint = value;
+                if (_playerData.DrawingRootBlueprint is null)
+                    _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { };
+                else
+                    _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _playerData.DrawingRootBlueprint.blueprint };
+            }
+        }
+
+        public PlayerRootBuildingInput(TextMeshProUGUI text, TextMeshProUGUI justText)
         {
             _costIndicator = text;
             _justText = justText;
-        }
-
-        private bool _isBuilding = false;
-        private Plant _playersPlant;
-        private Plant playersPlant
-        { 
-            get
-            {
-                if (_playersPlant is null)
-                {
-                    _playersPlant = _plantsModel.Plants
-                        .Single(p => p.Id == PLAYER_ID);
-                }
-
-                return _playersPlant;
-            } 
-        }
-        private RootNode _clickedNode;
-        private RootType _selectedType = RootType.Harvester;
-        private DrawingRootBlueprint _currentBlueprint;
-        private InputAction _mousePositionAction;
-
-        private DrawingRootBlueprint drawingBlueprint
-        {
-            get => _currentBlueprint;
-            set 
-            {
-                _currentBlueprint = value;
-                if (_currentBlueprint is null)
-                    _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { };
-                else
-                    _rootDrawSystem.BlueprintsToDraw = new List<RootBlueprint> { _currentBlueprint.blueprint };
-            }
         }
 
         private Vector2 GetMousePosition() => Camera.main.ScreenToWorldPoint(_mousePositionAction.ReadValue<Vector2>());
@@ -82,27 +68,22 @@ namespace Assets.Scripts.UX
                 Vector2 mousePosition = GetMousePosition();
                 if (IsClickedOnRoot(mousePosition))
                 {
-                    _isBuilding = true;
+                    _playerData.IsBuilding = true;
                     PrepareBlueprint(mousePosition);
                 }
             };
 
-            LBMPressedAction.canceled += _ => { _isBuilding = false; CancelBlueprinting(); };
+            LBMPressedAction.canceled += _ => { _playerData.IsBuilding = false; CancelBlueprinting(); };
         }
 
         void ITickable.Tick()
         {
-            Vector2 mousePos = GetMousePosition();
-
-            _justText.text = mousePos.ToString() + "\n"
-                + _mousePositionAction.ReadValue<Vector2>().ToString();
-
-            if (!_isBuilding)
+            if (!_playerData.IsBuilding)
                 return;
             else
                 _costIndicator.text = string.Empty;
-            
 
+            Vector2 mousePos = GetMousePosition();
 
             DrawTrajectory(mousePos);
             UpdateCostIndication(mousePos);
@@ -110,15 +91,16 @@ namespace Assets.Scripts.UX
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
-            List<RootNode> queiriedNodes = playersPlant.Roots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition);
-            _clickedNode = FindClosestNodeToMouse(queiriedNodes, mousePosition);
+            List<RootNode> queiriedNodes = _playerData.playersPlant.Roots.GetNodesFromCircle(_playerData.ClickedNodeSearchRadius, mousePosition);
+            var clickedNode = Geometry.FindClosestObject(queiriedNodes, mousePosition);
 
-            drawingBlueprint = _rootBlueprintingSystem.Create(_selectedType, _clickedNode);
+            drawingBlueprint = DrawingRootBlueprint.Create(_playerData.SelectedRootType, clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            drawingBlueprint = _rootBlueprintingSystem.Update(drawingBlueprint, mousePos);
+            if(drawingBlueprint is not null)
+                drawingBlueprint = _rootBlueprintingSystem.Update(drawingBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
@@ -131,7 +113,7 @@ namespace Assets.Scripts.UX
                 && !drawingBlueprint.IsBlocked)
             {
                 _rootGrowthSystem.StartGrowth(drawingBlueprint.blueprint);
-                _playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
+                _playerData.playersPlant.Resources.Calories -= _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
             }
                 
             drawingBlueprint = null;
@@ -139,53 +121,37 @@ namespace Assets.Scripts.UX
 
         private bool IsClickedOnRoot(Vector2 mousePosition)
         {
-
-            if (playersPlant.Roots.GetNodesFromCircle(_clickedNodeSearchRadius, mousePosition).Count != 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private RootNode FindClosestNodeToMouse(List<RootNode> rootNodes, Vector2 mousePosition)
-        {
-            RootNode closestNode = rootNodes[0];
-            float minDistance = Vector2.Distance(mousePosition, (Vector2)closestNode.Transform.position);
-            foreach (RootNode node in rootNodes)
-            {
-                if (Vector2.Distance((Vector2)node.Transform.position, mousePosition) < minDistance)
-                {
-                    closestNode = node;
-                    minDistance = Vector2.Distance((Vector2)node.Transform.position, mousePosition);
-                }
-            }
-            return closestNode;
+            return _playerData.playersPlant.Roots
+                .GetNodesFromCircle(_playerData.ClickedNodeSearchRadius, mousePosition)
+                .Count 
+                != 0;
         }
 
         #region -cost indicator-
 
-
         private void UpdateCostIndication(Vector2 mousePosition)
         {
+            if (drawingBlueprint is null)
+                return;
+
             var cost = _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
             _costIndicator.text = "- " + cost.ToString();
 
-            FollowMouse(_costIndicator.rectTransform, _costIndicator.canvas, new Vector2(50, 35));
+            UpdateCostIndicatorPosition();
         }
 
-        //TODO: DECOMPOSE
-        private void FollowMouse(RectTransform panelRectTransform, Canvas canvas, Vector2 offset)
+        private void UpdateCostIndicatorPosition()
         {
+            RectTransform panelRectTransform = _costIndicator.rectTransform;
+            Canvas canvas = _costIndicator.canvas;
+            Vector2 offset = new Vector2(50, 35);
+
             if (panelRectTransform == null || canvas == null)
             {
                 Debug.LogWarning("Panel RectTransform or Canvas is not assigned.");
                 return;
             }
 
-            //TODO: FIX
             // Get the mouse position in screen space
             Vector2 mousePosition = _mousePositionAction.ReadValue<Vector2>();
 
@@ -207,12 +173,15 @@ namespace Assets.Scripts.UX
             ClampToViewport(panelRectTransform, canvas);
         }
 
+        #endregion -cost indicator-
+
+        //TODO: move to a separate helper class
         /// <summary>
         /// Clamps the UI element's position to stay within the camera's viewport.
         /// </summary>
         /// <param name="panelRectTransform">The RectTransform of the UI element.</param>
         /// <param name="canvas">The Canvas containing the UI element.</param>
-        private static void ClampToViewport(RectTransform panelRectTransform, Canvas canvas)
+        public static void ClampToViewport(RectTransform panelRectTransform, Canvas canvas)
         {
             // Get the canvas size
             Vector2 canvasSize = canvas.GetComponent<RectTransform>().sizeDelta;
@@ -236,8 +205,6 @@ namespace Assets.Scripts.UX
             // Apply the clamped position
             panelRectTransform.anchoredPosition = panelPosition;
         }
-
-        #endregion -cost indicator-
     }
 }
 
