@@ -137,9 +137,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                             break;
 
                         case GrowthState.Canceled:
-                            _growingRoots.RemoveBlueprint(id);
-                            StopGrowingCoroutine();
-                            return;
                         case GrowthState.Failed:
                         case GrowthState.Completed:
                             _growingRoots.RemoveBlueprint(id);
