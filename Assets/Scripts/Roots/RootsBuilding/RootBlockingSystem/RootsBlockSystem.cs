@@ -29,7 +29,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
 
             for (int i = 0; i < rootPath.Count - 1; i++)
             {
-                if (IsBlock(rootPath[i], rootPath[i + 1]))
+                if (IsBlocked(rootPath[i], rootPath[i + 1]))
                 {
                     return true;
                 }
@@ -37,7 +37,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
             return false;
         }
 
-        public bool IsBlock(Vector2 originPos, Vector2 targetPos)
+        public bool IsBlocked(Vector2 originPos, Vector2 targetPos)
         {
             var blockingObjects = GetBlockingObjects(targetPos);
             var result = IsAnyIntersections(blockingObjects, originPos, targetPos);

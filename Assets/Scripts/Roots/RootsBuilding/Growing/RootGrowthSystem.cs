@@ -157,7 +157,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;
 
-            if(_rootsBlockSystem.IsBlock(growingRoot.Blueprint.StartRootNode.Transform.position, position))
+            if(_rootsBlockSystem.IsBlocked(growingRoot.Blueprint.StartRootNode.Transform.position, position))
             {
                 growingRoot.State = GrowthState.Canceled;
                 return;

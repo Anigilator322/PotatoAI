@@ -136,7 +136,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
                     rootBlueprint.IsBlocked = false;
                     return;
                 }
-                var result = _rootBlockSystem.IsBlock(rootBlueprint.RootPath[^1], rootBlueprint.RootPath[^2]);
+                var result = _rootBlockSystem.IsBlocked(rootBlueprint.RootPath[^1], rootBlueprint.RootPath[^2]);
                 if(rootBlueprint.IsBlocked == false)
                     rootBlueprint.IsBlocked = result;
 
