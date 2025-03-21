@@ -94,12 +94,13 @@ namespace Assets.Scripts.UX
             List<RootNode> queiriedNodes = _playerData.playersPlant.Roots.GetNodesFromCircle(_playerData.ClickedNodeSearchRadius, mousePosition);
             var clickedNode = Geometry.FindClosestObject(queiriedNodes, mousePosition);
 
-            drawingBlueprint = _rootBlueprintingSystem.Create(_playerData.SelectedRootType, clickedNode);
+            drawingBlueprint = DrawingRootBlueprint.Create(_playerData.SelectedRootType, clickedNode);
         }
 
         private void DrawTrajectory(Vector2 mousePos)
         {
-            drawingBlueprint = _rootBlueprintingSystem.Update(drawingBlueprint, mousePos);
+            if(drawingBlueprint is not null)
+                drawingBlueprint = _rootBlueprintingSystem.Update(drawingBlueprint, mousePos);
         }
 
         private void CancelBlueprinting()
@@ -125,11 +126,13 @@ namespace Assets.Scripts.UX
                 != 0;
         }
 
-
         #region -cost indicator-
 
         private void UpdateCostIndication(Vector2 mousePosition)
         {
+            if (drawingBlueprint is null)
+                return;
+
             var cost = _metabolicSystem.CalculateBlueprintPrice(drawingBlueprint);
             _costIndicator.text = "- " + cost.ToString();
 
