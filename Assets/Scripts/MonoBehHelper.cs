@@ -5,7 +5,6 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using Zenject;
-using Assets.Scripts.FogOfWar.View;
 using Assets.Scripts.UX;
 
 public class MonoBehHelper : MonoBehaviour

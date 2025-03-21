@@ -1,9 +1,13 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem;
+using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.Roots.RootsBuilding
 {
     public class RootBlueprintingSystem
     {
+        [Inject] 
+        private RootsBlockSystem _rootBlockSystem;
         public float _rootSegmentLength { get; private set; } = 0.8f;
         public float _maxBuildAngle { get; private set; } = 15f;
 
@@ -11,7 +15,9 @@ namespace Assets.Scripts.Roots.RootsBuilding
         {
             Vector2 lastNodePosition = rootBlueprint.RootPath[^1];
             direction.Normalize();
-            rootBlueprint.AppendPoint(lastNodePosition + direction * _rootSegmentLength);
+            var point = lastNodePosition + direction * _rootSegmentLength;
+            rootBlueprint.AppendPoint(point);
+            SetIsBlockedAfterActions(rootBlueprint, BlueprintingResult.Incr);
         }
 
         enum BlueprintingResult { Incr = 1, Decr = -1, Unchanged = 0};
@@ -43,17 +49,15 @@ namespace Assets.Scripts.Roots.RootsBuilding
                 {
                     Vector2 correctedDirection = FindMaxAllowedPathNode(directionOfPath, directionToTarget);
                     rootBlueprint.AppendPoint(rootBlueprint.RootPath[^1] + correctedDirection);
+                    SetIsBlockedAfterActions(rootBlueprint, BlueprintingResult.Incr);
                 }
                 return BlueprintingResult.Incr;
             }
             else
             {
-                var result = TryDecreasePath(rootBlueprint);
-
-                if(result)
-                    return BlueprintingResult.Decr;
-                else
-                    return BlueprintingResult.Unchanged;
+                var result = TryDecreasePath(rootBlueprint) ? BlueprintingResult.Decr : BlueprintingResult.Unchanged;
+                SetIsBlockedAfterActions(rootBlueprint, result);
+                return result;
             }
         }
 
@@ -117,6 +121,27 @@ namespace Assets.Scripts.Roots.RootsBuilding
                 return false;
             }    
             return true;
+        }
+
+        private void SetIsBlockedAfterActions(DrawingRootBlueprint rootBlueprint, BlueprintingResult blueprintResult)
+        {
+            if(blueprintResult == BlueprintingResult.Decr)
+            {
+                rootBlueprint.IsBlocked = _rootBlockSystem.IsAnyBlock(rootBlueprint);
+            }
+            else if (blueprintResult == BlueprintingResult.Incr)
+            {
+                if (rootBlueprint.IsBlocked == true)
+                    return;
+                if (rootBlueprint.RootPath.Count < 2)
+                { 
+                    rootBlueprint.IsBlocked = false;
+                    return;
+                }
+                var result = _rootBlockSystem.IsBlocked(rootBlueprint.RootPath[^1], rootBlueprint.RootPath[^2]);
+                rootBlueprint.IsBlocked = result;
+
+            }
         }
     }
 }

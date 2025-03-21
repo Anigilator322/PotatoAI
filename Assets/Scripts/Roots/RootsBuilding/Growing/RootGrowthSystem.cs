@@ -1,5 +1,6 @@
 using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
+using Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -24,18 +25,21 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         private RootSpawnSystem _rootSpawnSystem;
         private SynchronizationContext _mainThreadContext;
         private VisibilitySystem _visibilitySystem;
+        private RootsBlockSystem _rootsBlockSystem;
 
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
-        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel, VisibilitySystem visibilitySystem)
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel, 
+            VisibilitySystem visibilitySystem, RootsBlockSystem rootsBlockSystem)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
             _mainThreadContext = System.Threading.SynchronizationContext.Current;
             _visibilitySystem = visibilitySystem;
+            _rootsBlockSystem = rootsBlockSystem;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -135,7 +139,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                         case GrowthState.Canceled:
                         case GrowthState.Failed:
                         case GrowthState.Completed:
-                            //Debug.Log("Remove root " + id);
                             _growingRoots.RemoveBlueprint(id);
 
                             break;
@@ -154,7 +157,12 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             Vector2 position = growingRoot.Blueprint.RootPath[0];
             RootType type = growingRoot.Blueprint.RootType;
 
-            RootNode node = _rootSpawnSystem.SpawnRootNode(
+            if(_rootsBlockSystem.IsBlocked(growingRoot.Blueprint.StartRootNode.Transform.position, position))
+            {
+                growingRoot.State = GrowthState.Canceled;
+                return;
+            }
+            var node = _rootSpawnSystem.SpawnRootNode(
                 new RootNode(position, parent, type));
             //For visibility system
             _visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);

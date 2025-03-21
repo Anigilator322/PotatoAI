@@ -8,6 +8,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
         public RootBlueprint blueprint { get; }
 
         List<Vector2> _pseudoRootPath = new List<Vector2>();
+        public bool IsBlocked { get; set; }
 
         public DrawingRootBlueprint(RootType rootType, RootNode startRootNode)
         {
