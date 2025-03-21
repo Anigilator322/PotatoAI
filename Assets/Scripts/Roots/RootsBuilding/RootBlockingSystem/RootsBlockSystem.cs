@@ -68,23 +68,16 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
                 {
                     checkedNodes.Add(blockingObject, true);
 
-                    if (blockingObject.Parent is not null && IsIntersection(originPos, targetPos, blockingObject.Transform.position, blockingObject.Parent.Transform.position))
+                    var currentNode = blockingObject.Parent;
+                    int i = 0;
+                    while (i < blockingObject.Childs.Count)
                     {
-                        return true;
-                    }
-                    
-                    if(blockingObject.Childs is not null || blockingObject.Childs?.Count > 0)
-                    {
-                        foreach (var child in blockingObject.Childs)
+                        if (IsIntersection(originPos, targetPos, blockingObject.Transform.position, currentNode.Transform.position))
                         {
-                            if (checkedNodes.ContainsKey(child))
-                                continue;
-                            checkedNodes.Add(child, true);
-                            if (IsIntersection(originPos, targetPos, blockingObject.Transform.position, child.Transform.position))
-                            {
-                                return true;
-                            }
+                            return true;
                         }
+                        currentNode = blockingObject.Childs[i];
+                        i++;
                     }
                 }
             }
