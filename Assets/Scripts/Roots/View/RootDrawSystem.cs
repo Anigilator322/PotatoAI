@@ -35,7 +35,7 @@ namespace Assets.Scripts.Roots.View
         public async void Initialize()
         {
             _drawTickCoroutineCTS = new CancellationTokenSource();
-            UniTask.RunOnThreadPool(() => TickCoroutine(_drawTickCoroutineCTS.Token));
+            await UniTask.RunOnThreadPool(() => TickCoroutine(_drawTickCoroutineCTS.Token));
 
             await UniTask.Delay(1000);
 
