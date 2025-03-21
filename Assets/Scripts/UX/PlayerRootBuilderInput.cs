@@ -51,7 +51,7 @@ namespace Assets.Scripts.UX
             } 
         }
         private RootNode _clickedNode;
-        private RootType _selectedType = RootType.Wall;
+        private RootType _selectedType = RootType.Harvester;
         private DrawingRootBlueprint _currentBlueprint;
         private InputAction _mousePositionAction;
 

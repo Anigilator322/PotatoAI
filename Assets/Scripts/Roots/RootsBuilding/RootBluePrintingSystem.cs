@@ -123,13 +123,13 @@ namespace Assets.Scripts.Roots.RootsBuilding
             return true;
         }
 
-        private void SetIsBlockedAfterActions(DrawingRootBlueprint rootBlueprint, BlueprintingResult actionsResult)
+        private void SetIsBlockedAfterActions(DrawingRootBlueprint rootBlueprint, BlueprintingResult blueprintResult)
         {
-            if(actionsResult == BlueprintingResult.Decr)
+            if(blueprintResult == BlueprintingResult.Decr)
             {
                 rootBlueprint.IsBlocked = _rootBlockSystem.IsAnyBlock(rootBlueprint);
             }
-            if (actionsResult == BlueprintingResult.Incr)
+            else if (blueprintResult == BlueprintingResult.Incr)
             {
                 if (rootBlueprint.RootPath.Count < 2)
                 { 
