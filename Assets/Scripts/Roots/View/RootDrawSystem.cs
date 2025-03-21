@@ -411,22 +411,14 @@ namespace Assets.Scripts.Roots.View
 
         void UpdateMeshFilter(MeshFilter meshFilter, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
         {
-            try
-            {
-                var mesh = meshFilter.mesh;
-                mesh.vertices = vertices.ToArray();
-                mesh.triangles = triangles.ToArray();
-                mesh.uv = uvs.ToArray();
+            var mesh = meshFilter.mesh;
+            mesh.Clear();
+            mesh.vertices = vertices.ToArray();
+            mesh.triangles = triangles.ToArray();
+            mesh.uv = uvs.ToArray();
 
-                mesh.RecalculateNormals();
-                mesh.RecalculateBounds();
-            }
-            catch(Exception ex)
-            {
-                throw;
-            }
-
-
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
         }
 
         #endregion Mesh Generation

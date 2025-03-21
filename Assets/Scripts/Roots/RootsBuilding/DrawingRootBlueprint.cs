@@ -12,7 +12,16 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         List<Vector2> _pseudoRootPath = new List<Vector2>();
 
-        public DrawingRootBlueprint(RootType rootType, RootNode startRootNode)
+        public static DrawingRootBlueprint? Create(RootType rootType, RootNode startRootNode)
+        {
+            if((startRootNode.Childs.Count == 0) 
+                && (rootType != startRootNode.Type))
+                return null;
+            else
+                return new DrawingRootBlueprint(rootType, startRootNode);
+        }
+
+        private DrawingRootBlueprint(RootType rootType, RootNode startRootNode)
         {
             blueprint = new RootBlueprint(rootType, startRootNode);
             if (blueprint.StartRootNode.Childs.Count == 0

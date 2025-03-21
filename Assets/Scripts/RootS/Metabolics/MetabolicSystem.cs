@@ -43,6 +43,7 @@ namespace Assets.Scripts.Roots.Metabolics
                 foreach (var plant in _plantModel.Plants)
                 {
                     var allContactedResources = plant.Roots.Nodes
+                        .Where(n => n.Type == RootType.Harvester)
                         .SelectMany(n => _rootNodeContactsModel.ResourcePointsContacts[n])
                         .Distinct();
 
@@ -101,7 +102,7 @@ namespace Assets.Scripts.Roots.Metabolics
 
         public int CalculateBlueprintPrice(DrawingRootBlueprint scaffoldedBlueprint)
         {
-            int cost = 0;
+            float cost = 0;
             int startRootNodeDepth = GetDepthOrRootNode(scaffoldedBlueprint.blueprint.StartRootNode);
             int endRootNodeDepth = startRootNodeDepth + scaffoldedBlueprint.blueprint.RootPath.Count;
 
@@ -111,10 +112,22 @@ namespace Assets.Scripts.Roots.Metabolics
                 cost += startRootNodeDepth;
             }
 
+
             //==== Basic cost of new root nodes ====
-            
-            cost += (int)Mathf.Pow(endRootNodeDepth, 1.25f) - (int)Mathf.Pow(startRootNodeDepth, 1.25f);
-            return cost;
+
+            cost += Mathf.Pow(endRootNodeDepth, 1.25f) - Mathf.Pow(startRootNodeDepth, 1.25f);
+
+
+            //==== Cost modifiers for root types ====
+
+            cost *= scaffoldedBlueprint.blueprint.RootType switch
+            {
+                RootType.Recon => 1.5f,
+                RootType.Wall => 2f,
+                _ => 1,
+            };
+
+            return Mathf.RoundToInt(cost);
         }
 
         public static int GetDepthOrRootNode(RootNode rootNode)

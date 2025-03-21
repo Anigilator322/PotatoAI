@@ -27,6 +27,9 @@ namespace Assets.Scripts.Bootstrap.Installers
         [SerializeField]
         HorizontalLayoutGroup rootTypeSelection;
 
+        [SerializeField]
+        Image rootTypeSelectionIndicator;
+
         public override void InstallBindings()
         {
             // ======= Models =======
@@ -79,9 +82,10 @@ namespace Assets.Scripts.Bootstrap.Installers
             GameSystemsInstaller.Install(Container);
             InputInstaller.Install(Container);
 
-            Container.Bind<PlayerButtonControllsSystem>().FromNew().AsSingle().WithArguments(rootTypeSelection).NonLazy();
 
             Container.BindInterfacesAndSelfTo<CameraMoveInput>().FromNew().AsSingle();
+
+            Container.Bind<PlayerButtonControllsSystem>().FromNew().AsSingle().WithArguments(rootTypeSelection, rootTypeSelectionIndicator).NonLazy();
             Container.BindInterfacesAndSelfTo<PlayerRootBuildingInput>().AsSingle().WithArguments(buildCostIndicator, justText);
 
             Container.BindInterfacesAndSelfTo<ResourcesViewSystem>().AsSingle().WithArguments(resourcesIndicator, caloriesIndicator, colorsDict).Lazy();
