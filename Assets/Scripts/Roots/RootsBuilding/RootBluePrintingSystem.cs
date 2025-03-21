@@ -131,14 +131,15 @@ namespace Assets.Scripts.Roots.RootsBuilding
             }
             else if (blueprintResult == BlueprintingResult.Incr)
             {
+                if (rootBlueprint.IsBlocked == true)
+                    return;
                 if (rootBlueprint.RootPath.Count < 2)
                 { 
                     rootBlueprint.IsBlocked = false;
                     return;
                 }
                 var result = _rootBlockSystem.IsBlocked(rootBlueprint.RootPath[^1], rootBlueprint.RootPath[^2]);
-                if(rootBlueprint.IsBlocked == false)
-                    rootBlueprint.IsBlocked = result;
+                rootBlueprint.IsBlocked = result;
 
             }
         }
