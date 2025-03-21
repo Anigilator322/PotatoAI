@@ -5,7 +5,7 @@ using UnityEngine;
 using Zenject;
 namespace Assets.Scripts.Bootstrap
 {
-    public class GameBootstrapper : IInitializable
+    public class GameBootstrapper
     {
         [Inject] private Plant.Factory plantFactory;
         [Inject] private RootSpawnSystem rootSpawnSystem;
@@ -14,11 +14,11 @@ namespace Assets.Scripts.Bootstrap
 
         Texture2D texture2D;
 
-        public void Initialize()
+        public void Start()
         {
             monoBehHelper = GameObject.FindFirstObjectByType<MonoBehHelper>();
 
-            var plant = plantFactory.Create(PlayerRootBuilderInput.PLAYER_ID, Vector2.zero);
+            var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
             resourceSpawnSystem.FillSoilUniformly();
         }
     }
