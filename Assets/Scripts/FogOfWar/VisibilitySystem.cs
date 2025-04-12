@@ -96,14 +96,8 @@ namespace Assets.Scripts.FogOfWar
         {
             if (revealer.Parent is null)
                 return;
+
             var edge = revealer.Transform.position - revealer.Parent.Transform.position;
-            
-            //Radius = 1 * (revealer.Type switch
-            //{
-            //    RootType.Recon => 2,
-            //    RootType.Wall => 0.5f,
-            //    _ => 1
-            //});
 
             float revealRadius = Radius * (revealer.Type switch
             {
