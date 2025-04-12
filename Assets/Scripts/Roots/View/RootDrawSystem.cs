@@ -11,12 +11,42 @@ using Zenject;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
 using Assets.Scripts.UX;
+using static UnityEngine.Mesh;
+using ModestTree;
 
 class ModifiableMeshData
 {
     public List<Vector3> vertices = new List<Vector3>();
     public List<int> triangles = new List<int>();
     public List<Vector2> uvs = new List<Vector2>();
+    public List<Vector3> normals = new List<Vector3>();
+
+
+    // Track min/max UV values
+    public Vector2 uvMin = new Vector2(float.MaxValue, float.MaxValue);
+    public Vector2 uvMax = new Vector2(float.MinValue, float.MinValue);
+
+    public void AddUV(Vector2 uv)
+    {
+        uvs.Add(uv);
+        // Update bounds
+        uvMin = Vector2.Min(uvMin, uv);
+        uvMax = Vector2.Max(uvMax, uv);
+    }
+
+    public void NormalizeUVs()
+    {
+        Vector2 uvRange = uvMax - uvMin;
+
+        for (int i = 0; i < uvs.Count; i++)
+        {
+            Vector2 uv = uvs[i];
+            // Normalize to 0-1 range
+            uv.x = (uv.x - uvMin.x) / uvRange.x;
+            uv.y = (uv.y - uvMin.y) / uvRange.y;
+            uvs[i] = uv;
+        }
+    }
 }
 
 struct RectangleVetrices
@@ -159,7 +189,8 @@ namespace Assets.Scripts.Roots.View
                 UpdateMeshFilter(meshFilters[plantRoots.plant][rootMeshData.Key],
                     rootMeshData.Value.vertices,
                     rootMeshData.Value.triangles,
-                    rootMeshData.Value.uvs);
+                    rootMeshData.Value.uvs,
+                    rootMeshData.Value.normals);
             }
         }
 
@@ -205,10 +236,10 @@ namespace Assets.Scripts.Roots.View
                     triangles.Add(baseVertexIndex + 3);
 
                     // Add UVs
-                    uvs.Add(new Vector2(0, 0));
-                    uvs.Add(new Vector2(1, 0));
-                    uvs.Add(new Vector2(0, 1));
-                    uvs.Add(new Vector2(1, 1));
+                    uvs.Add(CalculateUVFromPosition(v1));
+                    uvs.Add(CalculateUVFromPosition(v2));
+                    uvs.Add(CalculateUVFromPosition(v3));
+                    uvs.Add(CalculateUVFromPosition(v4));
                 }
             }
 
@@ -220,9 +251,12 @@ namespace Assets.Scripts.Roots.View
             RectangleVetrices parentSegmentRectangle,
             Dictionary<RootType, ModifiableMeshData> rootsMeshesData = null)
         {
-            var vertices = rootsMeshesData[node.Type].vertices;
-            var triangles = rootsMeshesData[node.Type].triangles;
-            var uvs = rootsMeshesData[node.Type].uvs;
+            var meshData = rootsMeshesData[node.Type];
+
+            var vertices = meshData.vertices;
+            var triangles = meshData.triangles;
+            var uvs = meshData.uvs;
+            var normals = meshData.normals;
 
             var Parent = node.Parent;
 
@@ -246,6 +280,7 @@ namespace Assets.Scripts.Roots.View
 
                 var thinerPartOffest = perpendicular * ((nodeWidth / 2) / perpendicular.magnitude);
 
+                Vector3 v1, v2;
                 Vector3 v3 = node.Transform.position + thinerPartOffest;
                 Vector3 v4 = node.Transform.position - thinerPartOffest;
 
@@ -256,15 +291,17 @@ namespace Assets.Scripts.Roots.View
                 {
                     //Первый прямоугольник корешка
                     var widerPartOffest = perpendicular * ((widerPartWidth / 2) / perpendicular.magnitude);
-                    Vector3 v1 = parentPos + widerPartOffest;
-                    Vector3 v2 = parentPos - widerPartOffest;
+                    v1 = parentPos + widerPartOffest;
+                    v2 = parentPos - widerPartOffest;
 
                     parentSegmentRectangle.upRight = vertices.Count;
                     vertices.Add(v1);
+                    normals.Add(Vector3.zero);
                     parentSegmentRectangle.upLeft = vertices.Count;
                     vertices.Add(v2);
-                    uvs.Add(new Vector2(0, 0));
-                    uvs.Add(new Vector2(1, 0));
+                    normals.Add(Vector3.zero);
+                    meshData.AddUV(CalculateUVFromPosition(v1));
+                    meshData.AddUV(CalculateUVFromPosition(v2));
                 }
                 else
                 {
@@ -285,8 +322,8 @@ namespace Assets.Scripts.Roots.View
                             .magnitude;
 
                         var widerPartOffest = perpendicular * ((widerPartWidth / 2) / perpendicular.magnitude);
-                        Vector3 v1 = parentPos + widerPartOffest;
-                        Vector3 v2 = parentPos - widerPartOffest;
+                        v1 = parentPos + widerPartOffest;
+                        v2 = parentPos - widerPartOffest;
 
                         if (angle > 0)
                         {
@@ -296,7 +333,8 @@ namespace Assets.Scripts.Roots.View
                             vertices[parentSegmentRectangle.downLeft] = projectedPoint;
 
                             vertices.Add(v1);
-                            uvs.Add(new Vector2(0, 0));
+                            normals.Add(Vector3.zero);
+                            meshData.AddUV(CalculateUVFromPosition(v1));
 
                             triangles.Add(parentSegmentRectangle.downRight);
                             triangles.Add(vertices.Count - 1);
@@ -313,7 +351,8 @@ namespace Assets.Scripts.Roots.View
                             vertices[parentSegmentRectangle.downRight] = projectedPoint;
 
                             vertices.Add(v2);
-                            uvs.Add(new Vector2(1, 0));
+                            normals.Add(Vector3.zero);
+                            meshData.AddUV(CalculateUVFromPosition(v2));
 
                             triangles.Add(parentSegmentRectangle.downLeft);
                             triangles.Add(parentSegmentRectangle.downRight);
@@ -327,10 +366,14 @@ namespace Assets.Scripts.Roots.View
 
                 parentSegmentRectangle.downRight = vertices.Count;
                 vertices.Add(v3);
+                normals.Add(Vector3.zero);
+
                 parentSegmentRectangle.downLeft = vertices.Count;
                 vertices.Add(v4);
-                uvs.Add(new Vector2(0, 1));
-                uvs.Add(new Vector2(1, 1));
+                normals.Add(Vector3.zero);
+
+                meshData.AddUV(CalculateUVFromPosition(v3));
+                meshData.AddUV(CalculateUVFromPosition(v4));
 
                 // Create triangles for the current segment
                 triangles.Add(parentSegmentRectangle.upRight);
@@ -340,11 +383,22 @@ namespace Assets.Scripts.Roots.View
                 triangles.Add(parentSegmentRectangle.upLeft);
                 triangles.Add(parentSegmentRectangle.upRight);
                 triangles.Add(parentSegmentRectangle.downLeft);
+
+                var normalValues = CalculateQuadNormals(
+                    vertices[parentSegmentRectangle.upLeft],
+                    vertices[parentSegmentRectangle.upRight],
+                    vertices[parentSegmentRectangle.downLeft],
+                    vertices[parentSegmentRectangle.downRight]);
+
+                normals[parentSegmentRectangle.upLeft] = normalValues[0];
+                normals[parentSegmentRectangle.upRight] = normalValues[1];
+                normals[parentSegmentRectangle.downLeft] = normalValues[2];
+                normals[parentSegmentRectangle.downRight] = normalValues[3];
             }
 
             if (node.Childs.Count > 1)
             {
-                GenerateMergeCapsMeshData(node, vertices, triangles, uvs);
+                GenerateMergeCapsMeshData(node, meshData);
             }
 
             // Process all children nodes recursively
@@ -356,10 +410,13 @@ namespace Assets.Scripts.Roots.View
 
         void GenerateMergeCapsMeshData(
             RootNode node,
-            List<Vector3> vertices,
-            List<int> triangles,
-            List<Vector2> uvs)
+            ModifiableMeshData meshData)
         {
+            List<Vector3> vertices = meshData.vertices;
+            List<int> triangles = meshData.triangles;
+            List<Vector2> uvs = meshData.uvs;
+            var normals = meshData.normals;
+
             if (!rootWidths.TryGetValue(node, out float mergeWidth))
                 mergeWidth = _standardIncrement;
 
@@ -391,7 +448,8 @@ namespace Assets.Scripts.Roots.View
 
 
                 vertices.Add(mergeCenter + offset);
-                uvs.Add(new Vector2(i / (float)segments, 1)); // Optional UV mapping
+                normals.Add(Vector3.forward);
+                meshData.AddUV(mergeCenter + offset); // Optional UV mapping
             }
 
             // Create triangles connecting the semi-circle to the Parent root
@@ -409,7 +467,7 @@ namespace Assets.Scripts.Roots.View
             return Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
         }
 
-        void UpdateMeshFilter(MeshFilter meshFilter, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
+        void UpdateMeshFilter(MeshFilter meshFilter, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs, List<Vector3> normals = null)
         {
             var mesh = meshFilter.mesh;
             mesh.Clear();
@@ -417,8 +475,28 @@ namespace Assets.Scripts.Roots.View
             mesh.triangles = triangles.ToArray();
             mesh.uv = uvs.ToArray();
 
-            mesh.RecalculateNormals();
+            if(normals is not null )
+                mesh.normals = normals.ToArray();
+            else
+                mesh.RecalculateNormals();
+
             mesh.RecalculateBounds();
+        }
+        Vector2 CalculateUVFromPosition(Vector3 position)
+        {
+            return new Vector2(position.x, position.y);
+        }
+
+        Vector3[] CalculateQuadNormals(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            Vector3 normal0 = (v0 - v1).normalized;
+            Vector3 normal1 = -normal0;
+            Vector3 normal2 = normal0;
+            Vector3 normal3 = -normal0;
+
+            normal0.z = normal1.z = normal2.z = normal3.z = -0.01f;
+
+            return new Vector3[] { normal0, normal1, normal2, normal3 };
         }
 
         #endregion Mesh Generation
