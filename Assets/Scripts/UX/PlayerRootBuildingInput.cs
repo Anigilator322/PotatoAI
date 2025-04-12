@@ -109,7 +109,7 @@ namespace Assets.Scripts.UX
             
             if (drawingBlueprint is not null
                 && (drawingBlueprint.blueprint.RootPath.Count != 0)
-                && _metabolicSystem.IsAbleToBuild(drawingBlueprint, playersPlant)
+                && _metabolicSystem.IsAbleToBuild(drawingBlueprint, _playerData.playersPlant)
                 && !drawingBlueprint.IsBlocked)
             {
                 _rootGrowthSystem.StartGrowth(drawingBlueprint.blueprint);
