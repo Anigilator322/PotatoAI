@@ -24,15 +24,6 @@ public class MonoBehHelper : MonoBehaviour
         Application.targetFrameRate = 144;
     }
 
-    private void Update()
-    {
-        _capsuleCutSystem.Capsules.Clear();
-        for (int i=0;i<_visibilitySystem.Starts.Count();i++)
-        {
-            _capsuleCutSystem.SetCapsule(_visibilitySystem.Starts[i], _visibilitySystem.Ends[i], _visibilitySystem.Radius);
-        }
-    }
-
     private void OnDrawGizmos()
     {
         if (_plantsModel == null)
@@ -77,7 +68,7 @@ public class MonoBehHelper : MonoBehaviour
         if (!drawGizmosForFOV)
             return;
 
-        foreach (var plantAndPoints in _visibilitySystem._visibleByPlantsPoints)
+        foreach (var plantAndPoints in _visibilitySystem.VisibleByPlantsPoints)
         {
             Gizmos.color = Color.blue;
             foreach (var point in plantAndPoints.Value)
@@ -85,18 +76,13 @@ public class MonoBehHelper : MonoBehaviour
                 Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
             }
         }
-        float radius = 3f;
-
-        foreach (var start in _visibilitySystem.Starts)
+        foreach (var capsule in _visibilitySystem.VisibilityCapsules)
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(start, radius);
-            foreach (var end in _visibilitySystem.Ends)
-            {
-                var length = (end - start).magnitude;
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(end, radius);
-            }
+            Gizmos.DrawWireSphere(capsule.Start, capsule.Radius);
+            var length = (capsule.End - capsule.Start).magnitude;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(capsule.End, capsule.Radius);
         }
     }
     #endregion

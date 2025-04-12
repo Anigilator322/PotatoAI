@@ -2,7 +2,11 @@
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Tools;
+using Assets.Scripts.UX;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Plastic.Newtonsoft.Json.Serialization;
 using UnityEngine;
 using Zenject;
 using Zenject.ReflectionBaking.Mono.Cecil;
@@ -18,11 +22,12 @@ namespace Assets.Scripts.FogOfWar
         private int _cellSize;
 
         public int CellSize { get => _cellSize;}
-        public float Radius { get; set; } = 1f;
-        public List<Vector2> Starts { get; set; } = new List<Vector2>();
-        public List<Vector2> Ends { get; set; } = new List<Vector2>();
+        public List<VisibilityCapsule> VisibilityCapsules { get; set; } = new List<VisibilityCapsule>();
 
-        public Dictionary<Plant, List<IPositionedObject>> _visibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
+        public Dictionary<Plant, List<IPositionedObject>> VisibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
+        public CapsuleCutSystem _capsuleCutSystem { get; set; }
+
+        public Action<VisibilityCapsule> OnCapsuleCreated;
         public VisibilitySystem(Soil soil, PlantsModel model)
         {
             _soilResources = soil;
@@ -58,17 +63,13 @@ namespace Assets.Scripts.FogOfWar
         //Search cells in capsule
         //Return List<Vector2Int> with all cells in capsule
         //TODO: return List<PositionedObject> points that are in capsule
-        private List<Vector2Int> CapsuleCast(Vector2 start, Vector2 end, float radius)
+        private List<Vector2Int> CapsuleCast(VisibilityCapsule capsule)
         {
-            //DEBUG INFO
-            Starts.Add(start);
-            Ends.Add(end);
-            //END DEBUG INFO
             List<Vector2Int> cells = new List<Vector2Int>();
 
             // Определить AABB капсулы
-            Vector2 minPoint = Vector2.Min(start, end) - new Vector2(radius, radius);
-            Vector2 maxPoint = Vector2.Max(start, end) + new Vector2(radius, radius);
+            Vector2 minPoint = Vector2.Min(capsule.Start, capsule.End) - new Vector2(capsule.Radius, capsule.Radius);
+            Vector2 maxPoint = Vector2.Max(capsule.Start, capsule.End) + new Vector2(capsule.Radius, capsule.Radius);
 
             // Преобразовать AABB в координаты сетки
             int minX = Mathf.FloorToInt(minPoint.x / _cellSize);
@@ -83,7 +84,7 @@ namespace Assets.Scripts.FogOfWar
                 {
                     Vector2 cellCenter = new Vector2(x + 0.5f, y + 0.5f) * _cellSize;
 
-                    if (IsCellIntersectingCapsule(cellCenter, start, end, radius))
+                    if (IsCellIntersectingCapsule(cellCenter, capsule.Start, capsule.End, capsule.Radius))
                     {
                         cells.Add(new Vector2Int(x, y));
                     }
@@ -99,7 +100,7 @@ namespace Assets.Scripts.FogOfWar
 
             var edge = revealer.Transform.position - revealer.Parent.Transform.position;
 
-            float revealRadius = Radius * (revealer.Type switch
+            float revealRadius = (revealer.Type switch
             {
                 RootType.Recon => 2,
                 RootType.Wall => 0.5f,
@@ -108,7 +109,10 @@ namespace Assets.Scripts.FogOfWar
 
             float length = edge.magnitude;
             float width = revealRadius * 2;
-            List<Vector2Int> area = CapsuleCast(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
+            var capsule = new VisibilityCapsule(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
+            VisibilityCapsules.Add(capsule);
+            OnCapsuleCreated?.Invoke(capsule);
+            List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
         }
@@ -118,14 +122,14 @@ namespace Assets.Scripts.FogOfWar
             foreach (var cell in area)
             {
                 
-                if (!_visibleByPlantsPoints.ContainsKey(plantOwner))
-                    _visibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
+                if (!VisibleByPlantsPoints.ContainsKey(plantOwner))
+                    VisibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
                 var resources = _soilResources.GetResourcesFromCellDirectly(cell);
                 foreach (var resource in resources)
                 {
-                    if (!_visibleByPlantsPoints[plantOwner].Contains(resource))
+                    if (!VisibleByPlantsPoints[plantOwner].Contains(resource))
                     {
-                        _visibleByPlantsPoints[plantOwner].Add(resource);
+                        VisibleByPlantsPoints[plantOwner].Add(resource);
                     }
                 }
             }
@@ -137,15 +141,15 @@ namespace Assets.Scripts.FogOfWar
             {
                 foreach (var plant in _plantsModel.Plants) // foreach exist plants we check which roots are in capsule now
                 {
-                    if (!_visibleByPlantsPoints.ContainsKey(plant))
-                        _visibleByPlantsPoints.Add(plant, new List<IPositionedObject>());
+                    if (!VisibleByPlantsPoints.ContainsKey(plant))
+                        VisibleByPlantsPoints.Add(plant, new List<IPositionedObject>());
                     if (plant == plantOwner) // Skip nodes of the plant that is revealing
                         continue;
                     foreach (var node in plant.Roots.GetNodesFromCellDirectly(cell))
                     {
-                        if (!_visibleByPlantsPoints[plant].Contains(node)) // If node is already visible, do not make recursive call again
+                        if (!VisibleByPlantsPoints[plant].Contains(node)) // If node is already visible, do not make recursive call again
                         {
-                            _visibleByPlantsPoints[plant].Add(node);
+                            VisibleByPlantsPoints[plant].Add(node);
                             UpdateVisibilityForRootNode(plant, node); // Reactive Update visibility for node that is visible now, to recalculate their own visibilities
                         }
                     }
