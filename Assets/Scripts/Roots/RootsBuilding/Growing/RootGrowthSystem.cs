@@ -57,8 +57,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             StartGrowingCoroutine();
         }
 
-        bool coroutineIsRunning = false;
-
         private bool IsCoroutineRunning()
         {
             return _growRootsCancellationTokenSource is not null;
@@ -77,7 +75,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         private void StopGrowingCoroutine()
         {
             Debug.Log("Stopping coroutine");
-            Debug.Log("Is coroutine Running?: "+ IsCoroutineRunning());
+            Debug.Log("Is coroutine Running?: " + IsCoroutineRunning());
             if (IsCoroutineRunning())
             {
                 _growRootsCancellationTokenSource.Cancel();

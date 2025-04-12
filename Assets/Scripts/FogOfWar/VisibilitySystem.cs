@@ -96,8 +96,16 @@ namespace Assets.Scripts.FogOfWar
         {
             if (revealer.Parent is null)
                 return;
+
             var edge = revealer.Transform.position - revealer.Parent.Transform.position;
-            float revealRadius = ((int)revealer.Type + Radius);//Make configuration for revealRadius of different rootTypes
+
+            float revealRadius = Radius * (revealer.Type switch
+            {
+                RootType.Recon => 2,
+                RootType.Wall => 0.5f,
+                _ => 1
+            });                
+
             float length = edge.magnitude;
             float width = revealRadius * 2;
             List<Vector2Int> area = CapsuleCast(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
