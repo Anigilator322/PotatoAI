@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.FogOfWar;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.UX
 {
@@ -11,29 +13,34 @@ namespace Assets.Scripts.UX
     }
     public class CapsuleCutSystem : MonoBehaviour
     {
-        private List<CapsuleData> _capsuleDatas = new List<CapsuleData>();
-        private int _bufferCapacity = 0;
-        public List<(Vector2 start, Vector2 end, float radius)> Capsules { get; set; } = new List<(Vector2 start, Vector2 end, float radius)>();
+        public List<VisibilityCapsule> Capsules { get; set; } = new List<VisibilityCapsule>();
 
+    #region renderTools
         Renderer rend;
         MaterialPropertyBlock mpb;
         private ComputeBuffer capsuleBuffer;
-
         private Vector2 minMap = new Vector2(-20, -20);
         private Vector2 maxMap = new Vector2(20, 20);
+        private int _bufferCapacity = 0;
+        private List<CapsuleData> _capsuleDatas = new List<CapsuleData>();
+        #endregion
+
+        [Inject]
+        private VisibilitySystem _visibilitySystem;
 
         private void Awake()
         {
             rend = GetComponent<Renderer>();
             mpb = new MaterialPropertyBlock();
+            _visibilitySystem.OnCapsuleCreted += SetCapsule;
         }
 
-        public void SetCapsule(Vector2 start, Vector2 end, float radius)
+        public void SetCapsule(VisibilityCapsule capsule)
         { 
-            Vector2 startUV = (start - minMap) / (maxMap - minMap);
-            Vector2 endUV = (end - minMap) / (maxMap - minMap);
-            float normalizedRadius = radius / (maxMap.x - minMap.x);
-            Capsules.Add((startUV, endUV, normalizedRadius));
+            Vector2 startUV = (capsule.Start - minMap) / (maxMap - minMap);
+            Vector2 endUV = (capsule.End - minMap) / (maxMap - minMap);
+            float normalizedRadius = capsule.Radius / (maxMap.x - minMap.x);
+            Capsules.Add(new VisibilityCapsule(startUV, endUV, normalizedRadius));
         }
 
         public void Update()
@@ -46,9 +53,9 @@ namespace Assets.Scripts.UX
             
             foreach (var rootEdge in Capsules)
             {
-                Vector2 start = rootEdge.start;
-                Vector2 end = rootEdge.end;
-                float radius = rootEdge.radius;
+                Vector2 start = rootEdge.Start;
+                Vector2 end = rootEdge.End;
+                float radius = rootEdge.Radius;
 
                 _capsuleDatas.Add(new CapsuleData() 
                 {

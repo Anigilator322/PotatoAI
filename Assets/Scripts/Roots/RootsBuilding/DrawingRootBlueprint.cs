@@ -12,7 +12,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
 
         List<Vector2> _pseudoRootPath = new List<Vector2>();
         public bool IsBlocked { get; set; }
-
+        #nullable enable
         public static DrawingRootBlueprint? Create(RootType rootType, RootNode startRootNode)
         {
             if((startRootNode.Childs.Count == 0) 
