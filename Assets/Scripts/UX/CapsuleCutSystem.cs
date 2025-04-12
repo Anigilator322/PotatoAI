@@ -32,7 +32,7 @@ namespace Assets.Scripts.UX
         {
             rend = GetComponent<Renderer>();
             mpb = new MaterialPropertyBlock();
-            _visibilitySystem.OnCapsuleCreted += SetCapsule;
+            _visibilitySystem.OnCapsuleCreated += SetCapsule;
         }
 
         public void SetCapsule(VisibilityCapsule capsule)

@@ -27,7 +27,7 @@ namespace Assets.Scripts.FogOfWar
         public Dictionary<Plant, List<IPositionedObject>> VisibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
         public CapsuleCutSystem _capsuleCutSystem { get; set; }
 
-        public Action<VisibilityCapsule> OnCapsuleCreted;
+        public Action<VisibilityCapsule> OnCapsuleCreated;
         public VisibilitySystem(Soil soil, PlantsModel model)
         {
             _soilResources = soil;
@@ -111,7 +111,7 @@ namespace Assets.Scripts.FogOfWar
             float width = revealRadius * 2;
             var capsule = new VisibilityCapsule(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
             VisibilityCapsules.Add(capsule);
-            OnCapsuleCreted?.Invoke(capsule);
+            OnCapsuleCreated?.Invoke(capsule);
             List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
