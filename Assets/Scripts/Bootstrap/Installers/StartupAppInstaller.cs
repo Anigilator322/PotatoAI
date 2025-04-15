@@ -42,7 +42,8 @@ namespace Assets.Scripts.Bootstrap.Installers
                 .WithArguments(generalPrefabs.plantPrefab);
 
             Container.Bind<Plant>()
-                .FromMethod(x => Container.Resolve<Plant.Factory>().Create())
+                .FromFactory<Plant.Factory>()
+                //.FromMethod(x => Container.Resolve<Plant.Factory>().Create())
                 .AsTransient();
 
             Container.Bind<PlayerDataModel>().AsSingle();
