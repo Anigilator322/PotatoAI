@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Roots.Plants;
+﻿using Assets.Scripts.Bootstrap;
+using Assets.Scripts.Roots.Plants;
 using System;
 using UnityEngine;
 using Zenject.ReflectionBaking.Mono.Cecil;
@@ -8,20 +9,19 @@ namespace Assets.Scripts.Roots
     public class ResourcePointSpawnSystem
     {
         private readonly int numberOfResourcePoints = 20;
-        private readonly float amountInPoint = 10;
+        private readonly float maximumResourcesInPoint = 10;
 
         private readonly RootNodeContactsSystem _rootNodeContactsSystem;
         private readonly Soil _soil;
 
         public ResourcePointSpawnSystem(RootNodeContactsSystem rootNodeContactsSystem,
             Soil soilResourcesModel,
-            int numberOfResourcePoints,
-            float amountInPoint)
+            ResourcePointsConfig resourcePointsConfig)
         {
             _soil = soilResourcesModel;
             _rootNodeContactsSystem = rootNodeContactsSystem;
-            this.numberOfResourcePoints = numberOfResourcePoints;
-            this.amountInPoint = amountInPoint;
+            this.numberOfResourcePoints = resourcePointsConfig.numberOfResourcePoints;
+            this.maximumResourcesInPoint = resourcePointsConfig.maximumResourcesInPoint;
         }
 
         public ResourcePoint SpawnResourcePoint(ResourceType type, float amount, Vector2 position)
@@ -56,7 +56,7 @@ namespace Assets.Scripts.Roots
 
                 Vector2 worldPosition = new Vector2(x, y);
 
-                SpawnResourcePoint(resourceType, amountInPoint, worldPosition);
+                SpawnResourcePoint(resourceType, maximumResourcesInPoint, worldPosition);
             }
         }
     }
