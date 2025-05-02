@@ -5,18 +5,21 @@ using UnityEngine;
 using Zenject;
 namespace Assets.Scripts.Bootstrap
 {
-    public class GameBootstrapper
+    public class GameBootstrapper : IInitializable
     {
-        [Inject] private Plant.Factory plantFactory;
-        [Inject] private RootSpawnSystem rootSpawnSystem;
-        [Inject] private ResourcePointSpawnSystem resourceSpawnSystem;
-        MonoBehHelper monoBehHelper;
+        private Plant.Factory plantFactory;
+        private ResourcePointSpawnSystem resourceSpawnSystem;
+        //private MonoBehHelper monoBehHelper;
 
-        Texture2D texture2D;
-
-        public void Start()
+        public GameBootstrapper(Plant.Factory plantFactory, ResourcePointSpawnSystem resourceSpawnSystem)
         {
-            monoBehHelper = GameObject.FindFirstObjectByType<MonoBehHelper>();
+            this.plantFactory = plantFactory;
+            this.resourceSpawnSystem = resourceSpawnSystem;
+        }
+
+        public void Initialize()
+        {
+            //monoBehHelper = GameObject.FindFirstObjectByType<MonoBehHelper>();
 
             var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
             resourceSpawnSystem.FillSoilUniformly();
