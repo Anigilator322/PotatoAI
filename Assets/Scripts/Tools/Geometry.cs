@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Map;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Tools
@@ -35,10 +36,10 @@ namespace Assets.Scripts.Tools
         }
 
 
-        public static T FindClosestObject<T>(List<T> positionedObjects, Vector2 position)
+        public static T FindClosestObject<T>(IEnumerable<T> positionedObjects, Vector2 position)
             where T : IPositionedObject
         {
-            T closestObject = positionedObjects[0];
+            T closestObject = positionedObjects.First();
             float minDistance = Vector2.Distance(position, (Vector2)closestObject.Transform.position);
             foreach (T positionedObject in positionedObjects)
             {
