@@ -8,12 +8,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using Zenject.Asteroids;
+
+using Assets.Scripts.Bootstrap.Installers;
+using GameInstaller = Assets.Scripts.Bootstrap.Installers.GameInstaller;
 
 
 /// <summary>
 /// System that draws the resources of the player in the UIs
 /// </summary>
-public class ResourcesViewSystem : ITickable
+public class ResourcesViewSystem : IInitializable, ITickable
 {
     private PlayerDataModel _playerData { get; }
 
@@ -23,7 +27,7 @@ public class ResourcesViewSystem : ITickable
     public ResourcesViewSystem(VerticalLayoutGroup resourcesData,
         TextMeshProUGUI calories,
         PlayerDataModel playerData,
-        Dictionary<ResourceType, Color> resourcesColors)
+        [Inject(Id = GameInstaller.RESOURCES_COLOR)] Dictionary<ResourceType, Color> resourcesColors)
     {
         _playerData = playerData;
         _resourcesIndicators = resourcesData;
@@ -39,9 +43,11 @@ public class ResourcesViewSystem : ITickable
         _potassium.color = new Color (resourcesColors[ResourceType.Potassium].r, resourcesColors[ResourceType.Potassium].g, resourcesColors[ResourceType.Potassium].b, 0.8f);
         _phosphorus.color = new Color (resourcesColors[ResourceType.Phosphorus].r, resourcesColors[ResourceType.Phosphorus].g, resourcesColors[ResourceType.Phosphorus].b, 0.8f);
         _nitrogen.color = new Color (resourcesColors[ResourceType.Nitrogen].r, resourcesColors[ResourceType.Nitrogen].g, resourcesColors[ResourceType.Nitrogen].b, 0.8f);
+    }
 
+    public void Initialize()
+    {
         _resourcesIndicators.transform.parent.position = _playerData.playersPlant.transform.position + new Vector3(0, 2f, 0);
-        
     }
 
     public void Tick()
@@ -77,5 +83,4 @@ public class ResourcesViewSystem : ITickable
 
         return (new string('\u25CF', numberOfDots)) + (new string(' ', 5 - numberOfDots));
     }
-
 }

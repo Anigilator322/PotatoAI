@@ -21,25 +21,27 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
     public class RootGrowthSystem : IRootGrowthSystem
     {
-        private GrowingRoots _growingRoots = new GrowingRoots();
         private RootSpawnSystem _rootSpawnSystem;
         private SynchronizationContext _mainThreadContext;
         private VisibilitySystem _visibilitySystem;
         private RootsBlockSystem _rootsBlockSystem;
+        private readonly GrowingRoots _growingRoots;
 
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
-        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel, 
-            VisibilitySystem visibilitySystem, RootsBlockSystem rootsBlockSystem)
+        public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel,
+            VisibilitySystem visibilitySystem, RootsBlockSystem rootsBlockSystem,
+            GrowingRoots growingRoots)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
             _mainThreadContext = System.Threading.SynchronizationContext.Current;
             _visibilitySystem = visibilitySystem;
             _rootsBlockSystem = rootsBlockSystem;
+            _growingRoots = growingRoots;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -171,21 +173,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             {
                 growingRoot.State = GrowthState.Completed;
             }
-        }
-    }
-
-    internal class GrowingRoots
-    {
-        public Dictionary<string, GrowingRoot> Blueprints { get; private set; } = new Dictionary<string, GrowingRoot>();
-
-        public void RemoveBlueprint(GrowingRoot root)
-        {
-            RemoveBlueprint(root.Blueprint.Id);
-        }
-
-        public void RemoveBlueprint(string id)
-        {
-            Blueprints.Remove(id);
         }
     }
 }

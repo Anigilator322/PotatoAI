@@ -1005,6 +1005,7 @@ GameObject:
   - component: {fileID: 1574179253}
   - component: {fileID: 1574179252}
   - component: {fileID: 1574179251}
+  - component: {fileID: 1574179255}
   - component: {fileID: 1574179254}
   m_Layer: 0
   m_Name: SceneContext
@@ -1027,12 +1028,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   generalPrefabs: {fileID: 11400000, guid: 4fe693ba07e4b134d99bc95ac920624c, type: 2}
   resourcePointsConfig: {fileID: 11400000, guid: 8167f8dbffc51704a87c4193390eb89b, type: 2}
-  resourcesIndicator: {fileID: 2133861078}
-  caloriesIndicator: {fileID: 472038358}
-  buildCostIndicator: {fileID: 1100718740}
-  justText: {fileID: 1218745394}
-  rootTypeSelection: {fileID: 1035518113738749982}
-  rootTypeSelectionIndicator: {fileID: 268983902106667419}
 --- !u!114 &1574179252
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1048,6 +1043,7 @@ MonoBehaviour:
   _scriptableObjectInstallers: []
   _monoInstallers:
   - {fileID: 1574179251}
+  - {fileID: 1574179255}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -1094,6 +1090,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _capsuleCutSystem: {fileID: 486065286}
   drawGizmosForFOV: 0
+--- !u!114 &1574179255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574179250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2379be7409218634dbec7ab4f28bc637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resourcesIndicators: {fileID: 2133861078}
+  caloriesIndicator: {fileID: 472038358}
+  buildCostIndicator: {fileID: 1100718740}
+  justText: {fileID: 0}
+  rootTypeSelection: {fileID: 1035518113738749982}
+  rootTypeSelectionIndicator: {fileID: 268983902106667419}
 --- !u!1 &1632628985
 GameObject:
   m_ObjectHideFlags: 0
@@ -1592,7 +1606,7 @@ GameObject:
   - component: {fileID: 2133861077}
   - component: {fileID: 2133861078}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Resources Indicators
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1682,7 +1696,7 @@ GameObject:
   - component: {fileID: 6632989419158202459}
   - component: {fileID: 268983902106667419}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: Root Type Selection Indicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1701,7 +1715,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 9529bab22c0df6b49aeda1c235b34811, type: 2}
-  m_Color: {r: 1, g: 0.9108912, b: 0, a: 0.46666667}
+  m_Color: {r: 1, g: 0.9108912, b: 0, a: 0.09411765}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1871,7 +1885,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.2901961}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2585,7 +2599,7 @@ GameObject:
   - component: {fileID: 2451524786628203712}
   - component: {fileID: 1035518113738749982}
   m_Layer: 5
-  m_Name: RootTypes
+  m_Name: Root Type Selection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2765,7 +2779,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.26739052, g: 0.3490566, b: 0.19593272, a: 1}
+  m_Color: {r: 0.5220766, g: 1, b: 0.4198113, a: 0.18431373}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2825,7 +2839,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.509434, g: 0.41027662, b: 0.31479177, a: 1}
+  m_Color: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 0.18431373}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

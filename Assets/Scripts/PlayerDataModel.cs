@@ -36,7 +36,7 @@ namespace Assets.Scripts
                 if (_playersPlant is null)
                 {
                     _playersPlant = _plantsModel.Plants
-                        .Single(p => p.Id == PlayerDataModel.PLAYER_ID);
+                        .SingleOrDefault(p => p.Id == PlayerDataModel.PLAYER_ID);
                 }
 
                 return _playersPlant;
