@@ -1,8 +1,11 @@
+using Assets.Scripts.Bootstrap;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Zenject;
+
+using GameInstaller = Assets.Scripts.Bootstrap.Installers.GameInstaller;
 
 public class ResourceDrawSystem : ITickable
 {
@@ -20,18 +23,17 @@ public class ResourceDrawSystem : ITickable
     private Texture2D _circleColorTexture;
 
     public ResourceDrawSystem(Soil soil,
-        float resoursePointRadius,
-        Dictionary<ResourceType, Color> resourceColors,
-        float maxResourcesThreshold,
+        [Inject(Id = GameInstaller.RESOURCES_COLOR)] Dictionary<ResourceType, Color> resourceColors,
+        ResourcePointsConfig resourcePointsConfig,
         RootNodeContactsModel rootNodeContactsModel)
     {
         _soil = soil;
         _soilResourcesMaterial = _soil.Sprite.material;
 
-        PointRadius = resoursePointRadius;
+        PointRadius = resourcePointsConfig.size;
 
         ResourceTypeColors = resourceColors;
-        MaxResourcesThreshold = maxResourcesThreshold;
+        MaxResourcesThreshold = resourcePointsConfig.maximumResourcesInPoint;
 
         _boundsMinV2 = new Vector2(_soil.Sprite.bounds.min.x, _soil.Sprite.bounds.min.y);
         var boundsMaxV2 = new Vector2(_soil.Sprite.bounds.max.x, _soil.Sprite.bounds.max.y);
