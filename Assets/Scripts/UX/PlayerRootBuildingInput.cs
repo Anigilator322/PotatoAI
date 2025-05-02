@@ -1,5 +1,6 @@
 using Assets.Scripts.Map;
 using Assets.Scripts.Roots;
+using Assets.Scripts.Roots.Extensions;
 using Assets.Scripts.Roots.Metabolics;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
@@ -91,8 +92,10 @@ namespace Assets.Scripts.UX
 
         private void PrepareBlueprint(Vector2 mousePosition)
         {
-            List<RootNode> queiriedNodes = _playerData.playersPlant.Roots.GetNodesFromCircle(_playerData.ClickedNodeSearchRadius, mousePosition);
-            var clickedNode = Geometry.FindClosestObject(queiriedNodes, mousePosition);
+            var clickedNode = _playerData.playersPlant.Roots.GetNearestAllowedBasementNode(
+                _playerData.ClickedNodeSearchRadius,
+                mousePosition,
+                _playerData.SelectedRootType);
 
             drawingBlueprint = DrawingRootBlueprint.Create(_playerData.SelectedRootType, clickedNode);
         }
