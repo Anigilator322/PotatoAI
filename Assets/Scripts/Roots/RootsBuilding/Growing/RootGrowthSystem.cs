@@ -25,7 +25,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         private SynchronizationContext _mainThreadContext;
         private VisibilitySystem _visibilitySystem;
         private RootsBlockSystem _rootsBlockSystem;
-        private readonly GrowingRoots _growingRoots;
+        private readonly GrowingRootsModel _growingRoots;
 
         private PlantsModel PlantsModel { get; }
         private float _growthTickTime = 0.1f;
@@ -34,7 +34,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
         public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel,
             VisibilitySystem visibilitySystem, RootsBlockSystem rootsBlockSystem,
-            GrowingRoots growingRoots)
+            GrowingRootsModel growingRoots)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;

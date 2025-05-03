@@ -42,6 +42,19 @@ public class Soil : MonoBehaviour
         return _gridPartition.QueryDirectlyCell(cellPos);
     }
 
+    public void Reset()
+    {
+        foreach (var resource in Resources)
+        {
+            if (resource != null)
+            {
+                Destroy(resource.Transform.gameObject);
+            }
+        }
+
+        Resources.Clear();
+        _gridPartition.Clear();
+    }
 
     public class Factory : IFactory<Soil>
     {

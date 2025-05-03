@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.Roots.Plants
@@ -51,6 +52,11 @@ namespace Assets.Scripts.Roots.Plants
             {
                 return Create(id: null, rootBasePosition: Vector2.zero);
             }
+        }
+
+        internal void Reset()
+        {
+
         }
     }
 }

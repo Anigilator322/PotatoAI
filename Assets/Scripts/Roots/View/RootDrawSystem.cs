@@ -13,6 +13,7 @@ using Assets.Scripts.Roots.RootsBuilding;
 using Assets.Scripts.UX;
 using static UnityEngine.Mesh;
 using ModestTree;
+using Assets.Scripts.Roots.RootsBuilding.Growing;
 
 class ModifiableMeshData
 {
@@ -62,68 +63,22 @@ namespace Assets.Scripts.Roots.View
 {
     public class RootDrawSystem : ITickable, IInitializable
     {
-        //TODO: Separate the drawing of roots and blueprints
-
-        [Inject]
-        private PlantsModel PlantsModel { get; }
-
-        [Inject]
-        private Soil soil { get; }
-
-        public List<RootBlueprint> BlueprintsToDraw { get; set; } = new();
-
+        //TODO: outsource config value setup
         const float _standardIncrement = 0.01f;
         const float _blueprintWidth = _standardIncrement * 6f;
 
-        Dictionary<RootNode, float> rootWidths = new Dictionary<RootNode, float>();
+        [Inject] private PlantsModel PlantsModel { get; }
+        [Inject] private PlayerDataModel PlayerDataModel { get; }
+        [Inject] private MeshCache MeshCache { get; }
+        [Inject] private GrowingRootsModel GrowingRoots { get; }
 
-        CancellationTokenSource _drawTickCoroutineCTS = new CancellationTokenSource();
+        private Dictionary<RootNode, float> _rootWidths = new();
 
-        Dictionary<Plant, Dictionary<RootType, MeshFilter>> meshFilters = new Dictionary<Plant, Dictionary<RootType, MeshFilter>>();
-        MeshFilter blueprintsMeshFilter;
-
-
+        CancellationTokenSource _drawTickCoroutineCTS = new();
         public async void Initialize()
         {
             _drawTickCoroutineCTS = new CancellationTokenSource();
             await UniTask.RunOnThreadPool(() => TickTimerCoroutine(_drawTickCoroutineCTS.Token));
-
-            var soilScale = soil.transform.localScale;
-
-            foreach (Plant plant in PlantsModel.Plants)
-            {
-                //find player plant blooprints mesh
-                //TODO: Create separate model for player data
-                if(plant.Id == PlayerDataModel.PLAYER_ID)
-                {
-                    blueprintsMeshFilter = plant.transform.Find("RootBlueprints").GetComponent<MeshFilter>();
-                }
-
-                //scale the roots and rootBlueprints
-                for (int i = 0; i < plant.transform.childCount; i++)
-                {
-                    var child = plant.transform.GetChild(i);
-
-                    if ((child.name == "Roots") ||
-                        (child.name == "RootBlueprints"))
-                    {
-                        child.transform.localScale = new Vector3(1 / soilScale.x, 1 / soilScale.y, 1 / soilScale.z);
-                    }
-                }
-
-                //find meshes
-                foreach(MeshFilter meshFilter in plant.transform.GetComponentsInChildren<MeshFilter>())
-                {
-                    RootTypeComponent rootTypeComponent;
-                    if ((rootTypeComponent = meshFilter.GetComponent<RootTypeComponent>()) is not null)
-                    {
-                        if (!meshFilters.ContainsKey(plant))
-                            meshFilters[plant] = new Dictionary<RootType, MeshFilter>();
-
-                        meshFilters[plant][rootTypeComponent.rootType] = meshFilter;
-                    }
-                }
-            }
         }
     
         ~RootDrawSystem()
@@ -155,7 +110,7 @@ namespace Assets.Scripts.Roots.View
                 tickFlag = false;
                 EvaluateAllWidths();
 
-                UpdateBluprintsMesh();
+                UpdateBluprintsMeshes();
 
                 foreach (Plant plant in PlantsModel.Plants)
                 {
@@ -174,11 +129,13 @@ namespace Assets.Scripts.Roots.View
         {
             var baseNode = plantRoots.Nodes.Single(node => node.IsRootBase);
 
-            var rootsMeshesData = meshFilters[plantRoots.plant]
+            var rootsMeshesData = MeshCache.meshFilters[plantRoots.plant]
                 .ToDictionary(
                     meshFilter => meshFilter.Key,
                     meshFilter => new ModifiableMeshData());
-           
+
+            rootsMeshesData.Remove(RootType.Blueprint);
+
             var rectangleVertices = new RectangleVetrices();
             rectangleVertices.downLeft = rectangleVertices.upLeft = rectangleVertices.downLeft = rectangleVertices.downRight = -1;
 
@@ -186,7 +143,7 @@ namespace Assets.Scripts.Roots.View
 
             foreach (var rootMeshData in rootsMeshesData)
             {
-                UpdateMeshFilter(meshFilters[plantRoots.plant][rootMeshData.Key],
+                UpdateMeshFilter(MeshCache.meshFilters[plantRoots.plant][rootMeshData.Key],
                     rootMeshData.Value.vertices,
                     rootMeshData.Value.triangles,
                     rootMeshData.Value.uvs,
@@ -197,53 +154,74 @@ namespace Assets.Scripts.Roots.View
         /// <summary>
         /// Обновить меш чертежей корней
         /// </summary>
-        void UpdateBluprintsMesh()
+        void UpdateBluprintsMeshes()
         {
-            List<Vector3> vertices = new List<Vector3>();
-            List<int> triangles = new List<int>();
-            List<Vector2> uvs = new List<Vector2>();
-
-            foreach(var blueprint in BlueprintsToDraw)
+            var plantBlueprints = PlantsModel.Plants
+                .ToDictionary(
+                    plant => plant,
+                    plant => new List<RootBlueprint>());
+                
+            foreach (var growingRoot in GrowingRoots.Blueprints.Values)
             {
-                for (int i = 0; i < blueprint.RootPath.Count; i++)
-                {
-                    // Get Parent position and width from rootWidths
-                    Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.StartRootNode.Transform.position;
-
-                    // Generate straight segment vertices
-                    Vector2 direction = (blueprint.RootPath[i] - parentPos).normalized;
-                    Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-
-                    int baseVertexIndex = vertices.Count;
-
-                    Vector3 v1 = parentPos + perpendicular * _blueprintWidth / 2;
-                    Vector3 v2 = parentPos - perpendicular * _blueprintWidth / 2;
-                    Vector3 v3 = blueprint.RootPath[i] + perpendicular * _blueprintWidth / 2;
-                    Vector3 v4 = blueprint.RootPath[i] - perpendicular * _blueprintWidth / 2;
-
-                    // Add the four vertices
-                    vertices.Add(v1);
-                    vertices.Add(v2);
-                    vertices.Add(v3);
-                    vertices.Add(v4);
-
-                    // Create triangles for the current segment
-                    triangles.Add(baseVertexIndex);
-                    triangles.Add(baseVertexIndex + 2);
-                    triangles.Add(baseVertexIndex + 1);
-                    triangles.Add(baseVertexIndex + 1);
-                    triangles.Add(baseVertexIndex + 2);
-                    triangles.Add(baseVertexIndex + 3);
-
-                    // Add UVs
-                    uvs.Add(CalculateUVFromPosition(v1));
-                    uvs.Add(CalculateUVFromPosition(v2));
-                    uvs.Add(CalculateUVFromPosition(v3));
-                    uvs.Add(CalculateUVFromPosition(v4));
-                }
+                plantBlueprints[growingRoot.Plant].Add(growingRoot.Blueprint);
             }
 
-            UpdateMeshFilter(blueprintsMeshFilter, vertices, triangles, uvs);
+            if(PlayerDataModel.CurrentlyBeingDrawnBlueprint is not null)
+            {
+                plantBlueprints[PlayerDataModel.playersPlant].Add(PlayerDataModel.CurrentlyBeingDrawnBlueprint.blueprint);
+            }
+
+            foreach (var group in plantBlueprints)
+            {
+                List<Vector3> vertices = new List<Vector3>();
+                List<int> triangles = new List<int>();
+                List<Vector2> uvs = new List<Vector2>();
+
+                foreach (var blueprint in group.Value)
+                {
+                    for (int i = 0; i < blueprint.RootPath.Count; i++)
+                    {
+                        // Get Parent position and width from rootWidths
+                        Vector2 parentPos = i != 0 ? blueprint.RootPath[i - 1] : blueprint.StartRootNode.Transform.position;
+
+                        // Generate straight segment vertices
+                        Vector2 direction = (blueprint.RootPath[i] - parentPos).normalized;
+                        Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+
+                        int baseVertexIndex = vertices.Count;
+
+                        Vector3 v1 = parentPos + perpendicular * _blueprintWidth / 2;
+                        Vector3 v2 = parentPos - perpendicular * _blueprintWidth / 2;
+                        Vector3 v3 = blueprint.RootPath[i] + perpendicular * _blueprintWidth / 2;
+                        Vector3 v4 = blueprint.RootPath[i] - perpendicular * _blueprintWidth / 2;
+
+                        // Add the four vertices
+                        vertices.Add(v1);
+                        vertices.Add(v2);
+                        vertices.Add(v3);
+                        vertices.Add(v4);
+
+                        // Create triangles for the current segment
+                        triangles.Add(baseVertexIndex);
+                        triangles.Add(baseVertexIndex + 2);
+                        triangles.Add(baseVertexIndex + 1);
+                        triangles.Add(baseVertexIndex + 1);
+                        triangles.Add(baseVertexIndex + 2);
+                        triangles.Add(baseVertexIndex + 3);
+
+                        // Add UVs
+                        uvs.Add(CalculateUVFromPosition(v1));
+                        uvs.Add(CalculateUVFromPosition(v2));
+                        uvs.Add(CalculateUVFromPosition(v3));
+                        uvs.Add(CalculateUVFromPosition(v4));
+                    }
+                }
+
+                var meshFilter = MeshCache.GetMeshFilter(group.Key, RootType.Blueprint);
+
+                
+                UpdateMeshFilter(meshFilter, vertices, triangles, uvs);
+            }
         }
 
         void GenerateBranchMeshData(
@@ -262,7 +240,7 @@ namespace Assets.Scripts.Roots.View
 
             if (Parent is not null)
             {
-                var nodeWidth = rootWidths[node];
+                var nodeWidth = _rootWidths[node];
 
                 // Get Parent position
                 Vector3 parentPos = Parent.Transform.position;
@@ -417,7 +395,7 @@ namespace Assets.Scripts.Roots.View
             List<Vector2> uvs = meshData.uvs;
             var normals = meshData.normals;
 
-            if (!rootWidths.TryGetValue(node, out float mergeWidth))
+            if (!_rootWidths.TryGetValue(node, out float mergeWidth))
                 mergeWidth = _standardIncrement;
 
             mergeWidth = GetThinerPartWidth(mergeWidth);
@@ -469,6 +447,12 @@ namespace Assets.Scripts.Roots.View
 
         void UpdateMeshFilter(MeshFilter meshFilter, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs, List<Vector3> normals = null)
         {
+            if (meshFilter is null)
+                return;
+
+            if(meshFilter.mesh is null)
+                meshFilter.mesh = new Mesh();   
+
             var mesh = meshFilter.mesh;
             mesh.Clear();
             mesh.vertices = vertices.ToArray();
@@ -482,6 +466,7 @@ namespace Assets.Scripts.Roots.View
 
             mesh.RecalculateBounds();
         }
+
         Vector2 CalculateUVFromPosition(Vector3 position)
         {
             return new Vector2(position.x, position.y);
@@ -527,7 +512,7 @@ namespace Assets.Scripts.Roots.View
                 }
             }
 
-            rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
+            _rootWidths[node] = Mathf.Sqrt(nodeArea / Mathf.PI);
 
             return nodeArea;
         }

@@ -16,8 +16,7 @@ namespace Assets.Scripts.FogOfWar
     public class VisibilitySystem
     {
         private PlantsModel _plantsModel;
-        [Inject]
-        ResourceDrawSystem _resourceDrawSystem;
+
         private Soil _soilResources;
         private int _cellSize;
 

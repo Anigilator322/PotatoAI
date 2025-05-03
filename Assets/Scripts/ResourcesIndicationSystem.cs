@@ -17,14 +17,14 @@ using GameInstaller = Assets.Scripts.Bootstrap.Installers.GameInstaller;
 /// <summary>
 /// System that draws the resources of the player in the UIs
 /// </summary>
-public class ResourcesViewSystem : IInitializable, ITickable
+public class ResourcesIndicationSystem : IInitializable, ITickable
 {
     private PlayerDataModel _playerData { get; }
 
     private readonly TextMeshProUGUI _water, _phosphorus, _nitrogen, _potassium, _calories;
     private VerticalLayoutGroup _resourcesIndicators { get; set; }
 
-    public ResourcesViewSystem(VerticalLayoutGroup resourcesData,
+    public ResourcesIndicationSystem(VerticalLayoutGroup resourcesData,
         TextMeshProUGUI calories,
         PlayerDataModel playerData,
         [Inject(Id = GameInstaller.RESOURCES_COLOR)] Dictionary<ResourceType, Color> resourcesColors)
