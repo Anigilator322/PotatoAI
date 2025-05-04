@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem;
+﻿using Assets.Scripts.Bootstrap;
+using Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem;
 using UnityEngine;
 using Zenject;
 
@@ -6,10 +7,18 @@ namespace Assets.Scripts.Roots.RootsBuilding
 {
     public class RootBlueprintingSystem
     {
+        public RootBlueprintingSystem(RootsBlockSystem rootBlockSystem, 
+            MainConfig mainConfig)
+        {
+            _rootBlockSystem = rootBlockSystem;
+            _rootSegmentLength = mainConfig.rootSegmentLength;
+            _maxBuildAngle = mainConfig.maxBuildAngle;
+        }
+
         [Inject] 
         private RootsBlockSystem _rootBlockSystem;
-        public float _rootSegmentLength { get; private set; } = 0.8f;
-        public float _maxBuildAngle { get; private set; } = 15f;
+        public float _rootSegmentLength { get; private set; }
+        public float _maxBuildAngle { get; private set; }
 
         private void CreateNewPathNode(DrawingRootBlueprint rootBlueprint, Vector2 direction)
         {

@@ -14,9 +14,10 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
 
         private PlantsModel _plantsModel;
 
-        public RootsBlockSystem(PlantsModel plantsModel)
+        public RootsBlockSystem(PlantsModel plantsModel, float blockObjectsSeekRadius)
         {
             _plantsModel = plantsModel;
+            _blockObjectsSeekRadius = blockObjectsSeekRadius;
         }
 
         public bool IsAnyBlock(DrawingRootBlueprint rootBlueprint)

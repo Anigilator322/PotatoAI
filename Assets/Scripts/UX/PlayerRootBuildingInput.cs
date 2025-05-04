@@ -87,7 +87,7 @@ namespace Assets.Scripts.UX
         private void PrepareBlueprint(Vector2 mousePosition)
         {
             var clickedNode = _playerData.playersPlant.Roots.GetNearestAllowedBasementNode(
-                _playerData.ClickedNodeSearchRadius,
+                _playerData.clickNodeSearchRadius,
                 mousePosition,
                 _playerData.SelectedRootType);
 
@@ -119,7 +119,7 @@ namespace Assets.Scripts.UX
         private bool IsClickedOnRoot(Vector2 mousePosition)
         {
             return _playerData.playersPlant.Roots
-                .GetNodesFromCircle(_playerData.ClickedNodeSearchRadius, mousePosition)
+                .GetNodesFromCircle(_playerData.clickNodeSearchRadius, mousePosition)
                 .Count 
                 != 0;
         }

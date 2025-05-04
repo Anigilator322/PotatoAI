@@ -23,25 +23,26 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
     {
         private RootSpawnSystem _rootSpawnSystem;
         private SynchronizationContext _mainThreadContext;
-        private VisibilitySystem _visibilitySystem;
+        //private VisibilitySystem _visibilitySystem;
         private RootsBlockSystem _rootsBlockSystem;
         private readonly GrowingRootsModel _growingRoots;
 
         private PlantsModel PlantsModel { get; }
-        private float _growthTickTime = 0.1f;
+        private float _growthTickTime;
 
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
         public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel,
-            VisibilitySystem visibilitySystem, RootsBlockSystem rootsBlockSystem,
-            GrowingRootsModel growingRoots)
+            RootsBlockSystem rootsBlockSystem,
+            GrowingRootsModel growingRoots, float growthTickTime)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
             _mainThreadContext = System.Threading.SynchronizationContext.Current;
-            _visibilitySystem = visibilitySystem;
+            //_visibilitySystem = visibilitySystem;
             _rootsBlockSystem = rootsBlockSystem;
             _growingRoots = growingRoots;
+            _growthTickTime = growthTickTime;
         }
 
         public void StartGrowth(RootBlueprint blueprint)
@@ -70,14 +71,13 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             {
                 Debug.Log("Starting coroutine");
                 _growRootsCancellationTokenSource = new CancellationTokenSource();
-                UniTask.RunOnThreadPool(() => GrowRoots(_growRootsCancellationTokenSource.Token));
+                UniTask.RunOnThreadPool(() => GrowRoots(_growRootsCancellationTokenSource.Token))
+                    .Forget();
             }
         }
 
         private void StopGrowingCoroutine()
         {
-            Debug.Log("Stopping coroutine");
-            Debug.Log("Is coroutine Running?: " + IsCoroutineRunning());
             if (IsCoroutineRunning())
             {
                 _growRootsCancellationTokenSource.Cancel();
@@ -125,7 +125,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
                 {
                     var id = ids[i];
                     var growingRoot = _growingRoots.Blueprints[ids[i]];
-                    //Debug.Log("Growing root " + id);
 
                     switch (growingRoot.State)
                     {
@@ -165,7 +164,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             var node = _rootSpawnSystem.SpawnRootNode(
                 new RootNode(position, parent, type));
             //For visibility system
-            _visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);
+            //_visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);
             growingRoot.Blueprint.RemoveFirstPoint();
             growingRoot.Blueprint.StartRootNode = node;
 

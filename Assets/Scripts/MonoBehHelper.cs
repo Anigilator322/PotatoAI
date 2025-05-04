@@ -17,8 +17,8 @@ public class MonoBehHelper : MonoBehaviour
     MeshFilter meshFilter;
     [Inject] 
     private PlantsModel _plantsModel;
-    [Inject] 
-    private VisibilitySystem _visibilitySystem;
+    //[Inject] 
+    //private VisibilitySystem _visibilitySystem;
     #endregion
 
     private void Awake()
@@ -70,22 +70,22 @@ public class MonoBehHelper : MonoBehaviour
         if (!drawGizmosForFOV)
             return;
 
-        foreach (var plantAndPoints in _visibilitySystem.VisibleByPlantsPoints)
-        {
-            Gizmos.color = Color.blue;
-            foreach (var point in plantAndPoints.Value)
-            {
-                Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
-            }
-        }
-        foreach (var capsule in _visibilitySystem.VisibilityCapsules)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(capsule.Start, capsule.Radius);
-            var length = (capsule.End - capsule.Start).magnitude;
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(capsule.End, capsule.Radius);
-        }
+        //foreach (var plantAndPoints in _visibilitySystem.VisibleByPlantsPoints)
+        //{
+        //    Gizmos.color = Color.blue;
+        //    foreach (var point in plantAndPoints.Value)
+        //    {
+        //        Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
+        //    }
+        //}
+        //foreach (var capsule in _visibilitySystem.VisibilityCapsules)
+        //{
+        //    Gizmos.color = Color.yellow;
+        //    Gizmos.DrawWireSphere(capsule.Start, capsule.Radius);
+        //    var length = (capsule.End - capsule.Start).magnitude;
+        //    Gizmos.color = Color.yellow;
+        //    Gizmos.DrawWireSphere(capsule.End, capsule.Radius);
+        //}
     }
     #endregion
 }
