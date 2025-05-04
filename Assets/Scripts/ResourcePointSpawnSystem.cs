@@ -8,8 +8,8 @@ namespace Assets.Scripts.Roots
 {
     public class ResourcePointSpawnSystem
     {
-        private readonly int numberOfResourcePoints = 20;
-        private readonly float maximumResourcesInPoint = 10;
+        private readonly int numberOfResourcePoints;
+        private readonly float maximumResourcesInPoint;
 
         private readonly RootNodeContactsSystem _rootNodeContactsSystem;
         private readonly Soil _soil;

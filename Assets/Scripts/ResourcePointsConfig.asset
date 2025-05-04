@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abcd1ac6f71722a4bb24173238911a14, type: 3}
+  m_Name: ResourcePointsConfig
+  m_EditorClassIdentifier: 
+  water: {r: 0.45229617, g: 0.637164, b: 0.7924528, a: 0.17254902}
+  phosphorus: {r: 0.6226415, g: 0.3495016, b: 0.3495016, a: 0.18431373}
+  potassium: {r: 0.6698113, g: 0.47708258, b: 0.66709685, a: 0.18431373}
+  nitrogen: {r: 0.42831078, g: 0.7264151, b: 0.45599452, a: 0.20392157}
+  size: 2
+  maximumResourcesInPoint: 10
+  numberOfResourcePoints: 20

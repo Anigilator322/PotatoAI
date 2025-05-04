@@ -15,6 +15,7 @@ namespace Assets.Scripts.Roots.Plants
         public class Factory : IFactory<Plant>
         {
             private readonly PlantRoots.Factory _rootsFactory;
+            private readonly int _startCalories;
             private readonly Plant _plantPrefab;
             private readonly PlantsModel _plantsModel;
             private readonly Soil _soil;
@@ -25,8 +26,10 @@ namespace Assets.Scripts.Roots.Plants
                 PlantRoots.Factory rootsFactory,
                 PlantsModel plantsModel,
                 Soil soilModel,
-                RootSpawnSystem rootSpawnSystem)
+                RootSpawnSystem rootSpawnSystem,
+                int startCalories)
             {
+                _startCalories = startCalories;
                 _plantPrefab = plantPrefab;
                 _rootsFactory = rootsFactory;
                 _plantsModel = plantsModel;
@@ -39,7 +42,7 @@ namespace Assets.Scripts.Roots.Plants
                 Plant plant = Instantiate(_plantPrefab, (Vector3)rootBasePosition, Quaternion.identity, _soil.transform);
                 plant.Id = id;
 
-                plant.Resources.Calories = 500;
+                plant.Resources.Calories = _startCalories;
                 plant.Roots = _rootsFactory.Create(plant);
 
                 _rootSpawnSystem.SpawnRootNodeToPlant(plant.Roots, new RootNode(new Vector2(0, 0), null, RootType.Harvester));

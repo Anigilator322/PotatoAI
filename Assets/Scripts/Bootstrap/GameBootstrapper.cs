@@ -20,6 +20,7 @@ public class GameBootstrapper : IInitializable
     [Inject] RootNodeContactsModel rootNodeContacts;
     [Inject] PlayerDataModel playerDataModel;
     [Inject] MeshCache meshCache;
+    [Inject] TimerSystem timer;
 
     [SerializeField]
     MonoBehHelper monoBehHelper;
@@ -29,14 +30,27 @@ public class GameBootstrapper : IInitializable
         this.resourceSpawnSystem = resourceSpawnSystem;
     }
 
+    CancellationTokenSource _cts;
     public void Initialize()
     {
         monoBehHelper = GameObject.FindFirstObjectByType<MonoBehHelper>();
-        //monoBehHelper.Reset += Reset;
+
         Reset();
 
-        UniTask.RunOnThreadPool(async () => { await UniTask.Delay(5000); Reset(); })
-            .Forget();
+        //timer.TimeIsOver += Reset;
+
+        //_cts = new CancellationTokenSource();
+        //var token = _cts.Token;
+
+        //UniTask.RunOnThreadPool(async () => 
+        //{
+        //    while (!token.IsCancellationRequested)
+        //    {
+        //        await UniTask.Delay(1000);
+        //        Reset();
+        //    }
+        //})
+        //    .Forget();
     }
 
     public void Reset()
@@ -46,6 +60,7 @@ public class GameBootstrapper : IInitializable
         growingRoots.Reset();
         rootNodeContacts.Reset();
         playerDataModel.Reset();
+        timer.Reset();
 
         var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
 

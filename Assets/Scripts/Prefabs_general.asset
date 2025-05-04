@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dc61516db59bf54382e3b8c50b7f546, type: 3}
+  m_Name: Prefabs_general
+  m_EditorClassIdentifier: 
+  plantPrefab: {fileID: 2676730505666247869, guid: 72814e45bf3db3047a2ad2427dd3771d, type: 3}
+  soilPrefab: {fileID: 42500864760729487, guid: 060cf054a12820141a66e0fe7e068ed8, type: 3}

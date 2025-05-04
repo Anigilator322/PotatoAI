@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Roots.Plants;
+﻿using Assets.Scripts.Bootstrap;
+using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
@@ -98,6 +99,17 @@ namespace Assets.Scripts.Roots.Metabolics
             }
             else
                 return false;
+        }
+
+        public readonly float powerOfRootCost = 1.25f,
+            reconCost = 1.5f,
+            wallCost = 2;
+
+        public MetabolicSystem(MainConfig mainConfig)
+        {
+            powerOfRootCost = mainConfig.rootCostGrowthExponent;
+            reconCost = mainConfig.reconCost;
+            wallCost = mainConfig.wallCost;
         }
 
         public int CalculateBlueprintPrice(DrawingRootBlueprint scaffoldedBlueprint)

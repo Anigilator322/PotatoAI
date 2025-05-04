@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Roots;
+﻿using Assets.Scripts.Bootstrap;
+using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding;
 using System;
@@ -20,15 +21,19 @@ namespace Assets.Scripts
 
         public const string PLAYER_ID = "player_1";
 
-        public RootType SelectedRootType { get; set; }  = RootType.Harvester;
+        public RootType SelectedRootType { get; set; } = RootType.Harvester;
 
         // null if there is now blueprint being drawn currently
         public DrawingRootBlueprint CurrentlyBeingDrawnBlueprint { get; set; }
 
         public bool IsBuilding { get; set; }
 
-        [SerializeField] 
-        public float ClickedNodeSearchRadius = 2f;
+        public float clickNodeSearchRadius { get; private set; }
+
+        public PlayerDataModel(MainConfig mainConfig)
+        {
+            this.clickNodeSearchRadius = mainConfig.clickNodeSearchRadius;
+        }
 
         private Plant _playersPlant;
         public Plant playersPlant

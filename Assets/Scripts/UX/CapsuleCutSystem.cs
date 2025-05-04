@@ -25,14 +25,14 @@ namespace Assets.Scripts.UX
         private List<CapsuleData> _capsuleDatas = new List<CapsuleData>();
         #endregion
 
-        [Inject]
-        private VisibilitySystem _visibilitySystem;
+        //[Inject]
+        //private VisibilitySystem _visibilitySystem;
 
-        private void Awake()
+        private void Start()
         {
             rend = GetComponent<Renderer>();
             mpb = new MaterialPropertyBlock();
-            _visibilitySystem.OnCapsuleCreated += SetCapsule;
+//_visibilitySystem.OnCapsuleCreated += SetCapsule;
         }
 
         public void SetCapsule(VisibilityCapsule capsule)

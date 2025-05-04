@@ -28,6 +28,9 @@ namespace Assets.Scripts.Bootstrap.Installers
         [SerializeField]
         ResourcePointsConfig resourcePointsConfig;
 
+        [SerializeField]
+        MainConfig mainConfig;
+
         public override void InstallBindings()
         {
             // ======= Models =======
@@ -38,7 +41,7 @@ namespace Assets.Scripts.Bootstrap.Installers
 
             Container.Bind<PlantRoots.Factory>().AsSingle();
             Container.Bind<Plant.Factory>().AsCached()
-                .WithArguments(generalPrefabs.plantPrefab);
+                .WithArguments(generalPrefabs.plantPrefab, mainConfig.startCalories);
 
 
             // ======= Configs =======
@@ -51,16 +54,17 @@ namespace Assets.Scripts.Bootstrap.Installers
             }).WithId(RESOURCES_COLOR);
 
             Container.BindInstance(resourcePointsConfig);
+            Container.BindInstance(mainConfig);
 
 
             // ======= Systems =======
             Container.Bind<ResourcePointSpawnSystem>().AsSingle();
             Container.Bind<RootSpawnSystem>().AsSingle();
-            Container.Bind<RootGrowthSystem>().AsSingle();
-            Container.Bind<RootNodeContactsSystem>().AsSingle()
-                .WithArguments(resourcePointsConfig.size);
-            Container.Bind<RootsBlockSystem>().AsSingle();
+            Container.Bind<RootGrowthSystem>().AsSingle().WithArguments(mainConfig.growthTickTime);
+            Container.Bind<RootNodeContactsSystem>().AsSingle().WithArguments(resourcePointsConfig.size);
+            Container.Bind<RootsBlockSystem>().AsSingle().WithArguments(mainConfig.clickNodeSearchRadius);
             Container.Bind<RootBlueprintingSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<TimerSystem>().AsSingle().WithArguments(mainConfig.gameDurationSeconds);
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
 
             // ======= Bootstrap =======

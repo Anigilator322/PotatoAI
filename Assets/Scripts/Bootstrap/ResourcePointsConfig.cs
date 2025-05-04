@@ -3,17 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Assets.Scripts.Bootstrap
 {
-    [CreateAssetMenu(fileName = "Prefabs_general", menuName = "PrefabsReferenceMaps/General", order = 0)]
-    public class GeneralPrefabs : ScriptableObject
-    {
-        [SerializeField]
-        public Plant plantPrefab;
-
-        [SerializeField]
-        public Soil soilPrefab;
-    }
-
-    [CreateAssetMenu(fileName = "ResourcePoints", menuName = "PrefabsReferenceMaps/ResourcePoints", order = 1)]
+    [CreateAssetMenu(fileName = "ResourcePointsConfig", menuName = "GameConfigs/ResourcePoints", order = 1)]
     public class ResourcePointsConfig : ScriptableObject
     {
         [SerializeField]

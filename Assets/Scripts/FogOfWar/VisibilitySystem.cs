@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Map;
+﻿using Assets.Scripts.Bootstrap;
+using Assets.Scripts.Map;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Tools;
@@ -27,11 +28,11 @@ namespace Assets.Scripts.FogOfWar
         public CapsuleCutSystem _capsuleCutSystem { get; set; }
 
         public Action<VisibilityCapsule> OnCapsuleCreated;
-        public VisibilitySystem(Soil soil, PlantsModel model)
+        public VisibilitySystem(Soil soil, PlantsModel model, ResourcePointsConfig resourcePointsConfig)
         {
             _soilResources = soil;
             _plantsModel = model;
-            _cellSize = 1;
+            _cellSize = (int)resourcePointsConfig.size;
         }
 
         private Vector2Int GetCellCoordinates(Vector2 worldPosition)
