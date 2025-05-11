@@ -31,5 +31,15 @@ namespace Assets.Scripts.UX
                 CapsuleBuffer = null;
             }
         }
+
+        public void Reset()
+        {
+            CapsuleBuffer?.Release();
+            CapsuleBuffer?.Dispose();
+            CapsuleBuffer = null;
+            CapsulesFormated.Clear();
+            CapsuleDatas.Clear();
+            BufferCapacity = 0;
+        }
     }
 }

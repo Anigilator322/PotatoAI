@@ -22,5 +22,11 @@ namespace Assets.Scripts.FogOfWar
             VisibilityCapsules = new List<VisibilityCapsule>();
             VisibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
         }
+
+        public void Reset()
+        {
+            VisibilityCapsules.Clear();
+            VisibleByPlantsPoints.Clear();
+        }
     }
 }
