@@ -81,12 +81,8 @@ namespace Assets.Scripts.UX
             if (CapsuleCutComponent.CapsuleDatas?.Count() == 0)
                 return;
 
-            if (CapsuleCutComponent.CapsuleBuffer != null)
-            {
-                CapsuleCutComponent.CapsuleBuffer.Release();
-                CapsuleCutComponent.CapsuleBuffer.Dispose();
-                CapsuleCutComponent.CapsuleBuffer = null;
-            }
+            CapsuleCutComponent.CapsuleBuffer?.Release();
+            CapsuleCutComponent.CapsuleBuffer?.Dispose();
             CapsuleCutComponent.CapsuleBuffer = new ComputeBuffer(CapsuleCutComponent.CapsuleDatas.Count() != 0 ? CapsuleCutComponent.CapsuleDatas.Count() : 1, 32);
             CapsuleCutComponent.BufferCapacity = CapsuleCutComponent.CapsulesFormated.Count;
             CapsuleCutComponent.CapsuleBuffer.SetData(CapsuleCutComponent.CapsuleDatas);
@@ -96,6 +92,7 @@ namespace Assets.Scripts.UX
             _mpb.SetVector("_MapMin", MIN_MAP);
             _mpb.SetVector("_MapMax", MAX_MAP);
             _rend.SetPropertyBlock(_mpb);
+            
         }
     }
 }
