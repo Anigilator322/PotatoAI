@@ -9,8 +9,6 @@ using Assets.Scripts.UX;
 
 public class MonoBehHelper : MonoBehaviour
 {
-    [SerializeField] 
-    private CapsuleCutSystem _capsuleCutSystem;
     #region DrawGizmosFields
     MeshFilter meshFilter;
     [Inject] 
@@ -68,7 +66,7 @@ public class MonoBehHelper : MonoBehaviour
         if (!drawGizmosForFOV)
             return;
 
-        foreach (var plantAndPoints in _visibilitySystem.VisibleByPlantsPoints)
+        foreach (var plantAndPoints in _visibilitySystem.VisibilityComponent.VisibleByPlantsPoints)
         {
             Gizmos.color = Color.blue;
             foreach (var point in plantAndPoints.Value)
@@ -76,7 +74,7 @@ public class MonoBehHelper : MonoBehaviour
                 Gizmos.DrawSphere((Vector2)point.Transform.position, 0.1f);
             }
         }
-        foreach (var capsule in _visibilitySystem.VisibilityCapsules)
+        foreach (var capsule in _visibilitySystem.VisibilityComponent.VisibilityCapsules)
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(capsule.Start, capsule.Radius);
