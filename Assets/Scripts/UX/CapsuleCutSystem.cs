@@ -80,18 +80,17 @@ namespace Assets.Scripts.UX
             }
             if (_capsuleCutComponent.CapsuleDatas?.Count() == 0)
                 return;
-            if (_capsuleCutComponent.BufferCapacity != _capsuleCutComponent.CapsuleDatas?.Count())
+
+            if (_capsuleCutComponent.CapsuleBuffer != null)
             {
-                if (_capsuleCutComponent.CapsuleBuffer != null)
-                {
-                    _capsuleCutComponent.CapsuleBuffer.Release();
-                    _capsuleCutComponent.CapsuleBuffer.Dispose();
-                    _capsuleCutComponent.CapsuleBuffer = null;
-                }
-                _capsuleCutComponent.CapsuleBuffer = new ComputeBuffer(_capsuleCutComponent.CapsuleDatas.Count() != 0 ? _capsuleCutComponent.CapsuleDatas.Count() : 1, 32);
-                _capsuleCutComponent.BufferCapacity = _capsuleCutComponent.CapsulesFormated.Count;
+                _capsuleCutComponent.CapsuleBuffer.Release();
+                _capsuleCutComponent.CapsuleBuffer.Dispose();
+                _capsuleCutComponent.CapsuleBuffer = null;
             }
+            _capsuleCutComponent.CapsuleBuffer = new ComputeBuffer(_capsuleCutComponent.CapsuleDatas.Count() != 0 ? _capsuleCutComponent.CapsuleDatas.Count() : 1, 32);
+            _capsuleCutComponent.BufferCapacity = _capsuleCutComponent.CapsulesFormated.Count;
             _capsuleCutComponent.CapsuleBuffer.SetData(_capsuleCutComponent.CapsuleDatas);
+
             _mpb.SetBuffer("capsuleBuffer", _capsuleCutComponent.CapsuleBuffer);
             _mpb.SetInt("_CapsuleCount", _capsuleCutComponent.CapsuleDatas.Count());
             _mpb.SetVector("_MapMin", MIN_MAP);
