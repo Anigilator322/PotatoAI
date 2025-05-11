@@ -11,6 +11,9 @@ namespace Assets.Scripts.Bootstrap
 
         [SerializeField]
         public Soil soilPrefab;
+
+        [SerializeField]
+        public Renderer FogOfWarPrefab;
     }
 
     [CreateAssetMenu(fileName = "ResourcePoints", menuName = "PrefabsReferenceMaps/ResourcePoints", order = 1)]
