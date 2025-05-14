@@ -30,6 +30,8 @@ namespace Assets.Scripts.Bootstrap.Installers
         {
             // ======= Models =======
             Container.Bind<Soil>().FromComponentInNewPrefab(generalPrefabs.soilPrefab).AsSingle();
+            Container.Bind<Renderer>().FromComponentInNewPrefab(generalPrefabs.FogOfWarPrefab).AsSingle()
+                .NonLazy();
             Container.Bind<PlantsModel>().AsSingle();
             Container.Bind<GrowingRoots>().AsSingle();
             Container.Bind<RootNodeContactsModel>().AsSingle();
