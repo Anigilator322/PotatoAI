@@ -32,6 +32,8 @@ namespace Assets.Scripts.Bootstrap.Installers
         {
             // ======= Models =======
             Container.Bind<Soil>().FromComponentInNewPrefab(generalPrefabs.soilPrefab).AsSingle();
+            Container.Bind<Renderer>().FromComponentInNewPrefab(generalPrefabs.FogOfWarPrefab).AsSingle()
+                .NonLazy();
             Container.Bind<PlantsModel>().AsSingle();
             Container.Bind<GrowingRootsModel>().AsSingle();
             Container.Bind<RootNodeContactsModel>().AsSingle();
@@ -62,6 +64,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootsBlockSystem>().AsSingle();
             Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
+            Container.Bind<VisibilitySystem>().AsSingle();
 
             // ======= Bootstrap =======
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().AsSingle();
