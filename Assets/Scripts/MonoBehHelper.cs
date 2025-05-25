@@ -86,4 +86,9 @@ public class MonoBehHelper : MonoBehaviour
         }
     }
     #endregion
+
+    public void OnDestroy()
+    {
+        _visibilitySystem.CapsuleCutSystem.CapsuleCutComponent.Dispose();
+    }
 }

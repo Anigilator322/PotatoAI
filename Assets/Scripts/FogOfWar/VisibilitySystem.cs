@@ -10,7 +10,7 @@ namespace Assets.Scripts.FogOfWar
 {
     public class VisibilitySystem
     {
-        private CapsuleCutSystem _capsuleCutSystem { get; set; }
+        public CapsuleCutSystem CapsuleCutSystem { get; set; }
         public VisibilityModel VisibilityComponent { get; set; }
 
         private const int CELL_SIZE = 1;
@@ -19,7 +19,7 @@ namespace Assets.Scripts.FogOfWar
         public VisibilitySystem(PlantsModel model, Soil soil, Renderer fogOfWarRenderer)
         {
             VisibilityComponent = new VisibilityModel(model, soil);
-            _capsuleCutSystem = new CapsuleCutSystem(fogOfWarRenderer);
+            CapsuleCutSystem = new CapsuleCutSystem(fogOfWarRenderer);
         }
 
         private bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
@@ -92,11 +92,13 @@ namespace Assets.Scripts.FogOfWar
             var capsule = new VisibilityCapsule(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
             VisibilityComponent.VisibilityCapsules.Add(capsule);
             //OnCapsuleCreated?.Invoke(capsule);
-            _capsuleCutSystem.SetCapsule(capsule);
-            _capsuleCutSystem.UpdateVisionShader();
+            CapsuleCutSystem.SetCapsule(capsule);
+            CapsuleCutSystem.UpdateVisionShader();
             List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
+            if(VisibilityComponent.PlantsModel.Plants.Count == 0)
+                return;
         }
 
         private void CheckResources(Plant plantOwner, List<Vector2Int> area)

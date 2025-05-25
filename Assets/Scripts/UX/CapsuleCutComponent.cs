@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.UX
 {
-    public class CapsuleCutComponent
+    public class CapsuleCutComponent : IDisposable
     {
        
         #region CapsuleCutSystem
@@ -24,12 +24,25 @@ namespace Assets.Scripts.UX
         }
         ~CapsuleCutComponent()
         {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
             if (CapsuleBuffer != null)
             {
                 CapsuleBuffer.Release();
                 CapsuleBuffer.Dispose();
                 CapsuleBuffer = null;
             }
+        }
+
+        public void Reset()
+        {
+            Dispose();
+            CapsulesFormated.Clear();
+            CapsuleDatas.Clear();
+            BufferCapacity = 0;
         }
     }
 }
