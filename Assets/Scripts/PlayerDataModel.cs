@@ -21,7 +21,9 @@ namespace Assets.Scripts
         public const string PLAYER_ID = "player_1";
 
         public RootType SelectedRootType { get; set; }  = RootType.Harvester;
-        public DrawingRootBlueprint DrawingRootBlueprint { get; set; }
+
+        // null if there is now blueprint being drawn currently
+        public DrawingRootBlueprint CurrentlyBeingDrawnBlueprint { get; set; }
 
         public bool IsBuilding { get; set; }
 
@@ -41,6 +43,12 @@ namespace Assets.Scripts
 
                 return _playersPlant;
             }
+        }
+
+        internal void Reset()
+        {
+            _playersPlant = null;
+            IsBuilding = false;
         }
     }
 }

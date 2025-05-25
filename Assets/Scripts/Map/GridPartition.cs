@@ -119,5 +119,10 @@ namespace Assets.Scripts.Map
         {
             return _cellSize;
         }
+
+        public void Clear()
+        {
+            _grid.Clear();
+        }
     }
 }
