@@ -9,6 +9,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Assets.Scripts.Roots.View;
 using Assets.Scripts.FogOfWar;
+using Assets.Scripts.UX;
 
 public class GameBootstrapper : IInitializable
 {
@@ -22,6 +23,7 @@ public class GameBootstrapper : IInitializable
     [Inject] PlayerDataModel playerDataModel;
     [Inject] MeshCache meshCache;
     [Inject] VisibilitySystem visibilitySystem;
+    [Inject] CapsuleCutSystem capsuleCutSystem;
 
     [SerializeField]
     MonoBehHelper monoBehHelper;
@@ -49,6 +51,7 @@ public class GameBootstrapper : IInitializable
         rootNodeContacts.Reset();
         playerDataModel.Reset();
         visibilitySystem.Reset();
+        capsuleCutSystem.Reset();
         var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
 
         resourceSpawnSystem.FillSoilUniformly();

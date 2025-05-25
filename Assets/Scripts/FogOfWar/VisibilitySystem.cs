@@ -2,6 +2,7 @@
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.UX;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
@@ -10,22 +11,21 @@ namespace Assets.Scripts.FogOfWar
 {
     public class VisibilitySystem
     {
-        public CapsuleCutSystem CapsuleCutSystem { get; set; }
         public VisibilityModel VisibilityComponent { get; set; }
 
         private const int CELL_SIZE = 1;
 
+        public Action<VisibilityCapsule> OnCapsuleCreated;
+
         [Inject]
-        public VisibilitySystem(PlantsModel model, Soil soil, Renderer fogOfWarRenderer)
+        public VisibilitySystem(PlantsModel model, Soil soil)
         {
             VisibilityComponent = new VisibilityModel(model, soil);
-            CapsuleCutSystem = new CapsuleCutSystem(fogOfWarRenderer);
         }
 
         public void Reset()
         {
             VisibilityComponent.Reset();
-            CapsuleCutSystem.Reset();
         }
 
         private bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
@@ -97,9 +97,7 @@ namespace Assets.Scripts.FogOfWar
             float width = revealRadius * 2;
             var capsule = new VisibilityCapsule(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
             VisibilityComponent.VisibilityCapsules.Add(capsule);
-            //OnCapsuleCreated?.Invoke(capsule);
-            CapsuleCutSystem.SetCapsule(capsule);
-            CapsuleCutSystem.UpdateVisionShader();
+            OnCapsuleCreated?.Invoke(capsule);
             List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);

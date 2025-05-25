@@ -22,8 +22,11 @@ namespace Assets.Scripts.UX
         private readonly Vector2 MAX_MAP = new Vector2(20, 20);
         #endregion
 
-        public CapsuleCutSystem(Renderer capsuleCutViewRenderer)
+        private VisibilitySystem _visibilitySystem;
+
+        public CapsuleCutSystem(Renderer capsuleCutViewRenderer, VisibilitySystem visibilitySystem)
         {
+            _visibilitySystem = visibilitySystem;
             InitializeSystem(capsuleCutViewRenderer);
         }
 
@@ -37,6 +40,7 @@ namespace Assets.Scripts.UX
         private void InitializeSystem(Renderer capsuleCutViewRenderer)
         {
             CapsuleCutComponent = new CapsuleCutComponent();
+            _visibilitySystem.OnCapsuleCreated += SetCapsule;
             InitializeFogView(capsuleCutViewRenderer);
         }
 
@@ -63,6 +67,7 @@ namespace Assets.Scripts.UX
             Vector2 endUV = (capsule.End - MIN_MAP) / (MAX_MAP - MIN_MAP);
             float normalizedRadius = capsule.Radius / (MAX_MAP.x - MIN_MAP.x);
             CapsuleCutComponent.CapsulesFormated.Add(new VisibilityCapsule(startUV, endUV, normalizedRadius));
+            UpdateVisionShader();
         }
 
         public void UpdateVisionShader()

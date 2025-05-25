@@ -65,7 +65,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
             Container.Bind<VisibilitySystem>().AsSingle();
-
+            Container.Bind<CapsuleCutSystem>().AsSingle().NonLazy();
             // ======= Bootstrap =======
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().AsSingle();
             Container.BindInitializableExecutionOrder(typeof(GameBootstrapper), -1);
