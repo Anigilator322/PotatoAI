@@ -14,6 +14,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
+//using Sirenix.OdinInspector;
+
 namespace Assets.Scripts.Bootstrap.Installers
 {
     public class GameInstaller : MonoInstaller
@@ -31,7 +33,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             // ======= Models =======
             Container.Bind<Soil>().FromComponentInNewPrefab(generalPrefabs.soilPrefab).AsSingle();
             Container.Bind<PlantsModel>().AsSingle();
-            Container.Bind<GrowingRoots>().AsSingle();
+            Container.Bind<GrowingRootsModel>().AsSingle();
             Container.Bind<RootNodeContactsModel>().AsSingle();
 
             Container.Bind<PlantRoots.Factory>().AsSingle();
@@ -52,22 +54,18 @@ namespace Assets.Scripts.Bootstrap.Installers
 
 
             // ======= Systems =======
-            Container.Bind<RootNodeContactsSystem>().AsSingle()
-                .WithArguments(resourcePointsConfig.size);
-            Container.BindInterfacesAndSelfTo<ResourceDrawSystem>().AsSingle();
             Container.Bind<ResourcePointSpawnSystem>().AsSingle();
-            Container.Bind<RootsBlockSystem>().AsSingle();
-            Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.Bind<RootSpawnSystem>().AsSingle();
             Container.Bind<RootGrowthSystem>().AsSingle();
+            Container.Bind<RootNodeContactsSystem>().AsSingle()
+                .WithArguments(resourcePointsConfig.size);
+            Container.Bind<RootsBlockSystem>().AsSingle();
+            Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
-            Container.BindInterfacesAndSelfTo<RootDrawSystem>().AsSingle();
-            Container.Bind<VisibilitySystem>().FromNew().AsSingle();
-
 
             // ======= Bootstrap =======
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().AsSingle();
-            Container.BindInitializableExecutionOrder(typeof(GameBootstrapper), 1);
+            Container.BindInitializableExecutionOrder(typeof(GameBootstrapper), -1);
         }
     }
 }

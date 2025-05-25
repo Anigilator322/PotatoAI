@@ -25,8 +25,8 @@ namespace Assets.Scripts.Bootstrap.Installers
         {
             Container.Bind<PlayerButtonControllsSystem>().AsSingle().WithArguments(rootTypeSelection, rootTypeSelectionIndicator).NonLazy();
             Container.BindInterfacesAndSelfTo<PlayerRootBuildingInput>().AsSingle().WithArguments(buildCostIndicator, justText);
-            Container.BindInterfacesAndSelfTo<ResourcesViewSystem>().AsSingle().WithArguments(resourcesIndicators, caloriesIndicator);
-            Container.BindInitializableExecutionOrder(typeof(ResourcesViewSystem), 2);
+            Container.BindInterfacesAndSelfTo<ResourcesIndicationSystem>().AsSingle().WithArguments(resourcesIndicators, caloriesIndicator);
+            Container.BindInitializableExecutionOrder(typeof(ResourcesIndicationSystem), 2);
 
             Container.BindInterfacesAndSelfTo<CameraMoveInput>().FromNew().AsSingle();
 
