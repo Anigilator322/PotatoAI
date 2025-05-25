@@ -64,6 +64,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootsBlockSystem>().AsSingle();
             Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
+            Container.Bind<VisibilitySystem>().AsSingle();
 
             // ======= Bootstrap =======
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().AsSingle();
