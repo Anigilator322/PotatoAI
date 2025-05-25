@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks.Triggers;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Assets.Scripts.Roots.View;
+using Assets.Scripts.FogOfWar;
 
 public class GameBootstrapper : IInitializable
 {
@@ -20,6 +21,7 @@ public class GameBootstrapper : IInitializable
     [Inject] RootNodeContactsModel rootNodeContacts;
     [Inject] PlayerDataModel playerDataModel;
     [Inject] MeshCache meshCache;
+    [Inject] VisibilitySystem visibilitySystem;
 
     [SerializeField]
     MonoBehHelper monoBehHelper;
@@ -46,7 +48,7 @@ public class GameBootstrapper : IInitializable
         growingRoots.Reset();
         rootNodeContacts.Reset();
         playerDataModel.Reset();
-
+        visibilitySystem.Reset();
         var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
 
         resourceSpawnSystem.FillSoilUniformly();

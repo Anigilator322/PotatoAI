@@ -27,6 +27,13 @@ namespace Assets.Scripts.UX
             InitializeSystem(capsuleCutViewRenderer);
         }
 
+        public void Reset()
+        {
+            CapsuleCutComponent?.Reset();
+            CapsuleCutComponent = new CapsuleCutComponent();
+            InitializeFogView(_rend);
+        }
+
         private void InitializeSystem(Renderer capsuleCutViewRenderer)
         {
             CapsuleCutComponent = new CapsuleCutComponent();

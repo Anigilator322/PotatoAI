@@ -22,6 +22,12 @@ namespace Assets.Scripts.FogOfWar
             CapsuleCutSystem = new CapsuleCutSystem(fogOfWarRenderer);
         }
 
+        public void Reset()
+        {
+            VisibilityComponent.Reset();
+            CapsuleCutSystem.Reset();
+        }
+
         private bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
         {
             // Найти ближайшую точку от центра клетки на отрезке
