@@ -1,8 +1,5 @@
 using Assets.Scripts.Roots;
-using PlasticPipe.PlasticProtocol.Messages;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class RootNodeContactsModel
 {

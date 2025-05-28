@@ -15,8 +15,10 @@ public class MonoBehHelper : MonoBehaviour
     MeshFilter meshFilter;
     [Inject] 
     private PlantsModel _plantsModel;
-//    [Inject] 
+    //    [Inject] 
     //private VisibilitySystem _visibilitySystem;
+    [Inject]
+    private CapsuleCutSystem _capsuleCutSystem;
     #endregion
 
     private void Awake()
@@ -63,5 +65,6 @@ public class MonoBehHelper : MonoBehaviour
     public void OnDestroy()
     {
         //_visibilitySystem.CapsuleCutSystem.CapsuleCutComponent.Dispose();
+        _capsuleCutSystem.CapsuleCutComponent.Dispose();
     }
 }

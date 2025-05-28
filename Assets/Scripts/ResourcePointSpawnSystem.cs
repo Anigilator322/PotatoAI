@@ -1,8 +1,6 @@
 ﻿using Assets.Scripts.Bootstrap;
-using Assets.Scripts.Roots.Plants;
 using System;
 using UnityEngine;
-using Zenject.ReflectionBaking.Mono.Cecil;
 
 namespace Assets.Scripts.Roots
 {

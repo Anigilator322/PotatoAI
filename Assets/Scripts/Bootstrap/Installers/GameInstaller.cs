@@ -28,6 +28,7 @@ namespace Assets.Scripts.Bootstrap.Installers
         [SerializeField]
         ResourcePointsConfig resourcePointsConfig;
 
+        private CapsuleCutSystem _capsuleCutSystem;
         public override void InstallBindings()
         {
             // ======= Models =======

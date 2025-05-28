@@ -39,8 +39,8 @@ public class GameBootstrapper : IInitializable
         //monoBehHelper.Reset += Reset;
         Reset();
 
-        UniTask.RunOnThreadPool(async () => { await UniTask.Delay(5000); Reset(); })
-            .Forget();
+        //UniTask.RunOnThreadPool(async () => { await UniTask.Delay(5000); Reset(); })
+        //    .Forget();
     }
 
     public void Reset()
