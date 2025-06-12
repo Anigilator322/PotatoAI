@@ -146,14 +146,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 440589245}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7827629809016939299}
   - {fileID: 6279744906797519655}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 520729729}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &472038356
 GameObject:
@@ -379,7 +379,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 440589246}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &520729730
@@ -993,7 +994,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef29dd3fa62e1842a32107baa9371c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawGizmosForFOV: 0
 --- !u!114 &1574179255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1598,7 +1598,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 1873374805
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!1 &232973207363684498
 GameObject:
@@ -2156,7 +2156,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 1873374805
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!222 &4717326664657985752
 CanvasRenderer:
@@ -2878,5 +2878,4 @@ SceneRoots:
   - {fileID: 1574179253}
   - {fileID: 1867925666}
   - {fileID: 590674207}
-  - {fileID: 440589246}
   - {fileID: 1842454154}

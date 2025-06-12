@@ -1,9 +1,7 @@
-using Assets.Scripts.FogOfWar;
 using Assets.Scripts.Roots.Plants;
 using Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem;
 using Cysharp.Threading.Tasks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
@@ -23,7 +21,6 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
     {
         private RootSpawnSystem _rootSpawnSystem;
         private SynchronizationContext _mainThreadContext;
-        private VisibilitySystem _visibilitySystem;
         private RootsBlockSystem _rootsBlockSystem;
         private readonly GrowingRootsModel _growingRoots;
 
@@ -33,13 +30,12 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
         private CancellationTokenSource _growRootsCancellationTokenSource;
 
         public RootGrowthSystem(RootSpawnSystem rootSpawnSystem, PlantsModel plantsModel,
-            VisibilitySystem visibilitySystem, RootsBlockSystem rootsBlockSystem,
+            RootsBlockSystem rootsBlockSystem,
             GrowingRootsModel growingRoots)
         {
             PlantsModel = plantsModel;
             _rootSpawnSystem = rootSpawnSystem;
             _mainThreadContext = System.Threading.SynchronizationContext.Current;
-            _visibilitySystem = visibilitySystem;
             _rootsBlockSystem = rootsBlockSystem;
             _growingRoots = growingRoots;
         }
@@ -165,7 +161,7 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
             var node = _rootSpawnSystem.SpawnRootNode(
                 new RootNode(position, parent, type));
             //For visibility system
-            _visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);
+            //_visibilitySystem.UpdateVisibilityForRootNode(growingRoot.Plant, node);
             growingRoot.Blueprint.RemoveFirstPoint();
             growingRoot.Blueprint.StartRootNode = node;
 

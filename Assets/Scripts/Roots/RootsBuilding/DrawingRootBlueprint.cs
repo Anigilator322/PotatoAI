@@ -8,7 +8,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
     /// <summary>
     /// Обёртка вокруг RootBlueprint - Прокси, обеспечивающий удобство построения чертежа
     /// </summary>
-    public class DrawingRootBlueprint : IRootBlueprint
+    public class DrawingRootBlueprint
     {
         public RootBlueprint blueprint { get; }
 

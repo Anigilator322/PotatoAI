@@ -102,7 +102,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
             return angle;
         }
 
-        private bool TryDecreasePath(IRootBlueprint rootBlueprint)
+        private bool TryDecreasePath(DrawingRootBlueprint rootBlueprint)
         {
             return rootBlueprint.TryRemoveLastPoint();
         }
