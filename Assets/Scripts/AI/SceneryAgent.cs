@@ -41,7 +41,7 @@ namespace Assets.Scripts.AI
 
         private async Task Execute()
         {
-            var baseRoot = _plantsModel.Plants[0].Roots.Nodes[0];
+            var baseRoot = _plantsModel.Plants.First(plant => plant.Id != PlayerDataModel.PLAYER_ID).Roots.Nodes[0];
             while (Paths.Count > 0)
             {
                 List<Vector2> path = Paths.Dequeue();
