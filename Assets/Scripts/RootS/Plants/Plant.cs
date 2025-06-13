@@ -34,15 +34,15 @@ namespace Assets.Scripts.Roots.Plants
                 this._rootSpawnSystem = rootSpawnSystem;
             }
 
-            public Plant Create(string id, Vector2 rootBasePosition)
+            public Plant Create(string id, Vector2 rootBasePosition, int startCalories = 500)
             {
                 Plant plant = Instantiate(_plantPrefab, (Vector3)rootBasePosition, Quaternion.identity, _soil.transform);
                 plant.Id = id;
 
-                plant.Resources.Calories = 500;
+                plant.Resources.Calories = startCalories;
                 plant.Roots = _rootsFactory.Create(plant);
 
-                _rootSpawnSystem.SpawnRootNodeToPlant(plant.Roots, new RootNode(new Vector2(0, 0), null, RootType.Harvester));
+                _rootSpawnSystem.SpawnRootNodeToPlant(plant.Roots, new RootNode(rootBasePosition, null, RootType.Harvester));
 
                 _plantsModel.Plants.Add(plant);
                 return plant;

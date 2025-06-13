@@ -143,11 +143,13 @@ namespace Assets.Scripts.Roots.View
 
             foreach (var rootMeshData in rootsMeshesData)
             {
-                UpdateMeshFilter(MeshCache.meshFilters[plantRoots.plant][rootMeshData.Key],
+                UpdateMeshFilter(
+                    MeshCache.meshFilters[plantRoots.plant][rootMeshData.Key],
                     rootMeshData.Value.vertices,
                     rootMeshData.Value.triangles,
                     rootMeshData.Value.uvs,
-                    rootMeshData.Value.normals);
+                    rootMeshData.Value.normals,
+                    baseNode.Transform.position);
             }
         }
 
@@ -219,8 +221,8 @@ namespace Assets.Scripts.Roots.View
 
                 var meshFilter = MeshCache.GetMeshFilter(group.Key, RootType.Blueprint);
 
-                
-                UpdateMeshFilter(meshFilter, vertices, triangles, uvs);
+
+                UpdateMeshFilter(meshFilter, vertices, triangles, uvs, pivotPosition:group.Key.transform.transform.position);
             }
         }
 
@@ -445,7 +447,13 @@ namespace Assets.Scripts.Roots.View
             return Mathf.Sqrt((crossSectionalArea - _standardIncrement) / Mathf.PI);
         }
 
-        void UpdateMeshFilter(MeshFilter meshFilter, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs, List<Vector3> normals = null)
+        void UpdateMeshFilter(
+            MeshFilter meshFilter,
+            List<Vector3> vertices,
+            List<int> triangles,
+            List<Vector2> uvs,
+            List<Vector3> normals = null,
+            Vector3? pivotPosition = null)
         {
             if (meshFilter is null)
                 return;
@@ -455,6 +463,12 @@ namespace Assets.Scripts.Roots.View
 
             var mesh = meshFilter.mesh;
             mesh.Clear();
+
+            if(pivotPosition.HasValue)
+                for (int i = 0; i < vertices.Count(); i ++) {
+                    vertices[i] -= pivotPosition.Value;
+                }
+
             mesh.vertices = vertices.ToArray();
             mesh.triangles = triangles.ToArray();
             mesh.uv = uvs.ToArray();
