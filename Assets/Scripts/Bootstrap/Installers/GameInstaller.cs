@@ -13,6 +13,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using Assets.Scripts.AI;
 
 //using Sirenix.OdinInspector;
 
@@ -67,6 +68,7 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
             Container.Bind<VisibilitySystem>().AsSingle();
             Container.Bind<CapsuleCutSystem>().AsSingle().NonLazy();
+            Container.Bind<SceneryAgent>().AsSingle().NonLazy();
             // ======= Bootstrap =======
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().AsSingle();
             Container.BindInitializableExecutionOrder(typeof(GameBootstrapper), -1);
