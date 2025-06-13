@@ -17,10 +17,15 @@ namespace Assets.Scripts.UX
         [SerializeField] public float Speed = 6f;
 
         [Inject] private PlayerInputActions _playerInputActions;
-        
         private InputAction _rightArrowInput;
 
         Vector2 TargetSpeed, CurrentSpeed;
+        private Bounds _soilBounds;
+
+        public CameraMoveInput(Soil soil)
+        {
+            _soilBounds = soil.Sprite.bounds;
+        }
 
         void IInitializable.Initialize()
         {
@@ -44,8 +49,29 @@ namespace Assets.Scripts.UX
 
         void ITickable.Tick()
         {
-           CurrentSpeed = Vector2.Lerp(CurrentSpeed, TargetSpeed, 0.12f);       
-           Camera.main.transform.position += (Vector3)(CurrentSpeed * Speed * Time.deltaTime);
+           CurrentSpeed = Vector2.Lerp(CurrentSpeed, TargetSpeed, 0.12f);
+            var desiredPosition = Camera.main.transform.position + (Vector3)(CurrentSpeed * Speed * Time.deltaTime);
+            MoveCameraInBounds(_soilBounds, desiredPosition);
+        }
+
+        private void MoveCameraInBounds(Bounds bounds, Vector3 desiredCameraPosition)
+        {
+            float camHeight = Camera.main.orthographicSize * 2f;
+            float camWidth = camHeight * Camera.main.aspect;
+
+            float halfCamHeight = camHeight / 2f;
+            float halfCamWidth = camWidth / 2f;
+            Vector3 targetPos = desiredCameraPosition;
+
+            float minX = bounds.min.x + halfCamWidth;
+            float maxX = bounds.max.x - halfCamWidth;
+            float minY = bounds.min.y + halfCamHeight;
+            float maxY = bounds.max.y - halfCamHeight;
+
+            targetPos.x = Mathf.Clamp(targetPos.x, minX, maxX);
+            targetPos.y = Mathf.Clamp(targetPos.y, minY, maxY);
+
+            Camera.main.transform.position = new Vector3(targetPos.x, targetPos.y, Camera.main.transform.position.z);
         }
     }
 }
