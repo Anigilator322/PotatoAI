@@ -11,6 +11,8 @@ namespace Assets.Scripts.FogOfWar
 {
     public class VisibilitySystem
     {
+        public PlantsModel PlantsModel;
+        public Soil SoilResources;
         public VisibilityModel VisibilityComponent { get; set; }
 
         private const int CELL_SIZE = 1;
@@ -20,12 +22,18 @@ namespace Assets.Scripts.FogOfWar
         [Inject]
         public VisibilitySystem(PlantsModel model, Soil soil)
         {
-            VisibilityComponent = new VisibilityModel(model, soil);
+            PlantsModel = model;
+            SoilResources = soil;
+            VisibilityComponent = new VisibilityModel();
         }
 
         public void Reset()
         {
             VisibilityComponent.Reset();
+            foreach (var plant in PlantsModel.Plants)
+            {
+                UpdateVisibilityForRootNode(plant, plant.Roots.Nodes[0]);
+            }
         }
 
         private bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
@@ -81,10 +89,11 @@ namespace Assets.Scripts.FogOfWar
 
         public void UpdateVisibilityForRootNode(Plant plantOwner, RootNode revealer)
         {
-            if (revealer.Parent is null)
-                return;
+            var parent = revealer.Parent;
+            if (parent is null)
+                parent = revealer;
 
-            var edge = revealer.Transform.position - revealer.Parent.Transform.position;
+            var edge = revealer.Transform.position - parent.Transform.position;
 
             float revealRadius = (revealer.Type switch
             {
@@ -95,13 +104,13 @@ namespace Assets.Scripts.FogOfWar
 
             float length = edge.magnitude;
             float width = revealRadius * 2;
-            var capsule = new VisibilityCapsule(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
+            var capsule = new VisibilityCapsule(parent.Transform.position, revealer.Transform.position, revealRadius);
             VisibilityComponent.VisibilityCapsules.Add(capsule);
             OnCapsuleCreated?.Invoke(capsule);
             List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
-            if(VisibilityComponent.PlantsModel.Plants.Count == 0)
+            if(PlantsModel.Plants.Count == 0)
                 return;
         }
 
@@ -112,7 +121,7 @@ namespace Assets.Scripts.FogOfWar
                 
                 if (!VisibilityComponent.VisibleByPlantsPoints.ContainsKey(plantOwner))
                     VisibilityComponent.VisibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
-                var resources = VisibilityComponent.SoilResources.GetResourcesFromCellDirectly(cell);
+                var resources = SoilResources.GetResourcesFromCellDirectly(cell);
                 foreach (var resource in resources)
                 {
                     if (!VisibilityComponent.VisibleByPlantsPoints[plantOwner].Contains(resource))
@@ -127,7 +136,7 @@ namespace Assets.Scripts.FogOfWar
         {
             foreach (var cell in area)
             {
-                foreach (var plant in VisibilityComponent.PlantsModel.Plants) // foreach exist plants we check which roots are in capsule now
+                foreach (var plant in PlantsModel.Plants) // foreach exist plants we check which roots are in capsule now
                 {
                     if (!VisibilityComponent.VisibleByPlantsPoints.ContainsKey(plant))
                         VisibilityComponent.VisibleByPlantsPoints.Add(plant, new List<IPositionedObject>());

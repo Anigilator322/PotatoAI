@@ -96,7 +96,8 @@ namespace Assets.Scripts.UX
                 _playerData.ClickedNodeSearchRadius,
                 mousePosition,
                 _playerData.SelectedRootType);
-
+            if (clickedNode is null)
+                return;
             drawingBlueprint = DrawingRootBlueprint.Create(_playerData.SelectedRootType, clickedNode);
         }
 
