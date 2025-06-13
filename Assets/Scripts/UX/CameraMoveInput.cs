@@ -63,13 +63,17 @@ namespace Assets.Scripts.UX
             float halfCamWidth = camWidth / 2f;
             Vector3 targetPos = desiredCameraPosition;
 
-            float minX = bounds.min.x + halfCamWidth;
-            float maxX = bounds.max.x - halfCamWidth;
-            float minY = bounds.min.y + halfCamHeight;
-            float maxY = bounds.max.y - halfCamHeight;
+            float paddingX = 0f;
+            float paddingY = 2f;
+
+            float minX = bounds.min.x + halfCamWidth - paddingX;
+            float maxX = bounds.max.x - halfCamWidth + paddingX;
+            float minY = bounds.min.y + halfCamHeight - paddingY;
+            float maxY = bounds.max.y - halfCamHeight + paddingY;
 
             targetPos.x = Mathf.Clamp(targetPos.x, minX, maxX);
             targetPos.y = Mathf.Clamp(targetPos.y, minY, maxY);
+
 
             Camera.main.transform.position = new Vector3(targetPos.x, targetPos.y, Camera.main.transform.position.z);
         }
