@@ -11,14 +11,10 @@ namespace Assets.Scripts.FogOfWar
         #region VisibilitySystem
         public List<VisibilityCapsule> VisibilityCapsules;
         public Dictionary<Plant, List<IPositionedObject>> VisibleByPlantsPoints;
-        public PlantsModel PlantsModel;
-        public Soil SoilResources;
         #endregion
         
-        public VisibilityModel(PlantsModel plantsModel, Soil soilResources)
+        public VisibilityModel()
         {
-            PlantsModel = plantsModel;
-            SoilResources = soilResources;
             VisibilityCapsules = new List<VisibilityCapsule>();
             VisibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
         }
