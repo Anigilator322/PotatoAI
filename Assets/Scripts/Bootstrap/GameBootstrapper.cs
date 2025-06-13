@@ -10,6 +10,7 @@ using Cysharp.Threading.Tasks;
 using Assets.Scripts.Roots.View;
 using Assets.Scripts.FogOfWar;
 using Assets.Scripts.UX;
+using Assets.Scripts.AI;
 
 public class GameBootstrapper : IInitializable
 {
@@ -24,7 +25,7 @@ public class GameBootstrapper : IInitializable
     [Inject] MeshCache meshCache;
     [Inject] VisibilitySystem visibilitySystem;
     [Inject] CapsuleCutSystem capsuleCutSystem;
-
+    [Inject] SceneryAgent sceneryAgent;
     [SerializeField]
     MonoBehHelper monoBehHelper;
     public GameBootstrapper(Plant.Factory plantFactory, ResourcePointSpawnSystem resourceSpawnSystem)
@@ -58,5 +59,7 @@ public class GameBootstrapper : IInitializable
         resourceSpawnSystem.AddResourceClusterAtPoint(((Vector2)(playerPlant.transform.position + adversaryPlant.transform.position) / 2) + (Vector2.down * 3));
 
         meshCache.Reset();
+
+        sceneryAgent.Init();
     }
 }
