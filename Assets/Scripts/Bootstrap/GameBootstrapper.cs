@@ -53,9 +53,10 @@ public class GameBootstrapper : IInitializable
         playerDataModel.Reset();
         visibilitySystem.Reset();
         capsuleCutSystem.Reset();
-        var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
+        var playerPlant = plantFactory.Create(PlayerDataModel.PLAYER_ID, new Vector2(10, 0));
+        var adversaryPlant = plantFactory.Create("Scripted_adversary_plant", new Vector2(-10, 0), 99999999);
 
-        resourceSpawnSystem.FillSoilUniformly();
+        resourceSpawnSystem.AddResourceClusterAtPoint(((Vector2)(playerPlant.transform.position + adversaryPlant.transform.position) / 2) + (Vector2.down * 3));
 
         meshCache.Reset();
 
