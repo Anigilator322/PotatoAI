@@ -106,7 +106,7 @@ namespace Assets.Scripts.FogOfWar
             float width = revealRadius * 2;
             var capsule = new VisibilityCapsule(parent.Transform.position, revealer.Transform.position, revealRadius);
             VisibilityComponent.VisibilityCapsules.Add(capsule);
-            if(plantOwner.Id == "plant_1")
+            if(plantOwner.Id == PlayerDataModel.PLAYER_ID)
                 OnCapsuleCreated?.Invoke(capsule);
             List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
