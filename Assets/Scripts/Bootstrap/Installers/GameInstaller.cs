@@ -28,10 +28,13 @@ namespace Assets.Scripts.Bootstrap.Installers
         [SerializeField]
         ResourcePointsConfig resourcePointsConfig;
 
+        private CapsuleCutSystem _capsuleCutSystem;
         public override void InstallBindings()
         {
             // ======= Models =======
             Container.Bind<Soil>().FromComponentInNewPrefab(generalPrefabs.soilPrefab).AsSingle();
+            Container.Bind<Renderer>().FromComponentInNewPrefab(generalPrefabs.FogOfWarPrefab).AsSingle()
+                .NonLazy();
             Container.Bind<PlantsModel>().AsSingle();
             Container.Bind<GrowingRootsModel>().AsSingle();
             Container.Bind<RootNodeContactsModel>().AsSingle();
@@ -62,7 +65,8 @@ namespace Assets.Scripts.Bootstrap.Installers
             Container.Bind<RootsBlockSystem>().AsSingle();
             Container.Bind<RootBlueprintingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<MetabolicSystem>().AsSingle();
-
+            Container.Bind<VisibilitySystem>().AsSingle();
+            Container.Bind<CapsuleCutSystem>().AsSingle().NonLazy();
             // ======= Bootstrap =======
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().AsSingle();
             Container.BindInitializableExecutionOrder(typeof(GameBootstrapper), -1);

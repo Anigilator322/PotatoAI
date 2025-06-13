@@ -1,8 +1,6 @@
 ﻿using Assets.Scripts.Bootstrap;
-using Assets.Scripts.Roots.Plants;
 using System;
 using UnityEngine;
-using Zenject.ReflectionBaking.Mono.Cecil;
 
 namespace Assets.Scripts.Roots
 {
@@ -58,6 +56,39 @@ namespace Assets.Scripts.Roots
 
                 SpawnResourcePoint(resourceType, maximumResourcesInPoint, worldPosition);
             }
+        }
+
+        public void AddResourceClusterAtPoint(Vector2 clusterPosition)
+        {
+            Bounds soilBounds = _soil.Sprite.bounds;
+            float clusterRadius = 1;
+
+            ResourceType resourceType;
+            int numberOfDifferentTypes = Enum.GetValues(typeof(ResourceType)).Length;
+
+            for (int i = 0; i < numberOfResourcePoints / 4; i++)
+            {
+                resourceType = (ResourceType)(i % numberOfDifferentTypes);
+
+                float angle = UnityEngine.Random.Range(0, 360);
+                float distance = UnityEngine.Random.Range(0, clusterRadius);
+
+                Vector2 worldPosition = clusterPosition + Rotate(new Vector2(distance, 0), angle);
+
+                SpawnResourcePoint(resourceType, maximumResourcesInPoint, worldPosition);
+            }
+
+            Vector2 Rotate(Vector2 v, float degrees)
+            {
+                float radians = degrees * Mathf.Deg2Rad;
+                float cos = Mathf.Cos(radians);
+                float sin = Mathf.Sin(radians);
+                return new Vector2(
+                    v.x * cos,
+                    v.x * sin
+                );
+            }
+
         }
     }
 }

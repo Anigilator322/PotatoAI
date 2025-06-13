@@ -8,6 +8,10 @@ namespace Assets.Scripts.Roots.RootsBuilding
     {
         [Inject] 
         private RootsBlockSystem _rootBlockSystem;
+
+        [Inject] 
+        private Soil _soil;
+
         public float _rootSegmentLength { get; private set; } = 0.8f;
         public float _maxBuildAngle { get; private set; } = 15f;
 
@@ -102,7 +106,7 @@ namespace Assets.Scripts.Roots.RootsBuilding
             return angle;
         }
 
-        private bool TryDecreasePath(IRootBlueprint rootBlueprint)
+        private bool TryDecreasePath(DrawingRootBlueprint rootBlueprint)
         {
             return rootBlueprint.TryRemoveLastPoint();
         }
@@ -126,16 +130,11 @@ namespace Assets.Scripts.Roots.RootsBuilding
             }
             else if (blueprintResult == BlueprintingResult.Incr)
             {
-                if (rootBlueprint.IsBlocked == true)
+                if (rootBlueprint.IsBlocked  || rootBlueprint.RootPath.Count < 2)
                     return;
-                if (rootBlueprint.RootPath.Count < 2)
-                { 
-                    rootBlueprint.IsBlocked = false;
-                    return;
-                }
-                var result = _rootBlockSystem.IsBlocked(rootBlueprint.RootPath[^1], rootBlueprint.RootPath[^2]);
-                rootBlueprint.IsBlocked = result;
 
+                var result = _rootBlockSystem.IsBlocked(rootBlueprint.RootPath[^2], rootBlueprint.RootPath[^1]);
+                rootBlueprint.IsBlocked = result;
             }
         }
     }

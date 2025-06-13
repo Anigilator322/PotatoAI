@@ -1,10 +1,7 @@
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
-using PlasticPipe.PlasticProtocol.Messages;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class RootNodeContactsSystem
 {
@@ -51,6 +48,5 @@ public class RootNodeContactsSystem
     public void RemoveAllContacts(RootNode node)
     {
         _rootNodeContactsModel.ResourcePointsContacts.Remove(node);
-        _rootNodeContactsModel.RootNodeContacts.Remove(node);
     }
 }

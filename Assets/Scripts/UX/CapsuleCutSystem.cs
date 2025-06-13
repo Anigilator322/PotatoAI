@@ -11,86 +11,100 @@ namespace Assets.Scripts.UX
         public Vector4 Points;
         public Vector4 Extra;
     }
-    public class CapsuleCutSystem : MonoBehaviour
+    public class CapsuleCutSystem
     {
-        public List<VisibilityCapsule> Capsules { get; set; } = new List<VisibilityCapsule>();
+        public CapsuleCutComponent CapsuleCutComponent;
 
-    #region renderTools
-        Renderer rend;
-        MaterialPropertyBlock mpb;
-        private ComputeBuffer capsuleBuffer;
-        private Vector2 minMap = new Vector2(-20, -20);
-        private Vector2 maxMap = new Vector2(20, 20);
-        private int _bufferCapacity = 0;
-        private List<CapsuleData> _capsuleDatas = new List<CapsuleData>();
+        #region renderTools
+        private Renderer _rend;
+        private MaterialPropertyBlock _mpb;
+        private readonly Vector2 MIN_MAP = new Vector2(-20, -20);
+        private readonly Vector2 MAX_MAP = new Vector2(20, 20);
         #endregion
 
-        [Inject]
         private VisibilitySystem _visibilitySystem;
 
-        private void Awake()
+        public CapsuleCutSystem(Renderer capsuleCutViewRenderer, VisibilitySystem visibilitySystem)
         {
-            rend = GetComponent<Renderer>();
-            mpb = new MaterialPropertyBlock();
+            _visibilitySystem = visibilitySystem;
+            InitializeSystem(capsuleCutViewRenderer);
+        }
+
+        public void Reset()
+        {
+            CapsuleCutComponent?.Reset();
+            CapsuleCutComponent = new CapsuleCutComponent();
+            InitializeFogView(_rend);
+        }
+
+        private void InitializeSystem(Renderer capsuleCutViewRenderer)
+        {
+            CapsuleCutComponent = new CapsuleCutComponent();
             _visibilitySystem.OnCapsuleCreated += SetCapsule;
+            InitializeFogView(capsuleCutViewRenderer);
+        }
+
+        //Creates gameobject of FogOfWar. Create new on Reset
+        private void InitializeFogView(Renderer capsuleCutRenderer)
+        {
+            if (capsuleCutRenderer == null)
+            {
+                Debug.LogError("Prefab not found");
+                return;
+            }
+            _rend = capsuleCutRenderer;
+            _mpb = new MaterialPropertyBlock();
+            if(_rend is null)
+            {
+                Debug.LogError("Renderer not found");
+                return;
+            }
         }
 
         public void SetCapsule(VisibilityCapsule capsule)
         { 
-            Vector2 startUV = (capsule.Start - minMap) / (maxMap - minMap);
-            Vector2 endUV = (capsule.End - minMap) / (maxMap - minMap);
-            float normalizedRadius = capsule.Radius / (maxMap.x - minMap.x);
-            Capsules.Add(new VisibilityCapsule(startUV, endUV, normalizedRadius));
+            Vector2 startUV = (capsule.Start - MIN_MAP) / (MAX_MAP - MIN_MAP);
+            Vector2 endUV = (capsule.End - MIN_MAP) / (MAX_MAP - MIN_MAP);
+            float normalizedRadius = capsule.Radius / (MAX_MAP.x - MIN_MAP.x);
+            CapsuleCutComponent.CapsulesFormated.Add(new VisibilityCapsule(startUV, endUV, normalizedRadius));
+            UpdateVisionShader();
         }
 
-        public void Update()
+        public void UpdateVisionShader()
         {
-            _capsuleDatas.Clear();
-            if (Capsules is null)
+            CapsuleCutComponent.CapsuleDatas.Clear();
+            if (CapsuleCutComponent.CapsulesFormated is null)
                 return;
-            if(Capsules.Count() == 0)
+            if (CapsuleCutComponent.CapsulesFormated.Count() == 0)
                 return;
-            
-            foreach (var rootEdge in Capsules)
+
+            foreach (var rootEdge in CapsuleCutComponent.CapsulesFormated)
             {
                 Vector2 start = rootEdge.Start;
                 Vector2 end = rootEdge.End;
                 float radius = rootEdge.Radius;
 
-                _capsuleDatas.Add(new CapsuleData() 
+                CapsuleCutComponent.CapsuleDatas.Add(new CapsuleData()
                 {
                     Points = new Vector4(start.x, start.y, end.x, end.y),
                     Extra = new Vector4(radius, 0, 0, 0)
-                });                
+                });
             }
-            if(_capsuleDatas?.Count() == 0)
+            if (CapsuleCutComponent.CapsuleDatas?.Count() == 0)
                 return;
-            if (_bufferCapacity != _capsuleDatas?.Count())
-            {
-                if (capsuleBuffer != null)
-                {
-                    capsuleBuffer.Release();
-                    capsuleBuffer.Dispose();
-                }
-                capsuleBuffer = new ComputeBuffer(_capsuleDatas.Count() != 0 ? _capsuleDatas.Count() : 1, 32);
-                _bufferCapacity = Capsules.Count;
-            }
-            capsuleBuffer.SetData(_capsuleDatas);
-            mpb.SetBuffer("capsuleBuffer", capsuleBuffer);
-            mpb.SetInt("_CapsuleCount", _capsuleDatas.Count());
-            mpb.SetVector("_MapMin", minMap);
-            mpb.SetVector("_MapMax", maxMap);
-            rend.SetPropertyBlock(mpb);
-        }
 
-        private void OnDestroy()
-        {
-            if (capsuleBuffer != null)
-            {
-                Debug.Log("CapsuleCutSystem OnDestroy");
-                capsuleBuffer.Release();
-                capsuleBuffer.Dispose();
-            }
+            CapsuleCutComponent.CapsuleBuffer?.Release();
+            CapsuleCutComponent.CapsuleBuffer?.Dispose();
+            CapsuleCutComponent.CapsuleBuffer = new ComputeBuffer(CapsuleCutComponent.CapsuleDatas.Count() != 0 ? CapsuleCutComponent.CapsuleDatas.Count() : 1, 32);
+            CapsuleCutComponent.BufferCapacity = CapsuleCutComponent.CapsulesFormated.Count;
+            CapsuleCutComponent.CapsuleBuffer.SetData(CapsuleCutComponent.CapsuleDatas);
+
+            _mpb.SetBuffer("capsuleBuffer", CapsuleCutComponent.CapsuleBuffer);
+            _mpb.SetInt("_CapsuleCount", CapsuleCutComponent.CapsuleDatas.Count());
+            _mpb.SetVector("_MapMin", MIN_MAP);
+            _mpb.SetVector("_MapMax", MAX_MAP);
+            _rend.SetPropertyBlock(_mpb);
+            
         }
     }
 }
