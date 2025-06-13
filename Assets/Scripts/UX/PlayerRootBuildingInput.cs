@@ -12,6 +12,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Assets.Scripts.UX
@@ -32,7 +33,9 @@ namespace Assets.Scripts.UX
         [Inject] private RootGrowthSystem _rootGrowthSystem;
         [Inject] private MetabolicSystem _metabolicSystem;
 
+
         TextMeshProUGUI _costIndicator, _justText;
+        private readonly RectTransform _selectionPanelUIRect;
 
         private DrawingRootBlueprint drawingBlueprint
         {
@@ -43,10 +46,11 @@ namespace Assets.Scripts.UX
             }
         }
 
-        public PlayerRootBuildingInput(TextMeshProUGUI text, TextMeshProUGUI justText)
+        public PlayerRootBuildingInput(TextMeshProUGUI text, TextMeshProUGUI justText, HorizontalLayoutGroup rootTypeSelectionPanel)
         {
             _costIndicator = text;
             _justText = justText;
+            _selectionPanelUIRect = rootTypeSelectionPanel.GetComponent<RectTransform>();
         }
 
         private Vector2 GetMousePosition() => Camera.main.ScreenToWorldPoint(_mousePositionAction.ReadValue<Vector2>());
@@ -61,7 +65,9 @@ namespace Assets.Scripts.UX
             LBMPressedAction.performed += _ =>
             {
                 Vector2 mousePosition = GetMousePosition();
-                if (IsClickedOnRoot(mousePosition))
+
+                if(IsClickedOnRoot(mousePosition)
+                    && !RectTransformUtility.RectangleContainsScreenPoint(_selectionPanelUIRect, mousePosition))
                 {
                     _playerData.IsBuilding = true;
                     PrepareBlueprint(mousePosition);

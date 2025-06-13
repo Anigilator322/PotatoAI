@@ -148,6 +148,8 @@ namespace Assets.Scripts.Roots.RootsBuilding.Growing
 
         private void SpawnNode(GrowingRoot growingRoot)
         {
+            if ((growingRoot?.Blueprint?.RootPath.Count() ?? 0) == 0)
+                return;
 
             RootNode parent = growingRoot.Blueprint.StartRootNode;
             Vector2 position = growingRoot.Blueprint.RootPath[0];
