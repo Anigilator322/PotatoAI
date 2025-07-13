@@ -162,9 +162,11 @@ namespace Assets.Scripts.Roots.View
                 .ToDictionary(
                     plant => plant,
                     plant => new List<RootBlueprint>());
-                
+            
             foreach (var growingRoot in GrowingRoots.Blueprints.Values)
             {
+                if(growingRoot.Plant.Id != PlayerDataModel.PLAYER_ID)
+                    continue;
                 plantBlueprints[growingRoot.Plant].Add(growingRoot.Blueprint);
             }
 
