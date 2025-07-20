@@ -13,10 +13,12 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
         private float _blockObjectsSeekRadius = 2f;
 
         private PlantsModel _plantsModel;
+        private Bounds _soilBounds;
 
-        public RootsBlockSystem(PlantsModel plantsModel)
+        public RootsBlockSystem(PlantsModel plantsModel, Soil soil)
         {
             _plantsModel = plantsModel;
+            _soilBounds = soil.Sprite.bounds;
         }
 
         public bool IsAnyBlock(DrawingRootBlueprint rootBlueprint)
@@ -39,6 +41,12 @@ namespace Assets.Scripts.Roots.RootsBuilding.RootBlockingSystem
 
         public bool IsBlocked(Vector2 originPos, Vector2 targetPos)
         {
+            if(_soilBounds.min.x > targetPos.x 
+                || _soilBounds.max.x < targetPos.x
+                || _soilBounds.min.y > targetPos.y
+                || _soilBounds.max.y < targetPos.y)
+                return true;
+
             var blockingObjects = GetBlockingObjects(targetPos);
             var result = IsAnyIntersections(blockingObjects, originPos, targetPos);
             return result;

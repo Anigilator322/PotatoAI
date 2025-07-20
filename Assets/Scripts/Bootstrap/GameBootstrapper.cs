@@ -8,6 +8,9 @@ using Cysharp.Threading.Tasks.Triggers;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Assets.Scripts.Roots.View;
+using Assets.Scripts.FogOfWar;
+using Assets.Scripts.UX;
+using Assets.Scripts.AI;
 
 public class GameBootstrapper : IInitializable
 {
@@ -20,7 +23,9 @@ public class GameBootstrapper : IInitializable
     [Inject] RootNodeContactsModel rootNodeContacts;
     [Inject] PlayerDataModel playerDataModel;
     [Inject] MeshCache meshCache;
-
+    [Inject] VisibilitySystem visibilitySystem;
+    [Inject] CapsuleCutSystem capsuleCutSystem;
+    [Inject] SceneryAgent sceneryAgent;
     [SerializeField]
     MonoBehHelper monoBehHelper;
     public GameBootstrapper(Plant.Factory plantFactory, ResourcePointSpawnSystem resourceSpawnSystem)
@@ -35,8 +40,8 @@ public class GameBootstrapper : IInitializable
         //monoBehHelper.Reset += Reset;
         Reset();
 
-        UniTask.RunOnThreadPool(async () => { await UniTask.Delay(5000); Reset(); })
-            .Forget();
+        //UniTask.RunOnThreadPool(async () => { await UniTask.Delay(5000); Reset(); })
+        //    .Forget();
     }
 
     public void Reset()
@@ -46,11 +51,15 @@ public class GameBootstrapper : IInitializable
         growingRoots.Reset();
         rootNodeContacts.Reset();
         playerDataModel.Reset();
+        visibilitySystem.Reset();
+        capsuleCutSystem.Reset();
+        var playerPlant = plantFactory.Create(PlayerDataModel.PLAYER_ID, new Vector2(10, 0));
+        var adversaryPlant = plantFactory.Create("Scripted_adversary_plant", new Vector2(-10, 0), 99999999);
 
-        var plant = plantFactory.Create(PlayerDataModel.PLAYER_ID, Vector2.zero);
-
-        resourceSpawnSystem.FillSoilUniformly();
+        resourceSpawnSystem.AddResourceClusterAtPoint(((Vector2)(playerPlant.transform.position + adversaryPlant.transform.position) / 2) + (Vector2.down * 3));
 
         meshCache.Reset();
+
+        sceneryAgent.Init();
     }
 }

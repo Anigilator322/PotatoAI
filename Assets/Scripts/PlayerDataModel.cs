@@ -28,7 +28,7 @@ namespace Assets.Scripts
         public bool IsBuilding { get; set; }
 
         [SerializeField] 
-        public float ClickedNodeSearchRadius = 2f;
+        public float ClickedNodeSearchRadius = 1.5f;
 
         private Plant _playersPlant;
         public Plant playersPlant

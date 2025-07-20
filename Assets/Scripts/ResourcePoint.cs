@@ -1,12 +1,6 @@
-
 using Assets.Scripts;
-using Assets.Scripts.Bootstrap;
 using Assets.Scripts.Map;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
-using Zenject.ReflectionBaking.Mono.Cecil;
 
 public enum ResourceType
 {

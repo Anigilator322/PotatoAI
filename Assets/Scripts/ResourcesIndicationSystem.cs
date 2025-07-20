@@ -47,7 +47,7 @@ public class ResourcesIndicationSystem : IInitializable, ITickable
 
     public void Initialize()
     {
-        _resourcesIndicators.transform.parent.position = _playerData.playersPlant.transform.position + new Vector3(0, 2f, 0);
+        //_resourcesIndicators.transform.parent.position = _playerData.playersPlant.transform.position + new Vector3(0, 2f, 0);
     }
 
     public void Tick()

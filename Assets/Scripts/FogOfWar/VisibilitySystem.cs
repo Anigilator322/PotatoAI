@@ -1,44 +1,39 @@
 ﻿using Assets.Scripts.Map;
 using Assets.Scripts.Roots;
 using Assets.Scripts.Roots.Plants;
-using Assets.Scripts.Tools;
 using Assets.Scripts.UX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Plastic.Newtonsoft.Json.Serialization;
 using UnityEngine;
 using Zenject;
-using Zenject.ReflectionBaking.Mono.Cecil;
 
 namespace Assets.Scripts.FogOfWar
 {
     public class VisibilitySystem
     {
-        private PlantsModel _plantsModel;
+        public PlantsModel PlantsModel;
+        public Soil SoilResources;
+        public VisibilityModel VisibilityComponent { get; set; }
 
-        private Soil _soilResources;
-        private int _cellSize;
-
-        public int CellSize { get => _cellSize;}
-        public List<VisibilityCapsule> VisibilityCapsules { get; set; } = new List<VisibilityCapsule>();
-
-        public Dictionary<Plant, List<IPositionedObject>> VisibleByPlantsPoints = new Dictionary<Plant, List<IPositionedObject>>();
-        public CapsuleCutSystem _capsuleCutSystem { get; set; }
+        private const int CELL_SIZE = 1;
 
         public Action<VisibilityCapsule> OnCapsuleCreated;
-        public VisibilitySystem(Soil soil, PlantsModel model)
+
+        [Inject]
+        public VisibilitySystem(PlantsModel model, Soil soil)
         {
-            _soilResources = soil;
-            _plantsModel = model;
-            _cellSize = 1;
+            PlantsModel = model;
+            SoilResources = soil;
+            VisibilityComponent = new VisibilityModel();
         }
 
-        private Vector2Int GetCellCoordinates(Vector2 worldPosition)
+        public void Reset()
         {
-            int x = Mathf.FloorToInt(worldPosition.x / _cellSize);
-            int y = Mathf.FloorToInt(worldPosition.y / _cellSize);
-            return new Vector2Int(x, y);
+            VisibilityComponent.Reset();
+            foreach (var plant in PlantsModel.Plants)
+            {
+                UpdateVisibilityForRootNode(plant, plant.Roots.Nodes[0]);
+            }
         }
 
         private bool IsCellIntersectingCapsule(Vector2 cellCenter, Vector2 start, Vector2 end, float radius)
@@ -71,17 +66,17 @@ namespace Assets.Scripts.FogOfWar
             Vector2 maxPoint = Vector2.Max(capsule.Start, capsule.End) + new Vector2(capsule.Radius, capsule.Radius);
 
             // Преобразовать AABB в координаты сетки
-            int minX = Mathf.FloorToInt(minPoint.x / _cellSize);
-            int minY = Mathf.FloorToInt(minPoint.y / _cellSize);
-            int maxX = Mathf.FloorToInt(maxPoint.x / _cellSize);
-            int maxY = Mathf.FloorToInt(maxPoint.y / _cellSize);
+            int minX = Mathf.FloorToInt(minPoint.x / CELL_SIZE);
+            int minY = Mathf.FloorToInt(minPoint.y / CELL_SIZE);
+            int maxX = Mathf.FloorToInt(maxPoint.x / CELL_SIZE);
+            int maxY = Mathf.FloorToInt(maxPoint.y / CELL_SIZE);
 
             // Проверить каждую клетку в диапазоне AABB
             for (int x = minX; x <= maxX; x++)
             {
                 for (int y = minY; y <= maxY; y++)
                 {
-                    Vector2 cellCenter = new Vector2(x + 0.5f, y + 0.5f) * _cellSize;
+                    Vector2 cellCenter = new Vector2(x + 0.5f, y + 0.5f) * CELL_SIZE;
 
                     if (IsCellIntersectingCapsule(cellCenter, capsule.Start, capsule.End, capsule.Radius))
                     {
@@ -94,10 +89,11 @@ namespace Assets.Scripts.FogOfWar
 
         public void UpdateVisibilityForRootNode(Plant plantOwner, RootNode revealer)
         {
-            if (revealer.Parent is null)
-                return;
+            var parent = revealer.Parent;
+            if (parent is null)
+                parent = revealer;
 
-            var edge = revealer.Transform.position - revealer.Parent.Transform.position;
+            var edge = revealer.Transform.position - parent.Transform.position;
 
             float revealRadius = (revealer.Type switch
             {
@@ -108,12 +104,15 @@ namespace Assets.Scripts.FogOfWar
 
             float length = edge.magnitude;
             float width = revealRadius * 2;
-            var capsule = new VisibilityCapsule(revealer.Parent.Transform.position, revealer.Transform.position, revealRadius);
-            VisibilityCapsules.Add(capsule);
-            OnCapsuleCreated?.Invoke(capsule);
+            var capsule = new VisibilityCapsule(parent.Transform.position, revealer.Transform.position, revealRadius);
+            VisibilityComponent.VisibilityCapsules.Add(capsule);
+            if(plantOwner.Id == PlayerDataModel.PLAYER_ID)
+                OnCapsuleCreated?.Invoke(capsule);
             List<Vector2Int> area = CapsuleCast(capsule);
             CheckRoots(plantOwner, area);
             CheckResources(plantOwner, area);
+            if(PlantsModel.Plants.Count == 0)
+                return;
         }
 
         private void CheckResources(Plant plantOwner, List<Vector2Int> area)
@@ -121,14 +120,14 @@ namespace Assets.Scripts.FogOfWar
             foreach (var cell in area)
             {
                 
-                if (!VisibleByPlantsPoints.ContainsKey(plantOwner))
-                    VisibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
-                var resources = _soilResources.GetResourcesFromCellDirectly(cell);
+                if (!VisibilityComponent.VisibleByPlantsPoints.ContainsKey(plantOwner))
+                    VisibilityComponent.VisibleByPlantsPoints.Add(plantOwner, new List<IPositionedObject>());
+                var resources = SoilResources.GetResourcesFromCellDirectly(cell);
                 foreach (var resource in resources)
                 {
-                    if (!VisibleByPlantsPoints[plantOwner].Contains(resource))
+                    if (!VisibilityComponent.VisibleByPlantsPoints[plantOwner].Contains(resource))
                     {
-                        VisibleByPlantsPoints[plantOwner].Add(resource);
+                        VisibilityComponent.VisibleByPlantsPoints[plantOwner].Add(resource);
                     }
                 }
             }
@@ -138,17 +137,17 @@ namespace Assets.Scripts.FogOfWar
         {
             foreach (var cell in area)
             {
-                foreach (var plant in _plantsModel.Plants) // foreach exist plants we check which roots are in capsule now
+                foreach (var plant in PlantsModel.Plants) // foreach exist plants we check which roots are in capsule now
                 {
-                    if (!VisibleByPlantsPoints.ContainsKey(plant))
-                        VisibleByPlantsPoints.Add(plant, new List<IPositionedObject>());
+                    if (!VisibilityComponent.VisibleByPlantsPoints.ContainsKey(plant))
+                        VisibilityComponent.VisibleByPlantsPoints.Add(plant, new List<IPositionedObject>());
                     if (plant == plantOwner) // Skip nodes of the plant that is revealing
                         continue;
                     foreach (var node in plant.Roots.GetNodesFromCellDirectly(cell))
                     {
-                        if (!VisibleByPlantsPoints[plant].Contains(node)) // If node is already visible, do not make recursive call again
+                        if (!VisibilityComponent.VisibleByPlantsPoints[plant].Contains(node)) // If node is already visible, do not make recursive call again
                         {
-                            VisibleByPlantsPoints[plant].Add(node);
+                            VisibilityComponent.VisibleByPlantsPoints[plant].Add(node);
                             UpdateVisibilityForRootNode(plant, node); // Reactive Update visibility for node that is visible now, to recalculate their own visibilities
                         }
                     }
